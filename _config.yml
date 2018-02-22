@@ -1,0 +1,40 @@
+# visit https://github.com/mojombo/jekyll/wiki/Configuration for more settings
+
+paginate: 10 # pagination based on number of posts
+paginate_path: "page:num"
+exclude: ["README.md"] # files to exclude
+highlighter: pygments
+markdown: kramdown
+disqus: leezhenghui 
+google_analytics: Zhenghui Lee 
+title: Zhenghui Lee 
+
+defaults:
+  -
+    scope:
+      path: "" # empty string for all files
+    values:
+      title: ZH's Pocket 
+
+description: Zhenghui Lee's weblog 
+author:
+  name: Zhenghui Lee 
+  email: leezhenghui@gmail.com 
+  github: leezhenghui 
+  twitter: zhenghui_lee 
+  # pinterest: asd123
+  linkedin: zhenghui-lee-8a318729
+  bio: Engineer 
+  email_md5: 4381600ea126cafa87fa729b75312b10 
+
+rss_path: feed.xml
+categories_path: categories.html
+tags_path: tags.html
+
+# set it as url of an image
+# sidebar_background_image: https://www.dropbox.com/s/g9h23zrycedxtk5/sky.png?raw=1
+
+BASE_PATH:
+
+gems:
+  - jekyll-paginate
