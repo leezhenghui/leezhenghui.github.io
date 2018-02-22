@@ -37,7 +37,10 @@ It is compiled as a shared-lib and linked into a C/C++ program to enable the tra
 >
 > If you are familiar with [`flamegraph`](https://github.com/brendangregg/FlameGraph), you might know about it originally is used for sampling data without an order guarantee. In calltracer, the generated flamegraph are for tracer data, and we will ensure the call stack sequencing following the tracer generated order. 
 
-Notable, turning on the func-trace will introduce significant performance impact,  please avoid using it on a production environment. 
+
+> ![Note]({{ site.url }}/assets/ico/note.png)
+> 
+> Notable, turning on the func-trace will introduce significant performance impact,  please avoid enabling it on a production environment. 
 
 ## TODO
 
