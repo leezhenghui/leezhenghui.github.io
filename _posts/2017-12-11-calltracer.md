@@ -58,7 +58,7 @@ It is compiled as a shared-lib and linked into a C/C++ program to enable the tra
 
 - Have `node.js` runtime on your environment
 
-- Have `seqdiag` command installed if you want to generate seqdiag style sequencing diagram
+- (optional) `seqdiag` command, only be required if you want to generate seqdiag style sequencing diagram
 
 ## Example
 
