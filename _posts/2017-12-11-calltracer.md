@@ -64,7 +64,7 @@ It is compiled as a shared-lib and linked into a C/C++ program to enable the tra
 
 The sample is just used to demonstrate the usages of the tool. To make the sample cover mores situations, e.g: `executable ELF`, `static-lib`, `dynamic linking shared-lib`, `dynamic loading shared-lib`, `forked process` and `multiple-threads`, I am trying to split the sample into various modules with different lib types, this definitely does not make a sense in a real-life program.
 
-![Sample Components]({{ site.url }}/assets/materials/calltracer/example-design.jpeg)
+![Sample Components]({{ site.url }}/assets/materials/calltracer/example-design.png)
 
 
 ## How to run
