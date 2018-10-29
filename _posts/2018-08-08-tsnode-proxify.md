@@ -74,11 +74,9 @@ Before we dig into the tsnode-proxify, we need to clarify some concepts.
      }
      ```
 
-2. **Completion hints**
+2. **Completion hints**: invocation completion hint is the concept relevant to how tsnode-proxify runtime understand `after` of an execution join point. It should be mark as the moment of method logic execution done.
 
-    - Invocation completion hints(supported so far). This concept is relevant to how we understand `after` of an execution join point
-    
-    - method returned (for sync sytle method only)
+    - method returned (for typical sync style method only)
     
     - callback method get called (for both sync and async style method)
     
