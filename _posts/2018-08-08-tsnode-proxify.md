@@ -54,25 +54,24 @@ Before we dig into the tsnode-proxify, we need to clarify some concepts.
 1. Interaction style for a method call in node.js
 
     - Sync: The method `completion` should be done in the same tick as method invocation being requested. 
-    
-    	```
-    			e.g: 
-    			greet(name: string): string {
-    				return 'Hello, ' + name;
-    			}
-    			
-    	```
+
+     ```
+     e.g: 
+     greet(name: string): string {
+     return 'Hello, ' + name;
+     }
+     ```
     
     - Async: The method `completion` will be done in a future certain tick after the tick of method invocation being requested. 
-    
-    	```
-    			e.g: 
-    			greet(name: string, cb: Function): void{
-    				setTimeout(function() {
-    					let reval = 'Hello, ' + name;
-    					cb(null, reval);
-    					}, 10); 
-    				}
+
+     ```
+     e.g: 
+     greet(name: string, cb: Function): void{
+       setTimeout(function() {
+         let reval = 'Hello, ' + name;
+         cb(null, reval);
+       }, 10); 
+     }
     	```
 
 2. Completion identifier
