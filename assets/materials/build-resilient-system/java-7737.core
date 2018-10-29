@@ -1,0 +1,476 @@
+Attaching to core ./core.7737 from executable /usr/bin/java, please wait...
+Debugger attached successfully.
+Server compiler detected.
+JVM version is 25.181-b13
+Deadlock Detection:
+
+No deadlocks found.
+
+----------------- 7868 -----------------
+0x00007f1a748fa360	__pthread_cond_wait + 0xc0
+0x00007f1a73badb45	Unsafe_Park + 0xf5
+0x00007f1a5d112d2a	<Unknown compiled code>
+Locked ownable synchronizers:
+    - None
+----------------- 7867 -----------------
+0x00007f1a748fa709	__pthread_cond_timedwait + 0x129
+0x00007f1a73a2272f	_ZN13ObjectMonitor4waitElbP6Thread + 0x28f
+0x00007f1a73832272	JVM_MonitorWait + 0x182
+0x00007f1a5eb0e1a8	<Unknown compiled code>
+0x00007f1a5d0082bd	* java.util.TimerThread.mainLoop() bci:201 line:552 (Interpreted frame)
+0x00007f1a5d0082bd	* java.util.TimerThread.run() bci:1 line:505 (Interpreted frame)
+0x00007f1a5d0007a7	<StubRoutines>
+0x00007f1a7379fa76	_ZN9JavaCalls11call_helperEP9JavaValueP12methodHandleP17JavaCallArgumentsP6Thread + 0x1056
+0x00007f1a7379ff81	_ZN9JavaCalls12call_virtualEP9JavaValue11KlassHandleP6SymbolS4_P17JavaCallArgumentsP6Thread + 0x321
+0x00007f1a737a0427	_ZN9JavaCalls12call_virtualEP9JavaValue6Handle11KlassHandleP6SymbolS5_P6Thread + 0x47
+0x00007f1a7381f89e	_ZL12thread_entryP10JavaThreadP6Thread + 0x7e
+0x00007f1a73b893f3	_ZN10JavaThread17thread_main_innerEv + 0x103
+0x00007f1a73b8953c	_ZN10JavaThread3runEv + 0x11c
+0x00007f1a73a38198	_ZL10java_startP6Thread + 0x108
+Locked ownable synchronizers:
+    - None
+----------------- 7866 -----------------
+0x00007f1a748fa709	__pthread_cond_timedwait + 0x129
+0x00007f1a73a2272f	_ZN13ObjectMonitor4waitElbP6Thread + 0x28f
+0x00007f1a73832272	JVM_MonitorWait + 0x182
+0x00007f1a5eb0e1a8	<Unknown compiled code>
+0x00007f1a5d0082bd	* java.util.TimerThread.mainLoop() bci:201 line:552 (Interpreted frame)
+0x00007f1a5d0082bd	* java.util.TimerThread.run() bci:1 line:505 (Interpreted frame)
+0x00007f1a5d0007a7	<StubRoutines>
+0x00007f1a7379fa76	_ZN9JavaCalls11call_helperEP9JavaValueP12methodHandleP17JavaCallArgumentsP6Thread + 0x1056
+0x00007f1a7379ff81	_ZN9JavaCalls12call_virtualEP9JavaValue11KlassHandleP6SymbolS4_P17JavaCallArgumentsP6Thread + 0x321
+0x00007f1a737a0427	_ZN9JavaCalls12call_virtualEP9JavaValue6Handle11KlassHandleP6SymbolS5_P6Thread + 0x47
+0x00007f1a7381f89e	_ZL12thread_entryP10JavaThreadP6Thread + 0x7e
+0x00007f1a73b893f3	_ZN10JavaThread17thread_main_innerEv + 0x103
+0x00007f1a73b8953c	_ZN10JavaThread3runEv + 0x11c
+0x00007f1a73a38198	_ZL10java_startP6Thread + 0x108
+Locked ownable synchronizers:
+    - None
+----------------- 7865 -----------------
+0x00007f1a748fa709	__pthread_cond_timedwait + 0x129
+0x00007f1a73badb45	Unsafe_Park + 0xf5
+0x00007f1a5d112d2a	<Unknown compiled code>
+Locked ownable synchronizers:
+    - None
+----------------- 7863 -----------------
+0x00007f1a748fa709	__pthread_cond_timedwait + 0x129
+0x00007f1a73badb45	Unsafe_Park + 0xf5
+0x00007f1a5d112d2a	<Unknown compiled code>
+Locked ownable synchronizers:
+    - None
+----------------- 7862 -----------------
+0x00007f1a748fa709	__pthread_cond_timedwait + 0x129
+0x00007f1a73badb45	Unsafe_Park + 0xf5
+0x00007f1a5d112d2a	<Unknown compiled code>
+Locked ownable synchronizers:
+    - None
+----------------- 7861 -----------------
+0x00007f1a748fa709	__pthread_cond_timedwait + 0x129
+0x00007f1a73a2272f	_ZN13ObjectMonitor4waitElbP6Thread + 0x28f
+0x00007f1a73832272	JVM_MonitorWait + 0x182
+0x00007f1a5eb0e1a8	<Unknown compiled code>
+0x00007f1a5d0082bd	* java.util.TimerThread.mainLoop() bci:201 line:552 (Interpreted frame)
+0x00007f1a5d0082bd	* java.util.TimerThread.run() bci:1 line:505 (Interpreted frame)
+0x00007f1a5d0007a7	<StubRoutines>
+0x00007f1a7379fa76	_ZN9JavaCalls11call_helperEP9JavaValueP12methodHandleP17JavaCallArgumentsP6Thread + 0x1056
+0x00007f1a7379ff81	_ZN9JavaCalls12call_virtualEP9JavaValue11KlassHandleP6SymbolS4_P17JavaCallArgumentsP6Thread + 0x321
+0x00007f1a737a0427	_ZN9JavaCalls12call_virtualEP9JavaValue6Handle11KlassHandleP6SymbolS5_P6Thread + 0x47
+0x00007f1a7381f89e	_ZL12thread_entryP10JavaThreadP6Thread + 0x7e
+0x00007f1a73b893f3	_ZN10JavaThread17thread_main_innerEv + 0x103
+0x00007f1a73b8953c	_ZN10JavaThread3runEv + 0x11c
+0x00007f1a73a38198	_ZL10java_startP6Thread + 0x108
+Locked ownable synchronizers:
+    - None
+----------------- 7860 -----------------
+0x00007f1a748fa709	__pthread_cond_timedwait + 0x129
+0x00007f1a73a2272f	_ZN13ObjectMonitor4waitElbP6Thread + 0x28f
+0x00007f1a73832272	JVM_MonitorWait + 0x182
+0x00007f1a5eb0e1a8	<Unknown compiled code>
+0x00007f1a5d0082bd	* java.util.TimerThread.mainLoop() bci:201 line:552 (Interpreted frame)
+0x00007f1a5d0082bd	* java.util.TimerThread.run() bci:1 line:505 (Interpreted frame)
+0x00007f1a5d0007a7	<StubRoutines>
+0x00007f1a7379fa76	_ZN9JavaCalls11call_helperEP9JavaValueP12methodHandleP17JavaCallArgumentsP6Thread + 0x1056
+0x00007f1a7379ff81	_ZN9JavaCalls12call_virtualEP9JavaValue11KlassHandleP6SymbolS4_P17JavaCallArgumentsP6Thread + 0x321
+0x00007f1a737a0427	_ZN9JavaCalls12call_virtualEP9JavaValue6Handle11KlassHandleP6SymbolS5_P6Thread + 0x47
+0x00007f1a7381f89e	_ZL12thread_entryP10JavaThreadP6Thread + 0x7e
+0x00007f1a73b893f3	_ZN10JavaThread17thread_main_innerEv + 0x103
+0x00007f1a73b8953c	_ZN10JavaThread3runEv + 0x11c
+0x00007f1a73a38198	_ZL10java_startP6Thread + 0x108
+Locked ownable synchronizers:
+    - None
+----------------- 7859 -----------------
+0x00007f1a748fa709	__pthread_cond_timedwait + 0x129
+0x00007f1a73badb45	Unsafe_Park + 0xf5
+0x00007f1a5d112d2a	<Unknown compiled code>
+Locked ownable synchronizers:
+    - None
+----------------- 7858 -----------------
+0x00007f1a748fa709	__pthread_cond_timedwait + 0x129
+0x00007f1a73badb45	Unsafe_Park + 0xf5
+0x00007f1a5d112d2a	<Unknown compiled code>
+Locked ownable synchronizers:
+    - None
+----------------- 7857 -----------------
+0x00007f1a748fa709	__pthread_cond_timedwait + 0x129
+0x00007f1a73badb45	Unsafe_Park + 0xf5
+0x00007f1a5d112d2a	<Unknown compiled code>
+Locked ownable synchronizers:
+    - None
+----------------- 7784 -----------------
+0x00007f1a748fa709	__pthread_cond_timedwait + 0x129
+0x00007f1a73a2272f	_ZN13ObjectMonitor4waitElbP6Thread + 0x28f
+0x00007f1a73832272	JVM_MonitorWait + 0x182
+0x00007f1a5eb0e1a8	<Unknown compiled code>
+0x00007f1a5db62774	* java.lang.Object.wait(long, int) bci:46 line:460 (Compiled frame)
+* okio.AsyncTimeout.awaitTimeout() bci:85 line:361 (Compiled frame)
+* okio.AsyncTimeout$Watchdog.run() bci:5 line:312 (Interpreted frame)
+0x00007f1a5d0007a7	<StubRoutines>
+0x00007f1a7379fa76	_ZN9JavaCalls11call_helperEP9JavaValueP12methodHandleP17JavaCallArgumentsP6Thread + 0x1056
+0x00007f1a7379ff81	_ZN9JavaCalls12call_virtualEP9JavaValue11KlassHandleP6SymbolS4_P17JavaCallArgumentsP6Thread + 0x321
+0x00007f1a737a0427	_ZN9JavaCalls12call_virtualEP9JavaValue6Handle11KlassHandleP6SymbolS5_P6Thread + 0x47
+0x00007f1a7381f89e	_ZL12thread_entryP10JavaThreadP6Thread + 0x7e
+0x00007f1a73b893f3	_ZN10JavaThread17thread_main_innerEv + 0x103
+0x00007f1a73b8953c	_ZN10JavaThread3runEv + 0x11c
+0x00007f1a73a38198	_ZL10java_startP6Thread + 0x108
+Locked ownable synchronizers:
+    - None
+----------------- 7783 -----------------
+0x00007f1a748fa709	__pthread_cond_timedwait + 0x129
+0x00007f1a73a2272f	_ZN13ObjectMonitor4waitElbP6Thread + 0x28f
+0x00007f1a73832272	JVM_MonitorWait + 0x182
+0x00007f1a5eb0e1a8	<Unknown compiled code>
+0x00007f1a5db62774	* java.lang.Object.wait(long, int) bci:46 line:460 (Compiled frame)
+* okhttp3.ConnectionPool$1.run() bci:55 line:67 (Interpreted frame)
+0x00007f1a5d008302	* java.util.concurrent.ThreadPoolExecutor.runWorker(java.util.concurrent.ThreadPoolExecutor$Worker) bci:95 line:1149 (Interpreted frame)
+0x00007f1a5d0082bd	* java.util.concurrent.ThreadPoolExecutor$Worker.run() bci:5 line:624 (Interpreted frame)
+0x00007f1a5d008302	* java.lang.Thread.run() bci:11 line:748 (Interpreted frame)
+0x00007f1a5d0007a7	<StubRoutines>
+0x00007f1a7379fa76	_ZN9JavaCalls11call_helperEP9JavaValueP12methodHandleP17JavaCallArgumentsP6Thread + 0x1056
+0x00007f1a7379ff81	_ZN9JavaCalls12call_virtualEP9JavaValue11KlassHandleP6SymbolS4_P17JavaCallArgumentsP6Thread + 0x321
+0x00007f1a737a0427	_ZN9JavaCalls12call_virtualEP9JavaValue6Handle11KlassHandleP6SymbolS5_P6Thread + 0x47
+0x00007f1a7381f89e	_ZL12thread_entryP10JavaThreadP6Thread + 0x7e
+0x00007f1a73b893f3	_ZN10JavaThread17thread_main_innerEv + 0x103
+0x00007f1a73b8953c	_ZN10JavaThread3runEv + 0x11c
+0x00007f1a73a38198	_ZL10java_startP6Thread + 0x108
+Locked ownable synchronizers:
+    - <0x00000000e38a1320>, (a java/util/concurrent/ThreadPoolExecutor$Worker)
+----------------- 7782 -----------------
+0x00007f1a748fa709	__pthread_cond_timedwait + 0x129
+0x00007f1a73a38537	_ZN2os5sleepEP6Threadlb + 0x297
+0x00007f1a7383148a	JVM_Sleep + 0x3ba
+0x00007f1a5de74a31	<Unknown compiled code>
+0x00007f1a5d0082bd	* org.apache.coyote.AbstractProtocol$AsyncTimeout.run() bci:10 line:1133 (Interpreted frame)
+0x00007f1a5d008302	* java.lang.Thread.run() bci:11 line:748 (Interpreted frame)
+0x00007f1a5d0007a7	<StubRoutines>
+0x00007f1a7379fa76	_ZN9JavaCalls11call_helperEP9JavaValueP12methodHandleP17JavaCallArgumentsP6Thread + 0x1056
+0x00007f1a7379ff81	_ZN9JavaCalls12call_virtualEP9JavaValue11KlassHandleP6SymbolS4_P17JavaCallArgumentsP6Thread + 0x321
+0x00007f1a737a0427	_ZN9JavaCalls12call_virtualEP9JavaValue6Handle11KlassHandleP6SymbolS5_P6Thread + 0x47
+0x00007f1a7381f89e	_ZL12thread_entryP10JavaThreadP6Thread + 0x7e
+0x00007f1a73b893f3	_ZN10JavaThread17thread_main_innerEv + 0x103
+0x00007f1a73b8953c	_ZN10JavaThread3runEv + 0x11c
+0x00007f1a73a38198	_ZL10java_startP6Thread + 0x108
+Locked ownable synchronizers:
+    - None
+----------------- 7781 -----------------
+0x00007f1a748fd76d	__GI_accept + 0x2d
+0x00007f1a5d0186c7	* sun.nio.ch.ServerSocketChannelImpl.accept0(java.io.FileDescriptor, java.io.FileDescriptor, java.net.InetSocketAddress[]) bci:0 (Interpreted frame)
+0x00007f1a5d007d00	* sun.nio.ch.ServerSocketChannelImpl.accept(java.io.FileDescriptor, java.io.FileDescriptor, java.net.InetSocketAddress[]) bci:4 line:422 (Interpreted frame)
+0x00007f1a5d007d00	* sun.nio.ch.ServerSocketChannelImpl.accept() bci:130 line:250 (Interpreted frame)
+0x00007f1a5d008040	* org.apache.tomcat.util.net.NioEndpoint$Acceptor.run() bci:88 line:455 (Interpreted frame)
+0x00007f1a5d008302	* java.lang.Thread.run() bci:11 line:748 (Interpreted frame)
+0x00007f1a5d0007a7	<StubRoutines>
+0x00007f1a7379fa76	_ZN9JavaCalls11call_helperEP9JavaValueP12methodHandleP17JavaCallArgumentsP6Thread + 0x1056
+0x00007f1a7379ff81	_ZN9JavaCalls12call_virtualEP9JavaValue11KlassHandleP6SymbolS4_P17JavaCallArgumentsP6Thread + 0x321
+0x00007f1a737a0427	_ZN9JavaCalls12call_virtualEP9JavaValue6Handle11KlassHandleP6SymbolS5_P6Thread + 0x47
+0x00007f1a7381f89e	_ZL12thread_entryP10JavaThreadP6Thread + 0x7e
+0x00007f1a73b893f3	_ZN10JavaThread17thread_main_innerEv + 0x103
+0x00007f1a73b8953c	_ZN10JavaThread3runEv + 0x11c
+0x00007f1a73a38198	_ZL10java_startP6Thread + 0x108
+Locked ownable synchronizers:
+    - None
+----------------- 7780 -----------------
+0x00007f1a74210a13	__GI_epoll_wait + 0x33
+0x00007f1a5d7c4ef2	<Unknown compiled code>
+Locked ownable synchronizers:
+    - None
+----------------- 7779 -----------------
+0x00007f1a74210a13	__GI_epoll_wait + 0x33
+0x00007f1a5d7c4ef2	<Unknown compiled code>
+Locked ownable synchronizers:
+    - None
+----------------- 7778 -----------------
+0x00007f1a748fa360	__pthread_cond_wait + 0xc0
+0x00007f1a73badb45	Unsafe_Park + 0xf5
+0x00007f1a5d112d2a	<Unknown compiled code>
+Locked ownable synchronizers:
+    - None
+----------------- 7777 -----------------
+0x00007f1a748fa360	__pthread_cond_wait + 0xc0
+0x00007f1a73badb45	Unsafe_Park + 0xf5
+0x00007f1a5d112d2a	<Unknown compiled code>
+Locked ownable synchronizers:
+    - None
+----------------- 7776 -----------------
+0x00007f1a748fa360	__pthread_cond_wait + 0xc0
+0x00007f1a73badb45	Unsafe_Park + 0xf5
+0x00007f1a5d112d2a	<Unknown compiled code>
+Locked ownable synchronizers:
+    - None
+----------------- 7775 -----------------
+0x00007f1a748fa360	__pthread_cond_wait + 0xc0
+0x00007f1a73badb45	Unsafe_Park + 0xf5
+0x00007f1a5d112d2a	<Unknown compiled code>
+Locked ownable synchronizers:
+    - None
+----------------- 7774 -----------------
+0x00007f1a748fa360	__pthread_cond_wait + 0xc0
+0x00007f1a73badb45	Unsafe_Park + 0xf5
+0x00007f1a5d112d2a	<Unknown compiled code>
+Locked ownable synchronizers:
+    - None
+----------------- 7773 -----------------
+0x00007f1a748fa360	__pthread_cond_wait + 0xc0
+0x00007f1a73badb45	Unsafe_Park + 0xf5
+0x00007f1a5d112d2a	<Unknown compiled code>
+Locked ownable synchronizers:
+    - None
+----------------- 7772 -----------------
+0x00007f1a748fa360	__pthread_cond_wait + 0xc0
+0x00007f1a73badb45	Unsafe_Park + 0xf5
+0x00007f1a5d112d2a	<Unknown compiled code>
+Locked ownable synchronizers:
+    - None
+----------------- 7771 -----------------
+0x00007f1a748fa360	__pthread_cond_wait + 0xc0
+0x00007f1a73badb45	Unsafe_Park + 0xf5
+0x00007f1a5d112d2a	<Unknown compiled code>
+Locked ownable synchronizers:
+    - None
+----------------- 7770 -----------------
+0x00007f1a748fa360	__pthread_cond_wait + 0xc0
+0x00007f1a73badb45	Unsafe_Park + 0xf5
+0x00007f1a5d112d2a	<Unknown compiled code>
+Locked ownable synchronizers:
+    - None
+----------------- 7769 -----------------
+0x00007f1a748fa360	__pthread_cond_wait + 0xc0
+0x00007f1a73badb45	Unsafe_Park + 0xf5
+0x00007f1a5d112d2a	<Unknown compiled code>
+Locked ownable synchronizers:
+    - None
+----------------- 7768 -----------------
+0x00007f1a74210a13	__GI_epoll_wait + 0x33
+0x00007f1a5d7c4ef2	<Unknown compiled code>
+Locked ownable synchronizers:
+    - None
+----------------- 7767 -----------------
+0x00007f1a7420474d	__GI___poll + 0x2d
+0x00007f1a56f56b09	Java_java_net_SocketInputStream_socketRead0 + 0xb9
+0x00007f1a5e64f3e1	<Unknown compiled code>
+Locked ownable synchronizers:
+    - <0x00000000e36443f8>, (a java/util/concurrent/ThreadPoolExecutor$Worker)
+----------------- 7766 -----------------
+0x00007f1a7420474d	__GI___poll + 0x2d
+0x00007f1a56f56b09	Java_java_net_SocketInputStream_socketRead0 + 0xb9
+0x00007f1a5e64f3e1	<Unknown compiled code>
+Locked ownable synchronizers:
+    - <0x00000000e3680650>, (a java/util/concurrent/ThreadPoolExecutor$Worker)
+----------------- 7765 -----------------
+0x00007f1a748fa709	__pthread_cond_timedwait + 0x129
+0x00007f1a73badb45	Unsafe_Park + 0xf5
+0x00007f1a5d112d2a	<Unknown compiled code>
+Locked ownable synchronizers:
+    - None
+----------------- 7763 -----------------
+0x00007f1a748fa709	__pthread_cond_timedwait + 0x129
+0x00007f1a73a38537	_ZN2os5sleepEP6Threadlb + 0x297
+0x00007f1a7383148a	JVM_Sleep + 0x3ba
+0x00007f1a5de74a31	<Unknown compiled code>
+0x00007f1a5d0082bd	* org.apache.catalina.core.StandardServer.await() bci:35 line:427 (Interpreted frame)
+0x00007f1a5d008302	* org.springframework.boot.web.embedded.tomcat.TomcatWebServer$1.run() bci:10 line:182 (Interpreted frame)
+0x00007f1a5d0007a7	<StubRoutines>
+0x00007f1a7379fa76	_ZN9JavaCalls11call_helperEP9JavaValueP12methodHandleP17JavaCallArgumentsP6Thread + 0x1056
+0x00007f1a7379ff81	_ZN9JavaCalls12call_virtualEP9JavaValue11KlassHandleP6SymbolS4_P17JavaCallArgumentsP6Thread + 0x321
+0x00007f1a737a0427	_ZN9JavaCalls12call_virtualEP9JavaValue6Handle11KlassHandleP6SymbolS5_P6Thread + 0x47
+0x00007f1a7381f89e	_ZL12thread_entryP10JavaThreadP6Thread + 0x7e
+0x00007f1a73b893f3	_ZN10JavaThread17thread_main_innerEv + 0x103
+0x00007f1a73b8953c	_ZN10JavaThread3runEv + 0x11c
+0x00007f1a73a38198	_ZL10java_startP6Thread + 0x108
+Locked ownable synchronizers:
+    - None
+----------------- 7762 -----------------
+0x00007f1a748fa709	__pthread_cond_timedwait + 0x129
+0x00007f1a73a38537	_ZN2os5sleepEP6Threadlb + 0x297
+0x00007f1a7383148a	JVM_Sleep + 0x3ba
+0x00007f1a5de74a31	<Unknown compiled code>
+0x00007f1a5d0082bd	* org.apache.catalina.core.ContainerBase$ContainerBackgroundProcessor.run() bci:46 line:1357 (Interpreted frame)
+0x00007f1a5d008302	* java.lang.Thread.run() bci:11 line:748 (Interpreted frame)
+0x00007f1a5d0007a7	<StubRoutines>
+0x00007f1a7379fa76	_ZN9JavaCalls11call_helperEP9JavaValueP12methodHandleP17JavaCallArgumentsP6Thread + 0x1056
+0x00007f1a7379ff81	_ZN9JavaCalls12call_virtualEP9JavaValue11KlassHandleP6SymbolS4_P17JavaCallArgumentsP6Thread + 0x321
+0x00007f1a737a0427	_ZN9JavaCalls12call_virtualEP9JavaValue6Handle11KlassHandleP6SymbolS5_P6Thread + 0x47
+0x00007f1a7381f89e	_ZL12thread_entryP10JavaThreadP6Thread + 0x7e
+0x00007f1a73b893f3	_ZN10JavaThread17thread_main_innerEv + 0x103
+0x00007f1a73b8953c	_ZN10JavaThread3runEv + 0x11c
+0x00007f1a73a38198	_ZL10java_startP6Thread + 0x108
+Locked ownable synchronizers:
+    - None
+----------------- 7761 -----------------
+0x00007f1a748fa709	__pthread_cond_timedwait + 0x129
+0x00007f1a73badb45	Unsafe_Park + 0xf5
+0x00007f1a5d112d2a	<Unknown compiled code>
+Locked ownable synchronizers:
+    - None
+----------------- 7760 -----------------
+0x00007f1a748fa360	__pthread_cond_wait + 0xc0
+0x00007f1a73badb45	Unsafe_Park + 0xf5
+0x00007f1a5d0186c7	* sun.misc.Unsafe.park(boolean, long) bci:0 (Interpreted frame)
+0x00007f1a5d0082bd	* java.util.concurrent.locks.LockSupport.park(java.lang.Object) bci:14 line:175 (Interpreted frame)
+0x00007f1a5d0082bd	* java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await() bci:42 line:2039 (Interpreted frame)
+0x00007f1a5d008302	* java.util.concurrent.LinkedBlockingQueue.take() bci:29 line:442 (Interpreted frame)
+0x00007f1a5d008114	* java.util.concurrent.ThreadPoolExecutor.getTask() bci:149 line:1074 (Interpreted frame)
+0x00007f1a5d008040	* java.util.concurrent.ThreadPoolExecutor.runWorker(java.util.concurrent.ThreadPoolExecutor$Worker) bci:26 line:1134 (Interpreted frame)
+0x00007f1a5d0082bd	* java.util.concurrent.ThreadPoolExecutor$Worker.run() bci:5 line:624 (Interpreted frame)
+0x00007f1a5d008302	* java.lang.Thread.run() bci:11 line:748 (Interpreted frame)
+0x00007f1a5d0007a7	<StubRoutines>
+0x00007f1a7379fa76	_ZN9JavaCalls11call_helperEP9JavaValueP12methodHandleP17JavaCallArgumentsP6Thread + 0x1056
+0x00007f1a7379ff81	_ZN9JavaCalls12call_virtualEP9JavaValue11KlassHandleP6SymbolS4_P17JavaCallArgumentsP6Thread + 0x321
+0x00007f1a737a0427	_ZN9JavaCalls12call_virtualEP9JavaValue6Handle11KlassHandleP6SymbolS5_P6Thread + 0x47
+0x00007f1a7381f89e	_ZL12thread_entryP10JavaThreadP6Thread + 0x7e
+0x00007f1a73b893f3	_ZN10JavaThread17thread_main_innerEv + 0x103
+0x00007f1a73b8953c	_ZN10JavaThread3runEv + 0x11c
+0x00007f1a73a38198	_ZL10java_startP6Thread + 0x108
+Locked ownable synchronizers:
+    - None
+----------------- 7759 -----------------
+0x00007f1a748fa709	__pthread_cond_timedwait + 0x129
+0x00007f1a73a38537	_ZN2os5sleepEP6Threadlb + 0x297
+0x00007f1a7383148a	JVM_Sleep + 0x3ba
+0x00007f1a5de74a31	<Unknown compiled code>
+Locked ownable synchronizers:
+    - None
+----------------- 7758 -----------------
+0x00007f1a748fa360	__pthread_cond_wait + 0xc0
+0x00007f1a73badb45	Unsafe_Park + 0xf5
+0x00007f1a5d112d2a	<Unknown compiled code>
+0x00007f1a5ec29a94	* java.util.concurrent.locks.LockSupport.park(java.lang.Object) bci:14 line:175 (Compiled frame)
+* java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await() bci:42 line:2039 (Compiled frame)
+* java.util.concurrent.LinkedBlockingQueue.take() bci:29 line:442 (Compiled frame)
+* org.LatencyUtils.PauseDetector$PauseDetectorThread.run() bci:17 line:85 (Interpreted frame)
+0x00007f1a5d0007a7	<StubRoutines>
+0x00007f1a7379fa76	_ZN9JavaCalls11call_helperEP9JavaValueP12methodHandleP17JavaCallArgumentsP6Thread + 0x1056
+0x00007f1a7379ff81	_ZN9JavaCalls12call_virtualEP9JavaValue11KlassHandleP6SymbolS4_P17JavaCallArgumentsP6Thread + 0x321
+0x00007f1a737a0427	_ZN9JavaCalls12call_virtualEP9JavaValue6Handle11KlassHandleP6SymbolS5_P6Thread + 0x47
+0x00007f1a7381f89e	_ZL12thread_entryP10JavaThreadP6Thread + 0x7e
+0x00007f1a73b893f3	_ZN10JavaThread17thread_main_innerEv + 0x103
+0x00007f1a73b8953c	_ZN10JavaThread3runEv + 0x11c
+0x00007f1a73a38198	_ZL10java_startP6Thread + 0x108
+Locked ownable synchronizers:
+    - None
+----------------- 7757 -----------------
+0x00007f1a748fa709	__pthread_cond_timedwait + 0x129
+0x00007f1a73badb45	Unsafe_Park + 0xf5
+0x00007f1a5d112d2a	<Unknown compiled code>
+Locked ownable synchronizers:
+    - None
+----------------- 7750 -----------------
+0x00007f1a748fa709	__pthread_cond_timedwait + 0x129
+0x00007f1a739f16ee	_ZN7Monitor5IWaitEP6Threadl + 0x44e
+0x00007f1a739f1cce	_ZN7Monitor4waitEblb + 0x26e
+0x00007f1a73b82191	_ZNK13WatcherThread5sleepEv + 0x71
+0x00007f1a73b83d9e	_ZN13WatcherThread3runEv + 0x5e
+0x00007f1a73a38198	_ZL10java_startP6Thread + 0x108
+----------------- 7749 -----------------
+0x00007f1a748fa360	__pthread_cond_wait + 0xc0
+0x00007f1a739f1397	_ZN7Monitor5IWaitEP6Threadl + 0xf7
+0x00007f1a739f1cce	_ZN7Monitor4waitEblb + 0x26e
+0x00007f1a73ad21de	_ZN13ServiceThread20service_thread_entryEP10JavaThreadP6Thread + 0x3be
+0x00007f1a73b893f3	_ZN10JavaThread17thread_main_innerEv + 0x103
+0x00007f1a73b8953c	_ZN10JavaThread3runEv + 0x11c
+0x00007f1a73a38198	_ZL10java_startP6Thread + 0x108
+Locked ownable synchronizers:
+    - None
+----------------- 7748 -----------------
+0x00007f1a748fa709	__pthread_cond_timedwait + 0x129
+0x00007f1a739f16ee	_ZN7Monitor5IWaitEP6Threadl + 0x44e
+0x00007f1a739f1d46	_ZN7Monitor4waitEblb + 0x2e6
+0x00007f1a735bc34b	_ZN12CompileQueue3getEv + 0x13b
+0x00007f1a735be5bb	_ZN13CompileBroker20compiler_thread_loopEv + 0x18b
+0x00007f1a73b893f3	_ZN10JavaThread17thread_main_innerEv + 0x103
+0x00007f1a73b8953c	_ZN10JavaThread3runEv + 0x11c
+0x00007f1a73a38198	_ZL10java_startP6Thread + 0x108
+Locked ownable synchronizers:
+    - None
+----------------- 7747 -----------------
+0x00007f1a748fa709	__pthread_cond_timedwait + 0x129
+0x00007f1a739f16ee	_ZN7Monitor5IWaitEP6Threadl + 0x44e
+0x00007f1a739f1d46	_ZN7Monitor4waitEblb + 0x2e6
+0x00007f1a735bc34b	_ZN12CompileQueue3getEv + 0x13b
+0x00007f1a735be5bb	_ZN13CompileBroker20compiler_thread_loopEv + 0x18b
+0x00007f1a73b893f3	_ZN10JavaThread17thread_main_innerEv + 0x103
+0x00007f1a73b8953c	_ZN10JavaThread3runEv + 0x11c
+0x00007f1a73a38198	_ZL10java_startP6Thread + 0x108
+Locked ownable synchronizers:
+    - None
+----------------- 7746 -----------------
+0x00007f1a748fc827	do_futex_wait.constprop.3 + 0x37
+Locked ownable synchronizers:
+    - None
+----------------- 7745 -----------------
+0x00007f1a748fa360	__pthread_cond_wait + 0xc0
+0x00007f1a73a22f15	_ZN13ObjectMonitor4waitElbP6Thread + 0xa75
+0x00007f1a73832272	JVM_MonitorWait + 0x182
+0x00007f1a5eb0e1a8	<Unknown compiled code>
+0x00007f1a5d76e6e4	* java.lang.ref.ReferenceQueue.remove(long) bci:59 line:144 (Compiled frame)
+* java.lang.ref.ReferenceQueue.remove() bci:2 line:165 (Compiled frame)
+* java.lang.ref.Finalizer$FinalizerThread.run() bci:36 line:216 (Interpreted frame)
+0x00007f1a5d0007a7	<StubRoutines>
+0x00007f1a7379fa76	_ZN9JavaCalls11call_helperEP9JavaValueP12methodHandleP17JavaCallArgumentsP6Thread + 0x1056
+0x00007f1a7379ff81	_ZN9JavaCalls12call_virtualEP9JavaValue11KlassHandleP6SymbolS4_P17JavaCallArgumentsP6Thread + 0x321
+0x00007f1a737a0427	_ZN9JavaCalls12call_virtualEP9JavaValue6Handle11KlassHandleP6SymbolS5_P6Thread + 0x47
+0x00007f1a7381f89e	_ZL12thread_entryP10JavaThreadP6Thread + 0x7e
+0x00007f1a73b893f3	_ZN10JavaThread17thread_main_innerEv + 0x103
+0x00007f1a73b8953c	_ZN10JavaThread3runEv + 0x11c
+0x00007f1a73a38198	_ZL10java_startP6Thread + 0x108
+Locked ownable synchronizers:
+    - None
+----------------- 7744 -----------------
+0x00007f1a748fa360	__pthread_cond_wait + 0xc0
+0x00007f1a73a22f15	_ZN13ObjectMonitor4waitElbP6Thread + 0xa75
+0x00007f1a73832272	JVM_MonitorWait + 0x182
+0x00007f1a5eb0e1a8	<Unknown compiled code>
+Locked ownable synchronizers:
+    - None
+----------------- 7743 -----------------
+0x00007f1a748fa709	__pthread_cond_timedwait + 0x129
+0x00007f1a739f16ee	_ZN7Monitor5IWaitEP6Threadl + 0x44e
+0x00007f1a739f1cce	_ZN7Monitor4waitEblb + 0x26e
+0x00007f1a73be1ff9	_ZN8VMThread4loopEv + 0x339
+0x00007f1a73be2300	_ZN8VMThread3runEv + 0x70
+0x00007f1a73a38198	_ZL10java_startP6Thread + 0x108
+----------------- 7742 -----------------
+0x00007f1a748fa360	__pthread_cond_wait + 0xc0
+0x00007f1a739f1397	_ZN7Monitor5IWaitEP6Threadl + 0xf7
+0x00007f1a739f1cce	_ZN7Monitor4waitEblb + 0x26e
+0x00007f1a736e59f3	_ZN13GCTaskManager8get_taskEj + 0x43
+0x00007f1a736e6888	_ZN12GCTaskThread3runEv + 0x188
+0x00007f1a73a38198	_ZL10java_startP6Thread + 0x108
+----------------- 7741 -----------------
+0x00007f1a748fa360	__pthread_cond_wait + 0xc0
+0x00007f1a739f1397	_ZN7Monitor5IWaitEP6Threadl + 0xf7
+0x00007f1a739f1cce	_ZN7Monitor4waitEblb + 0x26e
+0x00007f1a736e59f3	_ZN13GCTaskManager8get_taskEj + 0x43
+0x00007f1a736e6888	_ZN12GCTaskThread3runEv + 0x188
+0x00007f1a73a38198	_ZL10java_startP6Thread + 0x108
+----------------- 7738 -----------------
+0x00007f1a748fa360	__pthread_cond_wait + 0xc0
+0x00007f1a739f1397	_ZN7Monitor5IWaitEP6Threadl + 0xf7
+0x00007f1a739f1b73	_ZN7Monitor4waitEblb + 0x113
+0x00007f1a73b891e1	_ZN7Threads10destroy_vmEv + 0x51
+0x00007f1a737dd971	jni_DestroyJavaVM + 0x81
+0x00007f1a746deb5d	JavaMain + 0x27d
+Locked ownable synchronizers:
+    - None
+----------------- 7737 -----------------
+0x00007f1a748f598d	pthread_join + 0xbd
+0x00007f1a74d22700		????????

@@ -2,7 +2,7 @@
 layout: post
 title: Boost I/O Strategy In Web Server - Motivation
 categories: [io-strategy]
-tags: [architecture, micro-services, I/O, perf]
+tags: [architecture, microservices, I/O, perf]
 series: [io-strategy]
 fullview: true
 comments: true
