@@ -58,7 +58,7 @@ Before we dig into the tsnode-proxify, we need to clarify some concepts.
      ```
      e.g: 
      greet(name: string): string {
-     return 'Hello, ' + name;
+       return 'Hello, ' + name;
      }
      ```
     
@@ -72,7 +72,7 @@ Before we dig into the tsnode-proxify, we need to clarify some concepts.
          cb(null, reval);
        }, 10); 
      }
-    	```
+     ```
 
 2. Completion identifier
 
