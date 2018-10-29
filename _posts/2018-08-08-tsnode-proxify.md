@@ -53,7 +53,7 @@ Before we dig into the tsnode-proxify, we need to clarify some concepts.
 
 1. **Interaction style** for a method call in node.js
 
-    - Sync: The method `completion` should be the same time point as method invocation being returned. 
+    - `Sync`: The method completion should be the same time point as method invocation being returned. 
 
      ```
      e.g: 
@@ -62,7 +62,7 @@ Before we dig into the tsnode-proxify, we need to clarify some concepts.
      }
      ```
     
-    - Async: The method `completion` will be done in a future certain time point after the moment of method invocation being returned. 
+    - `Async`: The method completion will be done in a future certain time point after the moment of method invocation being returned. 
 
      ```
      e.g: 
@@ -82,15 +82,15 @@ Before we dig into the tsnode-proxify, we need to clarify some concepts.
     
     - the returned promise's status change from pending to resolved or rejected (for async method with promise as return value only)  
 
-3. So, at the time being, tsnode-proxify can support below combinations with `before` and `after` advise join points
+3. `tsnode-proxify` can support below **interaction style and completion hints combinations** with `before` and `after` advise join points
 
-    - sync-return
+    - `sync-return`
     
-    - sync-callback
+    - `sync-callback`
     
-    - async-callback
+    - `async-callback`
     
-    - async-promise
+    - `async-promise`
 
 `tsnode-proxify` enable the aspect modularity to be implemented as an `Interceptor` class(declared by @Interceptor decorator) for a specific QoS intention, which can be dynamically injected into the join-point if a desired @QoS declaration being claimed on the target method. 
 
