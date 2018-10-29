@@ -53,7 +53,7 @@ Before we dig into the tsnode-proxify, we need to clarify some concepts.
 
 1. Interaction style for a method call in node.js
 
-    - Sync: The method `completion` should be done in the same tick as method invocation being requested. 
+    - Sync: The method `completion` should be the same time point as method invocation being returned. 
 
      ```
      e.g: 
@@ -62,7 +62,7 @@ Before we dig into the tsnode-proxify, we need to clarify some concepts.
      }
      ```
     
-    - Async: The method `completion` will be done in a future certain tick after the tick of method invocation being requested. 
+    - Async: The method `completion` will be done in a future certain time point after the moment of method invocation being returned. 
 
      ```
      e.g: 
