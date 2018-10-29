@@ -51,7 +51,7 @@ As mentioned above, the AOP framework can bring us so many benefits to improve t
 
 Before we dig into the tsnode-proxify, we need to clarify some concepts. 
 
-1. Interaction style for a method call in node.js
+1. **Interaction style** for a method call in node.js
 
     - Sync: The method `completion` should be the same time point as method invocation being returned. 
 
@@ -74,7 +74,7 @@ Before we dig into the tsnode-proxify, we need to clarify some concepts.
      }
      ```
 
-2. Completion identifier
+2. **Completion hints**
 
     - Invocation completion hints(supported so far). This concept is relevant to how we understand `after` of an execution join point
     
@@ -84,7 +84,7 @@ Before we dig into the tsnode-proxify, we need to clarify some concepts.
     
     - promise get resolved or rejected (for async method with promise as return value) 
 
-3. So totaolly can provide below combinations for `before` and `after` advise points
+3. So, at the time being, tsnode-proxify can support below combinations with `before` and `after` advise join points
 
     - sync-return
     
@@ -94,7 +94,7 @@ Before we dig into the tsnode-proxify, we need to clarify some concepts.
     
     - async-promise
 
-tsnode-proxify enable the aspect modularity to be implemented as an `Interceptor` class(declared by @Interceptor decorator) for a specific QoS intention, which can be dynamically injected into the join-point if a desired @QoS declaration being claimed on the target method. 
+`tsnode-proxify` enable the aspect modularity to be implemented as an `Interceptor` class(declared by @Interceptor decorator) for a specific QoS intention, which can be dynamically injected into the join-point if a desired @QoS declaration being claimed on the target method. 
 
 ```typescript
 
