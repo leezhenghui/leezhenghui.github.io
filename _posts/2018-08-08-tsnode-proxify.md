@@ -76,11 +76,11 @@ Before we dig into the tsnode-proxify, we need to clarify some concepts.
 
 2. **Completion hints**: invocation completion hint is the concept relevant to how tsnode-proxify runtime understand `after` of an execution join point. It should be mark as the moment of method logic execution done.
 
-    - method returned (for typical sync style method only)
+    - the time point of target method getting returned (for typical sync style method only)
     
-    - callback method get called (for both sync and async style method)
+    - the time point of the callback method getting called (for both sync and async style method)
     
-    - promise get resolved or rejected (for async method with promise as return value) 
+    - the returned promise's status change from pending to resolved or rejected (for async method with promise as return value)  
 
 3. So, at the time being, tsnode-proxify can support below combinations with `before` and `after` advise join points
 
@@ -139,7 +139,8 @@ Before we dig into the tsnode-proxify, we need to clarify some concepts.
 
 - Prerequsites 
   - node.js 
-  - typescript toolkits 
+  - typescript toolkits(including tsc and ts-node command)
+  - [Q](https://github.com/kriskowal/q) based promise
 
 - git clone 
 
