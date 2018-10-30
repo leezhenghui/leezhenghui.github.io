@@ -2,7 +2,7 @@
 layout: post
 title: Proxy-based function hook and AOP library for node.js 
 categories: [node.js]
-tags: [node.js, AOP, typescript, javascript]
+tags: [node.js, aop, typescript, javascript, proxy]
 fullview: true
 comments: true
 ---
@@ -82,7 +82,7 @@ Before we dig into the tsnode-proxify, we need to clarify some concepts.
     
     - the returned promise's status change from pending to resolved or rejected (for async method with promise as return value only)  
 
-3. `tsnode-proxify` can support below **interaction style and completion hints combinations** with `before` and `after` advise join points
+3. [tsnode-proxify](https://github.com/leezhenghui/tsnode-proxify.git) can support below **interaction style and completion hints combinations** with `before` and `after` advise join points
 
     - `sync-return`
     
