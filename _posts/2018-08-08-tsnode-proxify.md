@@ -13,7 +13,7 @@ comments: true
 
 > ![Note]({{ site.url }}/assets/ico/note.png)
 > 
-> tsnode-proxify depends on typescript decorator feature which marked as **experimental** feature in typescript. In the meanwhile, tsnode-proxify itself is a **WIP** project, not suggested to be used in production environment for now.
+> tsnode-proxify depends on typescript decorator feature which is marked as **experimental** feature in typescript. In the meanwhile, tsnode-proxify is still a **beta** version project for now. 
 
 ## Background
 
