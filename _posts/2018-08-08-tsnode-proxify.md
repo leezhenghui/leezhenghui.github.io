@@ -140,11 +140,13 @@ Before we dig into the tsnode-proxify, we need to clarify some concepts.
 - Prerequsites 
   - node.js 
   - typescript toolkits(including tsc and ts-node command)
-  - [Q](https://github.com/kriskowal/q) based promise
+  - [Q](https://github.com/kriskowal/q) based promise, will support native promise soon.
 
-- git clone 
+- clone the project to your workspace
 
+  ```
   git clone https://github.com/leezhenghui/tsnode-proxify.git
+  ```
 
 - Run the helloworld sample 
 
@@ -164,7 +166,6 @@ class Hello {
     return 'Hello, ' + name;	
   }
 }
-
 ```
 
 Construct a hello instance and call it without any difference than the normal usages.
@@ -176,7 +177,6 @@ Construct a hello instance and call it without any difference than the normal us
 
 let hello: Hello = new Hello();
 console.log('[result]: "' + hello.greet('World') + '"');
-
 ```
 
 The output result with aspect logger feature:
@@ -193,7 +193,6 @@ npm run demo:helloworld
 [greet]    ==> I am saying hello to World
 [logger] <response> Hello.greet; [output]: "Hello, World"; [timestamp]: 1540720637481
 [result]: "Hello, World"
-  
 ```
 
 - @Component decorator: declare a class to be managed as a component in tsnode-proxify  
@@ -218,13 +217,15 @@ Integration Tests
    ✓ @QoS on static sync-return method with sync-interceptor
    ✓ @QoS on sync-return method with sync-interceptor
    ✓ @QoS on sync-callback method with sync-interceptor
-   ✓ @QoS on async-promise method with sync-interceptor (102ms)
-   ✓ @QoS on async-promise method with async-interceptor (100ms)
-   ✓ @QoS on async-callback method with sync-interceptor (101ms)
-   ✓ @QoS on async-callback method with async-interceptor (252ms)
-   ✓ @QoS on sync-callback method which being invoked recursively with a pass-through callback function handler 
+   ✓ @QoS on async-promise method with sync-interceptor (101ms)
+   ✓ @QoS on async-promise method with async-interceptor (101ms)
+   ✓ @QoS on async-callback method with sync-interceptor (100ms)
+   ✓ @QoS on async-callback method with async-interceptor (251ms)
+   ✓ @QoS on sync-callback method which being invoked recursively with a pass-through callback function handler
    ✓ @QoS on a method with recursive invocations, QoSed method is triggered by "this" reference
    ✓ @QoS on sync-return bind()ed method
+   ✓ Validation: async style interceptor can NOT be applied to sync style target method
+   ✓ Validation: conflict/dumplicated interceptor names
 ```
 
 ## Join us
