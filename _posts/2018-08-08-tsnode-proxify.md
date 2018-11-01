@@ -105,22 +105,22 @@ Before we dig into the tsnode-proxify, we need to clarify some concepts.
   }
   
   // called before get into before and after advise
-  public canProcess(context: InvocationContext, callback: (error: any, canProcess: boolean) => void): void {
+  public canProcess(context: InvocationContext, callback: canProcessCallbackFn): void {
   	callback(null, true);	
   }
   
   // being called at before advise
-  public handleRequest(context: InvocationContext, done: Function): void {
+  public handleRequest(context: InvocationContext, done: doneFn): void {
   	done();	
   }
   
   // being called at after advise with output
-  public handleResponse(context: InvocationContext, done: Function): void {
+  public handleResponse(context: InvocationContext, done: doneFn): void {
   	done();	
   }
   
   // being called at after advise with fault 
-  public handleFault(context: InvocationContext, done: Function): void {
+  public handleFault(context: InvocationContext, done: doneFn): void {
   	done();	
   }
   
