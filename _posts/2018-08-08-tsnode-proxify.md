@@ -142,65 +142,199 @@ Before we dig into the tsnode-proxify, we need to clarify some concepts.
   - typescript toolkits(including tsc and ts-node command)
   - [Q](https://github.com/kriskowal/q) based promise, will support native promise soon.
 
-- clone the project to your workspace
+- Create your package folder e,g: named **hello-tsnode-proxify**
+
+  ```shell
+  mkdir hello-tsnode-proxify
+  cd hello-tsnode-proxify
+  mkdir src
+  git init
+  echo "# My first sample for tsnode-proxify" >> README.md
+  git add . && git commit -m "initial commit"
+  ```
+
+- Create **package.json**
 
   ```
-  git clone https://github.com/leezhenghui/tsnode-proxify.git
+  npm init -y 
+  echo "node_modules" >> .gitignore
+  echo "dist" >> .gitignore
+  echo "package-lock.json" >> .gitignore
+  npm install --save-dev typescript
+  npm install --save tsnode-proxify
   ```
+- Create **tsconfig.json**
 
-- Run the helloworld sample 
-
-[HelloWord sample](https://github.com/leezhenghui/tsnode-proxify/tree/master/demo/helloworld.ts) just contains a simple typescript source file, which includes an simple interceptor as well as a sample class. Briefly the sample looks like below:
-
-Hello class:
-
-```typescript
-@Component()
-class Hello {
-  constructor() {}
-
-  @InteractionStyle(InteractionStyleType.SYNC)
-  @QoS({interceptorType: Logger})
-  greet(name: string): string {
-    console.log('[greet]    ==> I am saying hello to', name);
-    return 'Hello, ' + name;	
+  ```
+  {
+    "compilerOptions": {
+      "target": "es5",
+      "module": "commonjs",
+      "declaration": true,
+      "outDir": "./dist",
+      "experimentalDecorators": true
+    },
+    "include": ["src"],
+    "exclude": ["node_modules"]
   }
-}
-```
+  ```
+- Add scripts to package.json
 
-Construct a hello instance and call it without any difference than the normal usages.
+  ```
+	"build": "tsc",
+	"start": "node dist/helloworld.js",
+  "main": "dist/helloworld.js"
+  ```
+  
+- Create a logger interceptor in file **src/logger.ts** as below:
 
-```typescript
-//=====================
-//    main
-//====================
+  ```
+  import {
+    Interceptor,
+    InteractionStyleType,
+    AbstractInterceptor,
+    InvocationContext,
+  } from 'tsnode-proxify';
+  
+  @Interceptor({
+    interactionStyle: InteractionStyleType.SYNC,
+  })
+  export class Logger extends AbstractInterceptor {
+    private LOG_PREFIX: string = '[logger] ';
+  
+    constructor(config: any) {
+      super(config);
+    }
+  
+    private getTargetFullName(context: InvocationContext): string {
+      let targetFullName = context.getClassName() + '.' + context.getOperationName();
+  
+      return targetFullName;
+    }
+  
+    public init(context: InvocationContext, done: Function): void {
+      console.log(this.LOG_PREFIX + '<init> ');
+      done();
+    }
+  
+    public handleRequest(context: InvocationContext, done: Function): void {
+      console.log(
+        this.LOG_PREFIX +
+          '<request> ' +
+          this.getTargetFullName(context) +
+          '; [input]: "' +
+          context.input +
+          '"; [timestamp]: ' +
+          new Date().getTime(),
+      );
+      done();
+    }
+  
+    public handleResponse(context: InvocationContext, done: Function): void {
+      console.log(
+        this.LOG_PREFIX +
+          '<response> ' +
+          this.getTargetFullName(context) +
+          '; [output]: "' +
+          context.output +
+          '"; [timestamp]: ' +
+          new Date().getTime(),
+      );
+      done();
+    }
+  
+    public handleFault(context: InvocationContext, done: Function): void {
+      console.log(
+        this.LOG_PREFIX +
+          '<fault> ' +
+          this.getTargetFullName(context) +
+          '; [fault]: ' +
+          context.fault +
+          '; [timestamp]: ' +
+          new Date().getTime(),
+      );
+      done();
+    }
+  
+    public canProcess(context: InvocationContext, callback: (error: any, canProcess: boolean) => void): void {
+      callback(null, true);
+    }
+  
+    public getName(): string {
+      return 'Logger';
+    }
+  }
+  ```
 
-let hello: Hello = new Hello();
-console.log('[result]: "' + hello.greet('World') + '"');
-```
+  To create a interceptor which encapsulate an cross-cutting concern solution, you just need to implement a class, which
 
-The output result with aspect logger feature:
+  - @Interceptor decorator: declare a class to be registried as interceptor in tsnode-proxify runtime
+  - Extend the **AbastractInterceptor** base class, and implement the methods.
 
-```
-npm install
+- Create a component in file **src/helloworld.ts** as below:
 
-npm run demo:helloworld
+  As you see beow, to "declare" a class to be a component managed, we just add to apply a couple of decorators to it. No other differences than a normal class definition.
+  
+  ```
+  import {
+    Component,
+    QoS,
+    InteractionStyle,
+    Completion,
+    Callback,
+    Fault,
+    Output,
+    InteractionStyleType,
+    InvocationContext,
+  } from 'tsnode-proxify';
+  import { Logger } from './logger';
+  
+  @Component()
+  class Hello {
+    constructor() {}
+  
+    @InteractionStyle(InteractionStyleType.SYNC)
+    @QoS({ interceptorType: Logger })
+    greet(name: string): string {
+      console.log('[greet]    ==> I am saying hello to', name);
+      return 'Hello, ' + name;
+    }
+  }
+  
+  // =====================
+  //    main
+  // ====================
+  
+  let hello: Hello = new Hello();
+  console.log('[result]: "' + hello.greet('World') + '"');
+  ```
 
-
-> ts-node ./demo/helloworld.ts
-
-[logger] <request> Hello.greet; [input]: "World"; [timestamp]: 1540720637480
-[greet]    ==> I am saying hello to World
-[logger] <response> Hello.greet; [output]: "Hello, World"; [timestamp]: 1540720637481
-[result]: "Hello, World"
-```
-
-- @Component decorator: declare a class to be managed as a component in tsnode-proxify  
-- @QoS decorator: declare a method to be proxify and provide `before` and `after` advises  
+  - @Component decorator: declare a class to be managed as a component in tsnode-proxify  
+  - @QoS decorator: declare a method to be proxify and provide `before` and `after` advises  
 
 > ![Note]({{ site.url }}/assets/ico/note.png)
 > 
 > Notable, to keep the helloword sample as simple as possible, I don't introduce some other decorators in that sample. If you want to try @Completion and callback invocation, you can refer to [stock](https://github.com/leezhenghui/tsnode-proxify/tree/master/demo/stock.ts) sample. For more advanced usages, please refer to integration unit test cases.
+
+- Run the helloworld sample 
+
+  ```shell
+  npm run build
+  npm run start
+  ```
+
+- The output result with aspect logger feature:
+
+  ```
+  > hello-tsnode-proxify@1.0.0 start /home/lizh/tmp/hello-tsnode-proxify
+  > node dist/helloworld.js
+  
+  [logger] <init> 
+  [logger] <request> Hello.greet; [input]: "World"; [timestamp]: 1541054935419
+  [greet]    ==> I am saying hello to World
+  [logger] <response> Hello.greet; [output]: "Hello, World"; [timestamp]: 1541054935420
+  [result]: "Hello, World"
+  ```
 
 ### Run Unit Tests
 
@@ -209,7 +343,7 @@ You can run the unit tests to get a full picture of what tsnode-proxify support 
 ```shell
 npm run test
 
-> mocha --compilers ts:ts-node/register,tsx:ts-node/register ./src/test/**/*test.ts
+> mocha --compilers ts:ts-node/register,tsx:ts-node/register ./test/**/*test.ts
 
     ...
 
