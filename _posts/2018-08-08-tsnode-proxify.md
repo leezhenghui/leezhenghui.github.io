@@ -153,6 +153,10 @@ Before we dig into the tsnode-proxify, we need to clarify some concepts.
   git add . && git commit -m "initial commit"
   ```
 
+> ![Note]({{ site.url }}/assets/ico/note.png)
+> If you don't want to following this step-by-step guide to complete the helloworld sample, you can download the sample from [link](https://github.com/leezhenghui/hello-tsnode-proxify.git) for a quick start
+>
+
 - Create **package.json**
 
   ```
@@ -181,8 +185,8 @@ Before we dig into the tsnode-proxify, we need to clarify some concepts.
 - Add scripts to package.json
 
   ```
-	"build": "tsc",
-	"start": "node dist/helloworld.js",
+  "build": "tsc",
+  "start": "node dist/helloworld.js",
   "main": "dist/helloworld.js"
   ```
   
@@ -314,7 +318,7 @@ Before we dig into the tsnode-proxify, we need to clarify some concepts.
 
 > ![Note]({{ site.url }}/assets/ico/note.png)
 > 
-> Notable, to keep the helloword sample as simple as possible, I don't introduce some other decorators in that sample. If you want to try @Completion and callback invocation, you can refer to [stock](https://github.com/leezhenghui/tsnode-proxify/tree/master/demo/stock.ts) sample. For more advanced usages, please refer to integration unit test cases.
+> Notable, to keep the helloworld sample as simple as possible, I don't introduce some other decorators in that sample. If you want to try @Completion and callback invocation, you can refer to [stock](https://github.com/leezhenghui/tsnode-proxify/tree/master/demo/stock.ts) sample. For more advanced usages, please refer to integration unit test cases.
 
 - Run the helloworld sample 
 
