@@ -141,6 +141,7 @@ Before we dig into the tsnode-proxify, we need to clarify some concepts.
   - [Q](https://github.com/kriskowal/q) based promise, will support native promise soon.
 
 > ![Note]({{ site.url }}/assets/ico/note.png)
+> 
 > If you don't want to following this step-by-step guide to complete the helloworld sample, you can download the sample from [link](https://github.com/leezhenghui/hello-tsnode-proxify.git) for a quick start
 >
 
@@ -367,7 +368,7 @@ Integration Tests
   ✓ Validation: conflict/dumplicated interceptor names
   ✓ @QoS on async/await method with sync interceptor
   ✓ @QoS on async/await method with async interceptor
-``
+```
 
 ## Join us
 
