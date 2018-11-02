@@ -95,7 +95,6 @@ Before we dig into the tsnode-proxify, we need to clarify some concepts.
 `tsnode-proxify` enable the aspect modularity to be implemented as an `Interceptor` class(declared by @Interceptor decorator) for a specific QoS intention, which can be dynamically injected into the join-point if a desired @QoS declaration being claimed on the target method. 
 
 ```typescript
-
 @Interceptor({
   "interactionStyle": InteractionStyleType.SYNC
 })
@@ -128,7 +127,6 @@ Before we dig into the tsnode-proxify, we need to clarify some concepts.
   	return 'NoopInterceptor';	
   }
 }
-
 ```
 
 > ![Note]({{ site.url }}/assets/ico/note.png)
@@ -279,7 +277,7 @@ Before we dig into the tsnode-proxify, we need to clarify some concepts.
 
 - Create a component in file **src/helloworld.ts** as below:
 
-  As you see beow, to "declare" a class to be a component managed, we just add to apply a couple of decorators to it. No other differences than a normal class definition.
+  As you see beow, to "declare" a class to be a component managed, we just need to apply a couple of decorators to it, there is no other differences than a normal class definition.
   
   ```
   import {
@@ -343,7 +341,7 @@ Before we dig into the tsnode-proxify, we need to clarify some concepts.
 
 ### Run Unit Tests
 
-You can run the unit tests to get a full picture of what tsnode-proxify support so far.
+You can run the [integration tests](https://github.com/leezhenghui/tsnode-proxify/tree/master/test) to get a full picture of what features has been supported by tsnode-proxify so far.
 
 ```shell
 npm run test
