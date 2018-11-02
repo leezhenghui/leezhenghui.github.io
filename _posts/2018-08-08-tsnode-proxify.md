@@ -190,6 +190,12 @@ Before we dig into the tsnode-proxify, we need to clarify some concepts.
   
 - Create a logger interceptor in file **src/logger.ts** as below:
 
+  To create a interceptor which encapsulate an cross-cutting concern solution, you just need to implement a class, which has:
+
+  - @Interceptor decorator: declare a class to be registried as interceptor in tsnode-proxify runtime
+  - Extend the **AbastractInterceptor** base class, and implement the methods.
+
+
   ```
   import {
     Interceptor,
@@ -270,14 +276,13 @@ Before we dig into the tsnode-proxify, we need to clarify some concepts.
   }
   ```
 
-  To create a interceptor which encapsulate an cross-cutting concern solution, you just need to implement a class, which
-
-  - @Interceptor decorator: declare a class to be registried as interceptor in tsnode-proxify runtime
-  - Extend the **AbastractInterceptor** base class, and implement the methods.
 
 - Create a component in file **src/helloworld.ts** as below:
 
   As you see beow, to "declare" a class to be a component managed, we just need to apply a couple of decorators to it, there is no other differences than a normal class definition.
+
+  - @Component decorator: declare a class to be managed as a component in tsnode-proxify  
+  - @QoS decorator: declare a method to be proxify and provide `before` and `after` advises  
   
   ```
   import {
@@ -312,13 +317,6 @@ Before we dig into the tsnode-proxify, we need to clarify some concepts.
   console.log('[result]: "' + hello.greet('World') + '"');
   ```
 
-  - @Component decorator: declare a class to be managed as a component in tsnode-proxify  
-  - @QoS decorator: declare a method to be proxify and provide `before` and `after` advises  
-
-> ![Note]({{ site.url }}/assets/ico/note.png)
-> 
-> Notable, to keep the helloworld sample as simple as possible, I don't introduce some other decorators in that sample. If you want to try @Completion and callback invocation, you can refer to [stock](https://github.com/leezhenghui/tsnode-proxify/tree/master/demo/stock.ts) sample. For more advanced usages, please refer to integration unit test cases.
-
 - Run the helloworld sample 
 
   ```shell
@@ -339,6 +337,10 @@ Before we dig into the tsnode-proxify, we need to clarify some concepts.
   [result]: "Hello, World"
   ```
 
+> ![Note]({{ site.url }}/assets/ico/note.png)
+> 
+> Notable, to keep the helloworld sample as simple as possible, I don't introduce some other decorators in that sample. If you want to try with **promise** or **callback** completion hints invocation, you can refer to [stock](https://github.com/leezhenghui/tsnode-proxify/tree/master/demo/stock.ts) sample. For more advanced usages(e.g: `async/await`, `multiple interceptors w/ different interaction styles`, `interceptor slot context`, etc), please refer to [unit test cases](https://github.com/leezhenghui/tsnode-proxify/blob/master/test/proxify.test.ts) for more details.
+
 ### Run Unit Tests
 
 You can run the [integration tests](https://github.com/leezhenghui/tsnode-proxify/tree/master/test) to get a full picture of what features has been supported by tsnode-proxify so far.
@@ -351,19 +353,21 @@ npm run test
     ...
 
 Integration Tests
-   ✓ @QoS on static sync-return method with sync-interceptor
-   ✓ @QoS on sync-return method with sync-interceptor
-   ✓ @QoS on sync-callback method with sync-interceptor
-   ✓ @QoS on async-promise method with sync-interceptor (101ms)
-   ✓ @QoS on async-promise method with async-interceptor (101ms)
-   ✓ @QoS on async-callback method with sync-interceptor (100ms)
-   ✓ @QoS on async-callback method with async-interceptor (251ms)
-   ✓ @QoS on sync-callback method which being invoked recursively with a pass-through callback function handler
-   ✓ @QoS on a method with recursive invocations, QoSed method is triggered by "this" reference
-   ✓ @QoS on sync-return bind()ed method
-   ✓ Validation: async style interceptor can NOT be applied to sync style target method
-   ✓ Validation: conflict/dumplicated interceptor names
-```
+  ✓ @QoS on static sync-return method with sync-interceptor
+  ✓ @QoS on sync-return method with sync-interceptor
+  ✓ @QoS on sync-callback method with sync-interceptor
+  ✓ @QoS on async-promise method with sync-interceptor (102ms)
+  ✓ @QoS on async-promise method with async-interceptor (102ms)
+  ✓ @QoS on async-callback method with sync-interceptor (101ms)
+  ✓ @QoS on async-callback method with async-interceptor (252ms)
+  ✓ @QoS on sync-callback method which being invoked recursively with a pass-through callback function handler
+  ✓ @QoS on a method with recursive invocations, QoSed method is triggered by "this" reference
+  ✓ @QoS on sync-return bind()ed method
+  ✓ Validation: async style interceptor can NOT be applied to sync style target method
+  ✓ Validation: conflict/dumplicated interceptor names
+  ✓ @QoS on async/await method with sync interceptor
+  ✓ @QoS on async/await method with async interceptor
+``
 
 ## Join us
 
