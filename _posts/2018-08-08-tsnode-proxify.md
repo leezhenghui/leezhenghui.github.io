@@ -9,7 +9,7 @@ comments: true
 
 ## Introduction
 
-[`tsnode-proxify`](https://github.com/leezhenghui/tsnode-proxify.git) is a proxy-based method hooks and AOP library for [node.js](https://nodejs.org) with [typescript](https://www.typescriptlang.org/). It allows you to extend/provide customized QoS handler and apply these QoS features via typescript decorators(metadata-programming-like syntax) without invasiveness to existing code logic, which increase modularity for your application.
+[**tsnode-proxify**](https://github.com/leezhenghui/tsnode-proxify.git) is a proxy-based method hook and AOP library for [node.js](https://nodejs.org) with [typescript](https://www.typescriptlang.org/). It allows you to extend/provide customized QoS handler and apply these QoS features via typescript [decorators](https://www.typescriptlang.org/docs/handbook/decorators.html)(metadata-programming-like syntax) without invasiveness to existing code logic, which increase modularity for your application.
 
 > ![Note]({{ site.url }}/assets/ico/note.png)
 > 
