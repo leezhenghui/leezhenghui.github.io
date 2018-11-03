@@ -94,7 +94,7 @@ Some concepts/terminologies to clarify before go further to understand the featu
 
 > ![Tips]({{ site.url }}/assets/ico/tip.png)
 >
-> tsnode-proxify support the method siganture defining both callback parameter AND promise typed return value, but for each invocation, the method should have a clear intention/behavior, that means, if a callback parameter is presented, the return value should be null, or a valid promise get returned, the callback parameter should absence for that invocation. 
+> tsnode-proxify support the method siganture defining both callback parameter AND promise typed return value. If both callback parameter and returned promise are satisfied for an invocation, the async-callback way will take preference. However, I strongly suggest a method keep a clear style/behavior, that means, for the invocation, if a callback parameter is presented, the return value should be null, or a valid promise get returned, the callback parameter should absence for that invocation. 
 
 
 `tsnode-proxify` enable the aspect modularity to be implemented as an `Interceptor` class(declared by @Interceptor decorator) for a specific QoS intention, which can be dynamically injected into the join-point if a desired @QoS declaration being claimed on the target method. 
