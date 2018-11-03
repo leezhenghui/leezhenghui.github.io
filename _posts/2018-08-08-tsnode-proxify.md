@@ -9,15 +9,15 @@ comments: true
 
 ## Introduction
 
-[**tsnode-proxify**](https://github.com/leezhenghui/tsnode-proxify.git) is a proxy-based method hook and AOP library for [node.js](https://nodejs.org) with [typescript](https://www.typescriptlang.org/). It allows you to extend/provide customized QoS handler and apply these QoS features via typescript [decorators](https://www.typescriptlang.org/docs/handbook/decorators.html)(metadata-programming-like syntax) without invasiveness to existing code logic, which increase modularity for your application.
+[**tsnode-proxify**](https://github.com/leezhenghui/tsnode-proxify.git) is a proxy-based method hook and AOP library for [node.js](https://nodejs.org) with [typescript](https://www.typescriptlang.org/). It allows you to implement a QoS handler and apply these QoS features via typescript [decorators](https://www.typescriptlang.org/docs/handbook/decorators.html)(metadata-programming-like syntax) around the business logic code without invasiveness, which increase modularity for your application.
 
 > ![Note]({{ site.url }}/assets/ico/note.png)
 > 
-> tsnode-proxify depends on typescript decorator feature which is marked as **experimental** feature in typescript. In the meanwhile, tsnode-proxify is still a **beta** version project for now. 
+> tsnode-proxify depends on typescript decorator feature which is marked as **experimental** feature in typescript. In the meanwhile, tsnode-proxify is a **beta** edition for now. 
 
 ## Background
 
-Before we jump into the tsnode-proxify, let's take one step back to take a look what problems could be resolved by proxy pattern and AOP, why it is so important in JEE.
+Before we jump into the tsnode-proxify, let's take one step back to take a look at what problems could be resolved by proxy pattern and AOP, why it is so important in JEE platform.
 
 ### Proxy pattern 
 
@@ -29,14 +29,14 @@ The `proxy` is a well-used design pattern. We can see it in either high level so
 
 #### AOP in Java 
 
-AOP is really popular in java. In a JEE runtime, the transaction, security are noramlly provided as AOP aspects under the hood. In SOA, the SCA runtime also heavily depends on the AOP to provide QoS, IT-Specific features around the business logic. In Spring, the AOP is actually delivered as a base component in fundamental layer and open to upper stack. Indeed, per my experiences on JEE server development, AOP provides an excellent solution for the problems in enterprise application field to increase modularity and make the system more loose-coupled, especially in the middleware product development.
+AOP is really popular in java. In a JEE server runtime, the transaction, security are noramlly provided as AOP aspects under the hood. In SOA, the [SCA](https://en.wikipedia.org/wiki/Service_Component_Architecture) runtime(e.g: Tuscany) also heavily depends on the AOP to provide QoS, IT-Specific features around the business logic. In [Spring](https://spring.io/), the AOP is actually delivered as a base component in fundamental layer and open to upper stack. Indeed, per my experiences on JEE server development, AOP provides an excellent solution for the problems in enterprise application field to increase modularity and make the system more loose-coupled, especially in the middleware product development.
 
 Implementing an AOP framework to advise method execution, the proxy pattern is perfect fit here. The aspect module code can be abstracted, prepared and  **injected** at `before` and `after` points of the method and also be able to recieve the execution context, arguments and output(or fault) to the target operation like it was there.  That is reason we usually see the proxy pattern in an AOP framework.  In a pure java world, some typical approaches to achieve this:
 
 - Weave(static-way)
   - Compile-time weaving(e.g: using AspectJ compiler, which can provide complete AOP implementation)
   - Load-time weaving(e.g: AspectJ LTW, which depends on the JVM option -javaagent, provide complete AOP implementation)
-- JDK Proxy(dynamical-way, for java interface and method execution join point only)
+- JDK Proxy(dynamical-way, for java interface and method execution [join point](https://en.wikipedia.org/wiki/Join_point) only)
 - CGlib Proxy(dynamical-way, adopt to both class and interface, method execution join point only, but need the proxied method to be public)
 
 > ![Note]({{ site.url }}/assets/ico/note.png)
@@ -45,11 +45,11 @@ Implementing an AOP framework to advise method execution, the proxy pattern is p
 
 ## Motivation
 
-As mentioned above, the AOP framework can bring us so many benefits to improve the software modularity. Inspired by JEE experiences, I believe it would be helpful if we have similar framework in node.js. That is reason I come across to tsnode-proxify project. The goal of tsnode-proxify is NOT to provide a complete AOP implementation, it primarily focus on method execution join point for the moment, will consider some IoC features to enable the property injection of proxied object in next step. 
+As mentioned above, the AOP framework can bring us so many benefits to improve the software modularity. Inspired by JEE experiences, I believe it would be helpful if we have similar framework in node.js. That is reason I come across to tsnode-proxify project. The goal of tsnode-proxify is NOT to provide a complete AOP implementation, it primarily focus on method execution [join point](https://en.wikipedia.org/wiki/Join_point) for the moment, will consider some IoC features to enable the property injection of proxied object in next step. 
 
 ## Concepts
 
-Before we dig into the tsnode-proxify, we need to clarify some concepts. 
+Some concepts/terminologies to clarify before go further to understand the features provided by tsnode-proxify.
 
 1. **Interaction style** for a method call in node.js
 
@@ -76,13 +76,13 @@ Before we dig into the tsnode-proxify, we need to clarify some concepts.
 
 2. **Completion hints**: invocation completion hint is the concept relevant to how tsnode-proxify runtime understand `after` of an execution join point. It should be mark as the moment of method logic execution done.
 
-    - target method getting returned (of course, this is for sync style method only)
+    - returned-directly: target method getting returned (of course, this is for sync style method only)
     
-    - the callback method getting called (adopt to both sync and async style method)
+    - callback: the callback method getting called (adopt to both sync and async style method)
     
-    - the returned promise's status change from pending to resolved or rejected (for async method with promise as return value only)  
+    - promise: the returned promise's status change from pending to resolved or rejected (for async method with promise as return value only)  
 
-3. [tsnode-proxify](https://github.com/leezhenghui/tsnode-proxify.git) can support below **interaction style and completion hints combinations** with `before` and `after` advise join points
+3. [tsnode-proxify](https://github.com/leezhenghui/tsnode-proxify.git) can support below **combinations** with `before` and/or `after` advise join points
 
     - `sync-return`
     
@@ -90,7 +90,12 @@ Before we dig into the tsnode-proxify, we need to clarify some concepts.
     
     - `async-callback`
     
-    - `async-promise`
+    - `async-promise`(suitable to `async/await` usage)
+
+> ![Tips]({{ site.url }}/assets/ico/tip.png)
+>
+> tsnode-proxify support the method siganture defining both callback parameter AND promise typed return value, but for each invocation, the method should have a clear intention/behavior, that means, if a callback parameter is presented, the return value should be null, or a valid promise get returned, the callback parameter should absence for that invocation. 
+
 
 `tsnode-proxify` enable the aspect modularity to be implemented as an `Interceptor` class(declared by @Interceptor decorator) for a specific QoS intention, which can be dynamically injected into the join-point if a desired @QoS declaration being claimed on the target method. 
 
@@ -340,7 +345,7 @@ Before we dig into the tsnode-proxify, we need to clarify some concepts.
 
 > ![Note]({{ site.url }}/assets/ico/note.png)
 > 
-> Notable, to keep the helloworld sample as simple as possible, I don't introduce some other decorators in that sample. If you want to try with **promise** or **callback** completion hints invocation, you can refer to [stock](https://github.com/leezhenghui/tsnode-proxify/tree/master/demo/stock.ts) sample. For more advanced usages(e.g: `async/await`, `multiple interceptors w/ different interaction styles`, `interceptor slot context`, etc), please refer to [unit test cases](https://github.com/leezhenghui/tsnode-proxify/blob/master/test/proxify.test.ts) for more details.
+> Notable, to keep the helloworld sample as simple as possible, it only contain a sync-return style method with a sync-interceptor. If you want to try with **promise** or **callback** completion hints invocation or any other advanced usages(e.g: `async/await`, `multiple interceptors`, `interceptor slot context`, `recursive callback stack`, etc), please refer to [unit test cases](https://github.com/leezhenghui/tsnode-proxify/blob/master/test/proxify.test.ts) for more details.
 
 ### Run Unit Tests
 
