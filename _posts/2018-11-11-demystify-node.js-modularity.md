@@ -24,7 +24,7 @@ Node.js is not just a javascript runtime, it actually shed much light on the cor
 
 ## Node.js builder
 
-When poking around a software, I personally would like to get a familiar with the builder system, because the builder usually can tell us much more information than compiling a build, indeed, it can help us making a sense of the softwdependences boundary, and also provides a highlevel outlook of souce code structure. So let's begin the journey with node.js builder.
+When poking around a software, I personally would like to get a familiar with the builder system, because the builder usually can tell us much more information than compiling a build, indeed, it can help us making a sense of the software dependence boundaries, and also provides a highlevel outlook of souce code structure. So let's begin the journey with node.js builder.
 
 ### Waf 
 
