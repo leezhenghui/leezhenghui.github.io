@@ -345,7 +345,7 @@ Some concepts/terminologies to clarify before go further to understand the featu
 
 > ![Note]({{ site.url }}/assets/ico/note.png)
 > 
-> Notable, to keep the helloworld sample as simple as possible, it only contain a sync-return style method with a sync-interceptor. If you want to try with **promise** or **callback** completion hints invocation or any other advanced usages(e.g: `async/await`, `multiple interceptors`, `interceptor slot context`, `recursive callback stack`, etc), please refer to [unit test cases](https://github.com/leezhenghui/tsnode-proxify/blob/master/test/proxify.test.ts) for more details.
+> Notable, to keep the helloworld sample as simple as possible, it only contain a sync-return style method with a sync-interceptor. If you want to try with **promise** or **callback** completion hints invocation or any other advanced usages(e.g: `async/await`, `multi-interceptors(w/ mixed-styles)`, `interceptor slot-context`, `recursive callback handler`, etc), please refer to [unit test cases](https://github.com/leezhenghui/tsnode-proxify/blob/master/test/proxify.test.ts) for more details.
 
 ### Run Unit Tests
 
