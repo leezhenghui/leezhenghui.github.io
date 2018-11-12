@@ -145,9 +145,9 @@ Let's take a closer look at Node.js builder via a quick practice on enabling [`c
 
 As you can see, the node.js architecture is based on a highly modularity architecture. It includes a micro-core(let's name it node-core in this article) which provide a highly extensible capabilities, most of features are encapsulated as a kind of module(`C/C++ binding`, `C/C++ addon` or `JS library`) contributed to Node.js project/ecosystem, that make Node.js easy to be extended and build up it's own ecosystem. 
 
-## What Node.js does in bootstrap phase 
+## Bootstrap workflow
 
-Essentially, node.js is working as a glues to put V8, libuv and other things together. To understand how Node-core works, the bootstrap workflow is a very important phase. Let's take a closer look at what it actually does in node-core in bootstrap phase.
+Essentially, node.js is working as a glues to put V8, libuv and other things together. To understand how node-core works, the bootstrap workflow is a very important phase. Let's take a closer look at what it actually does in node-core in bootstrap phase.
 
 ![node.js-start-process-brief]({{ site.url }}/assets/materials/demystify-nodejs/inside-nodejs-startup-workflow-brief.png)
 
