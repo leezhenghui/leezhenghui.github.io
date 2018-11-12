@@ -7,7 +7,12 @@ fullview: true
 comments: true
 ---
 
-# CallTracer
+## Contents
+
+* Kramdown table of contents
+{:toc .toc}
+
+## CallTracer
 
 [`CallTracer`](https://github.com/leezhenghui/calltracer) is an instrument toolkit and aimed to provide an easy way for native(C/C++) program debugging, in particular, it can work as an utility to record and layout the program execution details in various straight-forward representation ways.(e.g: sequencing diagram, flamegraph)
 

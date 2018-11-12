@@ -10,6 +10,11 @@ comments: true
 
 {% include series.html %}
 
+## Contents
+
+* Kramdown table of contents
+{:toc .toc}
+
 Node.js is a popular language on the cloud-native application development. Ryan Dahl who is Node.js creator once mentioned in his [interview](https://mappingthejourney.com/single-post/2017/08/31/episode-8-interview-with-ryan-dahl-creator-of-nodejs/), the original intention of Node.js comes along with the idea of providiing a web server which can combine a simplified web server programming interface and a **Nginx-like** structured non-blocking I/O basis. With a such premise, Node.js picked up Javascript as programming language and build up a pure async programming interface for I/O operations on the server side, it grows rapidly over the time and created a whole ecosystem by itself. 
 
 To be honst, I am not a big fan of javascript, as I personally favour statically typed languages much more on server side, but many years ago, when we invested/touched a couple of cloud-native/IoT-relevant projects to look for a more cloud-friendly(native) programming language, I was really attracted by the background idea and implementation in Node.js, it glues two perfect-fit technologies together, provides a powerful, clean, fascinating and fast server side programming interface and runtime. 
