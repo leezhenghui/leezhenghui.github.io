@@ -1,8 +1,8 @@
 ---
 layout: post
 title: Proxy-based function hook and AOP library for node.js 
-categories: [node.js]
-tags: [node.js, aop, typescript, javascript, proxy]
+categories: [node]
+tags: [node, aop, typescript, javascript, proxy]
 fullview: true
 comments: true
 ---
