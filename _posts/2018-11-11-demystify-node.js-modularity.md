@@ -583,6 +583,6 @@ In this post, we covered below parts in Node.js:
 
 I hope this post can help you setup a overview components structure in Node.js, especially, reduce your time to isolate a problem in Node.js, or contribute a feature to Node.js. 
 
-Anyway, this is just a beginning of the journey to exploring the Node.js internals. Many interesting things are waiting for us to dissover in the future posts. :-)
+Anyway, this is just a beginning of the journey to exploring the Node.js internals. Many interesting things are waiting for us to discover in the future posts. :-)
 
 {% include series.html %}
