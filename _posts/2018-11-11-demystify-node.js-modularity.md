@@ -56,7 +56,7 @@ Below diagram show the Node.js building process. Briefly, it includes four phase
 
 ![build-process]({{ site.url }}/assets/materials/demystify-nodejs/inside-nodejs-build-process.png)
 
-> [link]({{ site.url }}/assets/materials/demystify-nodejs/inside-nodejs-build-process.png) for clearer picture.
+> [link]({{ site.url }}/assets/materials/demystify-nodejs/inside-nodejs-build-process.png) for a clearer picture.
 
 ### Enable calltracer to Node.js
 
@@ -352,7 +352,7 @@ NODE_BUILTIN_MODULE_CONTEXT_AWARE(cares_wrap, node::cares_wrap::Initialize)
 
     > ![Tips]({{ site.url }}/assets/ico/tip.png)
     > 
-    > Refer to [link]({{ site.url }}/assets/materials/demystify-nodejs/builtin_module_register_flow.svg) for clearer picture 
+    > Refer to [link]({{ site.url }}/assets/materials/demystify-nodejs/builtin_module_register_flow.svg) for a clearer picture
 
 #### Loading process 
 
@@ -546,7 +546,7 @@ Let's start with the Node.js helloworld addon sample which use N-API approach.
   ![3rdparty-addons-register]({{ site.url }}/assets/materials/demystify-nodejs/3rdparty_addons_register_flow.svg)
 
   >
-  > Refer to [link]({{ site.url }}/assets/materials/demystify-nodejs/3rdparty_addons_register_flow.svg) for clearer picture 
+  > Refer to [link]({{ site.url }}/assets/materials/demystify-nodejs/3rdparty_addons_register_flow.svg) for a clearer picture 
 
 ### Native module
 
