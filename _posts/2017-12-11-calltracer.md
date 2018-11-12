@@ -47,14 +47,6 @@ It is compiled as a shared-lib and linked into a C/C++ program to enable the tra
 > 
 > Notable, turning on the func-trace will introduce significant performance impact,  please avoid enabling it on a production environment. 
 
-## TODO
-
-- Dynamic Tracer support, enable/disable the tracer on-the-fly
-
-- Support `dlclose` 
-
-- Code refine/refactor
-
 ## Prerequisites for run the example
 
 - Linux OS (Tested on Ubuntu variants)
@@ -113,6 +105,14 @@ Using below command to conver the trace log into a visualizer view:
 ### Diagrams 
 
 <img src="{{ site.url }}/assets/materials/calltracer/example.svg" width="800" height="500">
+
+## TODO
+
+- Dynamic Tracer support, enable/disable the tracer on-the-fly
+
+- Support `dlclose` 
+
+- Code refine/refactor
 
 ## Join us
 

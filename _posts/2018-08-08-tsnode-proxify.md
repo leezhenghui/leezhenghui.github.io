@@ -52,7 +52,7 @@ Implementing an AOP framework to advise method execution, the proxy pattern is p
 
 As mentioned above, the AOP framework can bring us so many benefits to improve the software modularity. Inspired by JEE experiences, I believe it would be helpful if we have similar framework in node.js. That is reason I come across to tsnode-proxify project. The goal of tsnode-proxify is NOT to provide a complete AOP implementation, it primarily focus on method execution [join point](https://en.wikipedia.org/wiki/Join_point) for the moment, will consider some IoC features to enable the property injection of proxied object in next step. 
 
-## Concepts
+## Concepts and Terminologies 
 
 Some concepts/terminologies to clarify before go further to understand the features provided by tsnode-proxify.
 

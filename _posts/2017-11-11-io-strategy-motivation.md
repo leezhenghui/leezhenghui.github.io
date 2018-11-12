@@ -12,7 +12,7 @@ comments: true
 
 <img src="{{ site.url }}/assets/materials/io-strategies/roadmap-0.png" alt="Road Map" width="600" height="250">
 
-## Contents
+### Contents
 
 * Kramdown table of contents
 {:toc .toc}
@@ -25,7 +25,7 @@ In this series articles, we start off a introduction on the background/motivatio
 >
 > With that in mind, the discussion center around UNIX-Like systems, in particular to LINUX, WINDOWS may be mentioned a little, however, all of PoC samples only guarantee to run on LINUX. 
 
-## Motivation 
+### Motivation 
  
 From software perspective, we want to accomplish highly `scalability` and high `concurrency` goal in our application, in the meanwhile,  ensure the overall system components utilizes the increased system hardware capabilities to the fullest. In modern applications, It is turned out that the I/O strategy design has become one of most important part in web server infrastructure to achieve highly scalability/concurrency. Why? Two principles can enlighen us on this problem:  `hardware trends` and `modern application trends`, and the `architecture trend` can guide us and provide the possibility to settle down a practical implementation to overcome the problem. 
 
