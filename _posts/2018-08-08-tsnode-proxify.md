@@ -143,7 +143,7 @@ Some concepts/terminologies to clarify before go further to understand the featu
 > 
 > Notable, If the target method is **sync** interaction style(especially, expected a synchronous return value), all of interceptors applied to that method should also be **sync** interaction style. 
 
-### Quick Start
+## Quick Start
 
 - Prerequsites 
   - node.js 
@@ -352,7 +352,7 @@ Some concepts/terminologies to clarify before go further to understand the featu
 > 
 > Notable, to keep the helloworld sample as simple as possible, it only contain a sync-return style method with a sync-interceptor. If you want to try with **promise** or **callback** completion hints invocation or any other advanced usages(e.g: `async/await`, `multi-interceptors(w/ mixed-styles)`, `interceptor slot-context`, `recursive callback handler`, etc), please refer to [unit test cases](https://github.com/leezhenghui/tsnode-proxify/blob/master/test/proxify.test.ts) for more details.
 
-### Run Unit Tests
+## Run Unit Tests
 
 You can run the [integration tests](https://github.com/leezhenghui/tsnode-proxify/tree/master/test) to get a full picture of what features has been supported by tsnode-proxify so far.
 
