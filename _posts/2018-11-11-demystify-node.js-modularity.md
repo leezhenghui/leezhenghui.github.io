@@ -20,7 +20,7 @@ From our projects, due to some other considerations, we changed our tech-stack o
 >
 > Node.js supports Android and Linux-based system, it definitely can run on a powerful IoT device which is installed an Android or Linux OS, e.g: a "retired" Android smart phone, the smart router with a linux kernel at your home,(of course, if you can hack it :)), [Raspberry Pi](https://www.raspberrypi.org/), etc, but please keep in mind that the suitable hardward to run Node.js/V8 should include **FPU** as well as at least **128MB RAM**, that means a typical [OpenWrt](https://en.wikipedia.org/wiki/OpenWrt) hardware or lower powerful MCU based hardware may not be able to run it. 
 
-Node.js is not just a javascript runtime, it actually shed much light on the correct manner to handle I/O via a clean&simpifild async programming interface. In the meanwhile, it is an interesting project for engineering as it is implemented in a highly modularity way(more details will be elaborated in this post on this topic), even nine years old, the code base in Node.js is still relatively small, readable. If you are interested in how Node.js works under the hood, the posts in this serie are suitable for you. 
+Node.js is not just a javascript runtime, it actually shed much light on the correct manner to handle I/O via a clean&simpifild async programming interface. In the meanwhile, it is an interesting project for engineering as it is implemented in a highly modularity way(more details will be elaborated in this post on this topic), even nine years old, the code base in Node.js is still relatively small, readable. If you are interested in how Node.js works under the hood, the posts in this series are suitable for you. 
 
 ## Node.js builder
 
@@ -138,7 +138,7 @@ Let's take a closer look at Node.js builder via a quick practice on enabling [`c
 
 ![runtime-component]({{ site.url }}/assets/materials/demystify-nodejs/inside-nodejs-runtime-components.png)
 
-As you can see, the node.js architecture is based on a highly modularity architecture. It includes a micro-core(let's name it node-core in this article) which provide a highly extensible capabilities, most of features are encapsulated as a kind of module(`C/C++ binding`, `C/C++ addon` or `JS library`) contributed to Node.js project/ecosystem, that make Node.js easy to be extended and build up his own ecosystem. 
+As you can see, the node.js architecture is based on a highly modularity architecture. It includes a micro-core(let's name it node-core in this article) which provide a highly extensible capabilities, most of features are encapsulated as a kind of module(`C/C++ binding`, `C/C++ addon` or `JS library`) contributed to Node.js project/ecosystem, that make Node.js easy to be extended and build up it's own ecosystem. 
 
 ## What Node.js does in bootstrap phase 
 
@@ -431,7 +431,7 @@ At the beginning of Node.js, the 3rd-party addon is allowed to access the google
 
 - NAN
 
-Later, Node.js team(Rod Vagg and Benjamin Byholm) contributed `NAN`(stands for Native Abstraction for Node.js) to resolve this problem. NAN actually are many macros which can hide the version differences and intelligently expand the appropriate logic branch based on the expected Node.js version. Of course, it need a recompile for the addon if Node.js version change. This is the main approach used by legacy C/C++ addons currently. 
+Later, Node.js team(Rod Vagg and Benjamin Byholm) contributed `NAN`(stands for Native Abstraction for Node.js) to resolve this problem. NAN actually are many macros which can hide the version differences and intelligently expand the appropriate logic branch based on the expected Node.js version. Of course, it need a recompilation for the addon if Node.js version change. This is the main approach used by legacy C/C++ addons currently. 
 
 - NAP
 
