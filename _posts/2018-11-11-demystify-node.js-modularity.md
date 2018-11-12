@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Demystify node.js - Modularization 
-categories: [node]
+categories: [node.js]
 tags: [node, c, javascript, architecture]
 series: [demystify-node.js]
 fullview: true
