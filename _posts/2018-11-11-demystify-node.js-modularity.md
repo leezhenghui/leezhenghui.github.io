@@ -73,7 +73,7 @@ Let's take a closer look at Node.js builder via a quick practice on enabling [`c
 
 - Add git submodule for calltracer, following Node.js source structure, pull the calltracer to `<node_src>/deps`
 
-  ```
+  ```shell
   git clone https://github.com/nodejs/node
   cd ./node
   git checkout -b v10.13.0 v10.13.0
@@ -171,7 +171,7 @@ As component architecture diagram show us, mainly, we have seven types of module
 
 The modules use `NM_F_BUILTIN` (this is based on the latest code in master branch)
 
-```
+```c++
 NODE_BUILTIN_MODULE_CONTEXT_AWARE(inspector, node::inspector::Initialize);
 NODE_BUILTIN_MODULE_CONTEXT_AWARE(util, node::util::Initialize)
 NODE_BUILTIN_MODULE_CONTEXT_AWARE(tcp_wrap, node::TCPWrap::Initialize)
@@ -372,7 +372,7 @@ The internal module type was introduced by in v8.9.0, the purpose is to transfer
 
 The modules use `NM_F_INTERNAL` (this is based on the latest code in master branch)
 
-```
+```c++
 NODE_MODULE_CONTEXT_AWARE_INTERNAL(heap_utils, node::heap::Initialize)
 NODE_MODULE_CONTEXT_AWARE_INTERNAL(types, node::InitializeTypes)
 NODE_MODULE_CONTEXT_AWARE_INTERNAL(timers, node::Initialize)
