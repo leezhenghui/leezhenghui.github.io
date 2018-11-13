@@ -4,7 +4,6 @@ title: Demystify node.js - Modularization
 categories: [node.js]
 tags: [node.js, c/c++, javascript, architecture]
 series: [demystify-node.js]
-fullview: true
 comments: true
 ---
 
