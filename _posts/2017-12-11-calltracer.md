@@ -2,7 +2,7 @@
 layout: post
 title: CallTracer 
 categories: [linux]
-tags: [linux, c, debug, toolkit]
+tags: [linux, c/c++, debug, toolkit]
 fullview: true
 comments: true
 ---

@@ -2,13 +2,13 @@
 layout: post
 title: Boost I/O Strategy In Web Server - Motivation
 categories: [io-strategy]
-tags: [architecture, microservices, IO, perf]
+tags: [architecture, microservices, I/O, perf]
 series: [io-strategy]
 fullview: true
 comments: true
 ---
 
-{% include series.html %}
+{% include common/series.html %}
 
 <img src="{{ site.url }}/assets/materials/io-strategies/roadmap-0.png" alt="Road Map" width="600" height="250">
 
@@ -165,4 +165,4 @@ If you are facing CPU-bound service, Java, Go, even C are seen as go-to technolo
 
 Any comments/correction is welcome
 
-{% include series.html %}
+{% include common/series.html %}

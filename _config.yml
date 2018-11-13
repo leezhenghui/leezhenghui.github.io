@@ -1,11 +1,15 @@
-# visit https://github.com/mojombo/jekyll/wiki/Configuration for more settings
+# Site Settings
+encoding: UTF-8
+exclude: ["*.gem", "*.gemspec", "Gemfile", "Gemfile.lock", "node_modules", "Rakefile", "starter-kit", "vendor"]
+lang: en # Language code as defined in _data/i18n.yml. en, en-gb, en-us, zh, zh-cn, zh-tw etc.
+permalink: /:categories/:year/:month/:day/:title.html
 
-paginate: 10 # pagination based on number of posts
-paginate_path: "page:num"
-
-exclude: ["README.md"] # files to exclude
-
-highlighter: rouge
+whitelist: [jekyll-feed, jekyll-redirect-from, jekyll-seo-tag, jekyll-sitemap]
+plugins:
+  - jekyll-feed
+  - jekyll-redirect-from
+  - jekyll-seo-tag
+  - jekyll-sitemap
 
 markdown: kramdown
 kramdown:
@@ -13,40 +17,52 @@ kramdown:
   smart_quotes: ["apos", "apos", "quot", "quot"]
   toc_levels: 1..3
 
-disqus: leezhenghui 
-google_analytics: Zhenghui Lee 
+sass:
+  style: compressed
 
-title: Zhenghui Lee 
-
-defaults:
-  -
-    scope:
-      path: "" # empty string for all files
-    values:
-      title: ZH's Pocket 
-
-description: Zhenghui Lee's weblog 
+# Site Data
+url: # the base hostname & protocol for your site, e.g. http://example.com
+baseurl: # the subpath of your site, e.g. /blog
+title: ZH's Pocket 
+description: "Zhenghui Lee's weblog"
+keywords: 'technology,blog'
 author:
-  name: Zhenghui Lee 
-  email: leezhenghui@gmail.com 
-  github: leezhenghui 
-  twitter: zhenghui_lee 
-  # pinterest: asd123
-  linkedin: zhenghui-lee-8a318729
-  bio: Engineer 
-  email_md5: 4381600ea126cafa87fa729b75312b10 
+  name: Zhenghui Lee
+  job_title: Engineer 
+  location:
+  email: leezhenghui@gmail.com
+  social_links:
+    - name: facebook
+      url: https://www.facebook.com/zhenghui.li.94
+    - name: github
+      url: https://github.com/leezhenghui
+    - name: instagram
+      url:
+    - name: linkedin
+      url: https://linkedin.com/in/zhenghui-lee-8a318729 
+    - name: stackoverflow
+      url:
+    - name: twitter
+      url: https://twitter.com/zhenghui_lee 
+    - name: vk
+      url:
+home:
+  section1: '<style>img{border-radius: 50%;}</style><a href="/blog"><img src="//www.gravatar.com/avatar/4381600ea126cafa87fa729b75312b10?s=150" style="width:220px"></a>'
+  section2: <h1>ZHENGHUI LEE</h1>
+  section3: <h2>Engineer</h2>
+blog:
+  cc_license: http://creativecommons.org/licenses/by-sa/4.0/ # A link to CC License of your choice.
+  cc_license_image: /assets/images/theme/cc-by-sa.png # An image of your CC License. 
+  footer_content: Copyright (c) 2017, 2018 Zhenghui Lee <a href="http://creativecommons.org/licenses/by-sa/4.0/">(CC BY-SA 4.0)</a>
 
-rss_path: feed.xml
-categories_path: categories.html
-tags_path: tags.html
+disqus:
+  shortname: # e.g.lizh 
+  public_key: # e.g. ULZ0b9TFefCUJHKQd4JCKv2v3u27YoG7YG8zXPewkWrT333Z0Se9YnxLzoV6VM8W
+google_tag_manager: # e.g. 'GTM-KCQJXZ8F'
+addthis_public_id: # AddThis sharing plugin. See http://www.addthis.com/. E.g. ra-53329e27694534j5 
 
-# set it as url of an image
-# sidebar_background_image: https://www.dropbox.com/s/g9h23zrycedxtk5/sky.png?raw=1
-
-BASE_PATH:
-
-plugins_dir: ./_scripts
-
-plugins:
-  - jekyll-paginate
-  - jekyll-sitemap
+paths:
+  home: /
+  blog: /blog/
+  categories: /blog/categories/
+  tags: /blog/tags/

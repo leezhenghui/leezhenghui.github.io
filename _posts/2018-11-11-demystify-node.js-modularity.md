@@ -2,13 +2,13 @@
 layout: post
 title: Demystify node.js - Modularization 
 categories: [node.js]
-tags: [node, c, javascript, architecture]
+tags: [node.js, c/c++, javascript, architecture]
 series: [demystify-node.js]
 fullview: true
 comments: true
 ---
 
-{% include series.html %}
+{% include common/series.html %}
 
 ## Contents
 
@@ -590,4 +590,4 @@ I hope this post can help you setup a overview components structure in Node.js, 
 
 Anyway, this is just a beginning of the journey to exploring the Node.js internals. Many interesting things are waiting for us to discover in the future posts. :-)
 
-{% include series.html %}
+{% include common/series.html %}

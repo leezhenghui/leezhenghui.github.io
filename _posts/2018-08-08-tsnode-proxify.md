@@ -2,7 +2,7 @@
 layout: post
 title: Proxy-based function hook and AOP library for node.js 
 categories: [node.js]
-tags: [node, aop, typescript, javascript, proxy]
+tags: [node.js, aop, typescript, javascript, proxy]
 fullview: true
 comments: true
 ---
@@ -60,7 +60,7 @@ Some concepts/terminologies to clarify before go further to understand the featu
 
     - `Sync`: The method completion should be the same time point as method invocation being returned. 
 
-     ```
+     ```javascript
      e.g: 
      greet(name: string): string {
        return 'Hello, ' + name;
@@ -69,7 +69,7 @@ Some concepts/terminologies to clarify before go further to understand the featu
     
     - `Async`: The method completion will be done in a future certain time point after the moment of method invocation being returned. 
 
-     ```
+     ```javascript
      e.g: 
      greet(name: string, cb: Function): void{
        setTimeout(function() {
@@ -168,7 +168,7 @@ Some concepts/terminologies to clarify before go further to understand the featu
 
 - Create **package.json**
 
-  ```
+  ```shell
   npm init -y 
   echo "node_modules" >> .gitignore
   echo "dist" >> .gitignore
@@ -178,7 +178,7 @@ Some concepts/terminologies to clarify before go further to understand the featu
   ```
 - Create **tsconfig.json**
 
-  ```
+  ```json
   {
     "compilerOptions": {
       "target": "es5",
@@ -193,7 +193,7 @@ Some concepts/terminologies to clarify before go further to understand the featu
   ```
 - Add scripts to package.json
 
-  ```
+  ```json
   "build": "tsc",
   "start": "node dist/helloworld.js",
   "main": "dist/helloworld.js"
@@ -207,7 +207,7 @@ Some concepts/terminologies to clarify before go further to understand the featu
   - Extend the **AbastractInterceptor** base class, and implement the methods.
 
 
-  ```
+  ```typescript
   import {
     Interceptor,
     InteractionStyleType,
@@ -295,7 +295,7 @@ Some concepts/terminologies to clarify before go further to understand the featu
   - @Component decorator: declare a class to be managed as a component in tsnode-proxify  
   - @QoS decorator: declare a method to be proxify and provide `before` and `after` advises  
   
-  ```
+  ```typescript
   import {
     Component,
     QoS,
@@ -337,7 +337,7 @@ Some concepts/terminologies to clarify before go further to understand the featu
 
 - The output result with aspect logger feature:
 
-  ```
+  ```shell
   > hello-tsnode-proxify@1.0.0 start /home/lizh/tmp/hello-tsnode-proxify
   > node dist/helloworld.js
   
