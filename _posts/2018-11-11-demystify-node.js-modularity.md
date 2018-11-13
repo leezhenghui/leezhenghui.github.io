@@ -32,11 +32,13 @@ When poking around a software, I personally would like to get a familiar with th
 
 ### Waf 
 
-[`waf`](https://waf.io/) is the build toolkit used by node.js prior to v0.8 version. If you see a project, especially an C/C++ addon, contains a file named "wscript", that usually means it came along with a very old Node.js version.  Consiering I am trying to complete the article with latest LTS version(by now, it is v10.13.0), I will skip the introduction on Waf in this post.
+[`waf`](https://waf.io/) is the 1st-gen build toolkit used by node.js for the versions prior to v0.8. If you see a project, especially an C/C++ addon, contains a file named "wscript", that usually means it came along with a very old Node.js version.  Consiering I am trying to complete the article with latest LTS version(by now, it is v10.13.0), I will skip the introduction on Waf in this post.
 
 ### GYP
 
-> From GYP [wikipedia](https://en.wikipedia.org/wiki/GYP_\(software\)):
+[GYP](https://gyp.gsrc.io/index.md) is the build tool used by node.js and node-gyp since v0.8.
+
+> From [wikipedia](https://en.wikipedia.org/wiki/GYP_\(software\)):
 >
 > [GYP](https://gyp.gsrc.io/index.md)(generate your projects) is a build automation tool. GYP was created by Google to generate native IDE project files (such as Visual Studio Code and Xcode) for building the Chromium web browser and is licensed as open source software using the BSD software license.
 >
@@ -44,7 +46,10 @@ When poking around a software, I personally would like to get a familiar with th
 >
 > Software projects being built using GYP include the V8 Javascript engine, Google's Chromium web browser, Dart, Node.js, WebRTC, and Telegram.
 >
-> In 2016 the Chromium project replaced GYP with [GN](https://chromium.googlesource.com/chromium/src/tools/gn/).
+
+> ![Tips]({{ site.url }}/assets/ico/tip.png)
+>
+> BTW,[GN](https://chromium.googlesource.com/chromium/src/tools/gn/) is a meta-build system that generates NinjaBuild files, GN files are more readable and maintainable than GYP files, in the meanwhile, it is fast, the test result from Google mentioned it is 20x faster than GYP. In 2016 the Chromium project replaced GYP with GN. The project [deno](https://github.com/denoland/deno.git)(Ryan's new project for a secure typescript runtime on V8) is using GN as it build system.
 >
 
 If you want to get quick started on GYP, please refer to my [hello-gyp](https://github.com/leezhenghui/hello-gyp.git) sample. If your project include `Executable ELF`, and dependences with `Static library` and/or `Dynamic linking library`, you can refer to my [example](https://github.com/leezhenghui/calltracer/tree/master/examples) for a quick reference.
