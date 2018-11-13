@@ -56,7 +56,7 @@ blog:
   footer_content: Copyright (c) 2017, 2018 Zhenghui Lee <a href="http://creativecommons.org/licenses/by-sa/4.0/">(CC BY-SA 4.0)</a>
 
 disqus:
-  shortname: # e.g.lizh 
+  shortname: zhenghui
   public_key: # e.g. ULZ0b9TFefCUJHKQd4JCKv2v3u27YoG7YG8zXPewkWrT333Z0Se9YnxLzoV6VM8W
 google_tag_manager: # e.g. 'GTM-KCQJXZ8F'
 addthis_public_id: # AddThis sharing plugin. See http://www.addthis.com/. E.g. ra-53329e27694534j5 
