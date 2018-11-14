@@ -147,7 +147,7 @@ Let's take a closer look at Node.js builder via a quick practice on enabling [`c
 
 ![runtime-component]({{ site.url }}/assets/materials/demystify-nodejs/inside-nodejs-runtime-components.png)
 
-As you can see, the node.js architecture is based on a highly modularity architecture. It includes a micro-core(let's name it node-core in this article) which provide a highly extensible capabilities, most of features are encapsulated as a kind of module(`C/C++ binding`, `C/C++ addon` or `JS library`) contributed to Node.js project/ecosystem, that make Node.js easy to be extended and build up it's own ecosystem. 
+As you can see, the node.js architecture is based on a modular design. It includes a micro-core(let's name it node-core in this article) which provide a highly extensible capabilities, most of features are encapsulated as a kind of module(`C/C++ binding`, `C/C++ addon` or `JS library`) contributed to Node.js project/ecosystem, that make Node.js easy to be extended and build up it's own ecosystem. 
 
 ## Bootstrap workflow
 
