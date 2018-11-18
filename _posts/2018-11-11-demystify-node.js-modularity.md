@@ -9,7 +9,7 @@ comments: true
 
 {% include common/series.html %}
 
-## Contents
+## Table of Contents
 
 * Kramdown table of contents
 {:toc .toc}

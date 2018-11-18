@@ -6,7 +6,7 @@ tags: [linux, c/c++, debug, toolkit]
 comments: true
 ---
 
-## Contents
+## Table of Contents
 
 * Kramdown table of contents
 {:toc .toc}

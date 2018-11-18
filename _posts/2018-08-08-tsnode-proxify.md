@@ -6,7 +6,7 @@ tags: [node.js, aop, typescript, javascript, proxy]
 comments: true
 ---
 
-## Contents
+## Table of Contents
 
 * Kramdown table of contents
 {:toc .toc}

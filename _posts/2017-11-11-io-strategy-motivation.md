@@ -11,7 +11,7 @@ comments: true
 
 <img src="{{ site.url }}/assets/materials/io-strategies/roadmap-0.png" alt="Road Map" width="600" height="250">
 
-### Contents
+### Table of Contents
 
 * Kramdown table of contents
 {:toc .toc}
