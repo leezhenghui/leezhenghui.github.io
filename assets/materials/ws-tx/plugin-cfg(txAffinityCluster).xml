@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="ISO-8859-1"?><!--HTTP server plugin config file for the webserver NDCell01.CustomNode01.httpDispatcher generated on 2013.05.06 at 11:04:30 AM CST-->
+<Config ASDisableNagle="false" AcceptAllContent="false" AppServerPortPreference="HostHeader" ChunkedResponse="false" FIPSEnable="false" FailoverToNext="false" HTTPMaxHeaders="300" IISDisableNagle="false" IISPluginPriority="High" IgnoreDNSFailures="false" RefreshInterval="60" ResponseChunkSize="64" SSLConsolidate="true" TrustedProxyEnable="false" VHostMatchingCompat="false">
+   <Log LogLevel="Debug" Name="c:\IBM\HTTPServer\Plugins\logs\httpDispatcher\http_plugin.log"/>
+   <Property Name="ESIEnable" Value="true"/>
+   <Property Name="ESIMaxCacheSize" Value="1024"/>
+   <Property Name="ESIInvalidationMonitor" Value="false"/>
+   <Property Name="ESIEnableToPassCookies" Value="false"/>
+   <Property Name="PluginInstallRoot" Value="c:\IBM\HTTPServer\Plugins\"/>
+   <VirtualHostGroup Name="default_host">
+      <VirtualHost Name="*:9080"/>
+      <VirtualHost Name="*:80"/>
+      <VirtualHost Name="*:9443"/>
+      <VirtualHost Name="*:5060"/>
+      <VirtualHost Name="*:5061"/>
+      <VirtualHost Name="*:443"/>
+      <VirtualHost Name="*:9062"/>
+      <VirtualHost Name="*:9081"/>
+      <VirtualHost Name="*:9444"/>
+      <VirtualHost Name="*:9045"/>
+      <VirtualHost Name="*:9063"/>
+      <VirtualHost Name="*:9082"/>
+      <VirtualHost Name="*:9445"/>
+      <VirtualHost Name="*:9046"/>
+      <VirtualHost Name="*:81"/>
+      <VirtualHost Name="*:82"/>
+      <VirtualHost Name="*:444"/>
+   </VirtualHostGroup>
+   <ServerCluster CloneSeparatorChange="false" GetDWLMTable="false" IgnoreAffinityRequests="true" LoadBalance="Round Robin" Name="SingleCluster.AppTarget" PostBufferSize="64" PostSizeLimit="-1" RemoveSpecialHeaders="true" RetryInterval="60">
+      <Server CloneID="17oe3vjf8" ConnectTimeout="5" ExtendedHandshake="false" LoadBalanceWeight="1" MaxConnections="-1" Name="CustomNode01_SingleCluster.AppTarget.CustomNode01.0" ServerIOTimeout="60" WaitForContinue="false">
+         <Transport Hostname="localhost" Port="9081" Protocol="http"/>
+         <Transport Hostname="localhost" Port="9444" Protocol="https">
+            <Property Name="keyring" Value="c:\IBM\HTTPServer\Plugins\config\httpDispatcher\plugin-key.kdb"/>
+            <Property Name="stashfile" Value="c:\IBM\HTTPServer\Plugins\config\httpDispatcher\plugin-key.sth"/>
+         </Transport>
+      </Server>
+      <Server CloneID="17oe402oh" ConnectTimeout="5" ExtendedHandshake="false" LoadBalanceWeight="1" MaxConnections="-1" Name="CustomNode01_SingleCluster.AppTarget.CustomNode01.1" ServerIOTimeout="60" WaitForContinue="false">
+         <Transport Hostname="localhost" Port="9082" Protocol="http"/>
+         <Transport Hostname="localhost" Port="9445" Protocol="https">
+            <Property Name="keyring" Value="c:\IBM\HTTPServer\Plugins\config\httpDispatcher\plugin-key.kdb"/>
+            <Property Name="stashfile" Value="c:\IBM\HTTPServer\Plugins\config\httpDispatcher\plugin-key.sth"/>
+         </Transport>
+      </Server>
+      <PrimaryServers>
+         <Server Name="CustomNode01_SingleCluster.AppTarget.CustomNode01.0"/>
+         <Server Name="CustomNode01_SingleCluster.AppTarget.CustomNode01.1"/>
+      </PrimaryServers>
+   </ServerCluster>
+   
+   <ServerCluster CloneSeparatorChange="false" GetDWLMTable="false" IgnoreAffinityRequests="true" LoadBalance="Round Robin" Name="dmgr_NDCM01_Cluster" PostBufferSize="64" PostSizeLimit="-1" RemoveSpecialHeaders="true" RetryInterval="60">
+      <Server ConnectTimeout="0" ExtendedHandshake="false" MaxConnections="-1" Name="NDCM01_dmgr" ServerIOTimeout="0" WaitForContinue="false"/>
+   </ServerCluster>
+   
+  <ServerCluster Name="TXAffinityCluster" CloneSeparatorChange="false" LoadBalance="Round Robin" PostSizeLimit="-1" RemoveSpecialHeaders="true" RetryInterval="60">
+      <Server Name="txProxyMember-0" ConnectTimeout="0" ExtendedHandshake="false" MaxConnections="-1" WaitForContinue="false" LoadBalanceWeight="2">
+         <Transport Hostname="localhost" Port ="81" Protocol ="http"/>
+         <Transport Hostname="localhost" Port ="443" Protocol ="https">
+            <Property Name="keyring" Value="C:\WPS70\profiles\Custom01/etc/plugin-key.kdb"/>
+            <Property Name="stashfile" Value="C:\WPS70\profiles\Custom01/etc/plugin-key.sth"/>
+         </Transport>
+      </Server>
+      <Server Name="txProxyMember-1" ConnectTimeout="0" ExtendedHandshake="false" MaxConnections="-1" WaitForContinue="false" LoadBalanceWeight="2">
+         <Transport Hostname="localhost" Port ="82" Protocol ="http"/>
+         <Transport Hostname="localhost" Port ="444" Protocol ="https">
+            <Property Name="keyring" Value="C:\WPS70\profiles\Custom01/etc/plugin-key.kdb"/>
+            <Property Name="stashfile" Value="C:\WPS70\profiles\Custom01/etc/plugin-key.sth"/>
+         </Transport>
+      </Server>
+   </ServerCluster>
+   
+   <UriGroup Name="default_host_SingleCluster.AppTarget_URIs">
+      <Uri AffinityCookie="JSESSIONID" AffinityURLIdentifier="jsessionid" Name="/HTM_PredefinedTaskMsg_V7003_SingleCluster.AppTargetWeb/*"/>
+      <Uri AffinityCookie="JSESSIONID" AffinityURLIdentifier="jsessionid" Name="/BusinessSpaceHelp/*"/>
+      <Uri AffinityCookie="JSESSIONID" AffinityURLIdentifier="jsessionid" Name="/BSpaceWebformsProxy/*"/>
+      <Uri AffinityCookie="JSESSIONID" AffinityURLIdentifier="jsessionid" Name="/BSpaceWidgetsHM/*"/>
+      <Uri AffinityCookie="JSESSIONID" AffinityURLIdentifier="jsessionid" Name="/PolymorphicWidget/*"/>
+      <Uri AffinityCookie="JSESSIONID" AffinityURLIdentifier="jsessionid" Name="/scaWidget/*"/>
+      <Uri AffinityCookie="JSESSIONID" AffinityURLIdentifier="jsessionid" Name="/SecurityManagerWidgets/*"/>
+      <Uri AffinityCookie="JSESSIONID" AffinityURLIdentifier="jsessionid" Name="/ServiceMonitorGraphWidget/*"/>
+      <Uri AffinityCookie="JSESSIONID" AffinityURLIdentifier="jsessionid" Name="/StoreAndForward/*"/>
+      <Uri AffinityCookie="JSESSIONID" AffinityURLIdentifier="jsessionid" Name="/BSpaceWidgetsBCM/*"/>
+      <Uri AffinityCookie="JSESSIONID" AffinityURLIdentifier="jsessionid" Name="/VisualStepWidgets/*"/>
+      <Uri AffinityCookie="JSESSIONID" AffinityURLIdentifier="jsessionid" Name="/br/*"/>
+      <Uri AffinityCookie="JSESSIONID" AffinityURLIdentifier="jsessionid" Name="/BSpaceWidgetsWPS/*"/>
+      <Uri AffinityCookie="JSESSIONID" AffinityURLIdentifier="jsessionid" Name="/HTM_PredefinedTasks_V7003_SingleCluster.AppTargetWeb/*"/>
+      <Uri AffinityCookie="JSESSIONID" AffinityURLIdentifier="jsessionid" Name="/wesbWidget/*"/>
+      <Uri AffinityCookie="JSESSIONID" AffinityURLIdentifier="jsessionid" Name="/BFMIF_SingleCluster.AppTarget/*"/>
+      <Uri AffinityCookie="JSESSIONID" AffinityURLIdentifier="jsessionid" Name="/rest/bpm/bfm/*"/>
+      <Uri AffinityCookie="JSESSIONID" AffinityURLIdentifier="jsessionid" Name="/rest/bpm/bfm/*.jsp"/>
+      <Uri AffinityCookie="JSESSIONID" AffinityURLIdentifier="jsessionid" Name="/rest/bpm/bfm/*.jsv"/>
+      <Uri AffinityCookie="JSESSIONID" AffinityURLIdentifier="jsessionid" Name="/rest/bpm/bfm/*.jsw"/>
+      <Uri AffinityCookie="JSESSIONID" AffinityURLIdentifier="jsessionid" Name="/rest/bpm/bfm/j_security_check"/>
+      <Uri AffinityCookie="JSESSIONID" AffinityURLIdentifier="jsessionid" Name="/rest/bpm/bfm/ibm_security_logout"/>
+      <Uri AffinityCookie="JSESSIONID" AffinityURLIdentifier="jsessionid" Name="/rest/bpm/bfm/servlet/*"/>
+      <Uri AffinityCookie="JSESSIONID" AffinityURLIdentifier="jsessionid" Name="/BFMJAXWSAPI/*"/>
+      <Uri AffinityCookie="JSESSIONID" AffinityURLIdentifier="jsessionid" Name="/BusinessSpace/*"/>
+      <Uri AffinityCookie="JSESSIONID" AffinityURLIdentifier="jsessionid" Name="/bpc/*"/>
+      <Uri AffinityCookie="JSESSIONID" AffinityURLIdentifier="jsessionid" Name="/RemoteALWeb/*"/>
+      <Uri AffinityCookie="JSESSIONID" AffinityURLIdentifier="jsessionid" Name="/rest/*"/>
+      <Uri AffinityCookie="JSESSIONID" AffinityURLIdentifier="jsessionid" Name="/rest/*.jsp"/>
+      <Uri AffinityCookie="JSESSIONID" AffinityURLIdentifier="jsessionid" Name="/rest/*.jsv"/>
+      <Uri AffinityCookie="JSESSIONID" AffinityURLIdentifier="jsessionid" Name="/rest/*.jsw"/>
+      <Uri AffinityCookie="JSESSIONID" AffinityURLIdentifier="jsessionid" Name="/rest/j_security_check"/>
+      <Uri AffinityCookie="JSESSIONID" AffinityURLIdentifier="jsessionid" Name="/rest/ibm_security_logout"/>
+      <Uri AffinityCookie="JSESSIONID" AffinityURLIdentifier="jsessionid" Name="/HumanTaskManagementWidgets/*"/>
+      <Uri AffinityCookie="JSESSIONID" AffinityURLIdentifier="jsessionid" Name="/BSpaceWidgetsForms/*"/>
+      <Uri AffinityCookie="JSESSIONID" AffinityURLIdentifier="jsessionid" Name="/mum/administration"/>
+      <Uri AffinityCookie="JSESSIONID" AffinityURLIdentifier="jsessionid" Name="/mum/widgetsandbox"/>
+      <Uri AffinityCookie="JSESSIONID" AffinityURLIdentifier="jsessionid" Name="/mum/config"/>
+      <Uri AffinityCookie="JSESSIONID" AffinityURLIdentifier="jsessionid" Name="/mum/*"/>
+      <Uri AffinityCookie="JSESSIONID" AffinityURLIdentifier="jsessionid" Name="/mum/proxy/*"/>
+      <Uri AffinityCookie="JSESSIONID" AffinityURLIdentifier="jsessionid" Name="/mum/bootstrap"/>
+      <Uri AffinityCookie="JSESSIONID" AffinityURLIdentifier="jsessionid" Name="/mum/resources/bootstrap"/>
+      <Uri AffinityCookie="JSESSIONID" AffinityURLIdentifier="jsessionid" Name="/mum/enabler"/>
+      <Uri AffinityCookie="JSESSIONID" AffinityURLIdentifier="jsessionid" Name="/mum/mymashups"/>
+      <Uri AffinityCookie="JSESSIONID" AffinityURLIdentifier="jsessionid" Name="/mum/demos/loaddemo.jsp"/>
+      <Uri AffinityCookie="JSESSIONID" AffinityURLIdentifier="jsessionid" Name="/mum/*.jsp"/>
+      <Uri AffinityCookie="JSESSIONID" AffinityURLIdentifier="jsessionid" Name="/mum/*.jsv"/>
+      <Uri AffinityCookie="JSESSIONID" AffinityURLIdentifier="jsessionid" Name="/mum/*.jsw"/>
+      <Uri AffinityCookie="JSESSIONID" AffinityURLIdentifier="jsessionid" Name="/mum/j_security_check"/>
+      <Uri AffinityCookie="JSESSIONID" AffinityURLIdentifier="jsessionid" Name="/mum/ibm_security_logout"/>
+      <Uri AffinityCookie="JSESSIONID" AffinityURLIdentifier="jsessionid" Name="/mum/servlet/*"/>
+      <Uri AffinityCookie="JSESSIONID" AffinityURLIdentifier="jsessionid" Name="/widgets/*"/>
+      <Uri AffinityCookie="JSESSIONID" AffinityURLIdentifier="jsessionid" Name="/HTMIF_SingleCluster.AppTarget/*"/>
+      <Uri AffinityCookie="JSESSIONID" AffinityURLIdentifier="jsessionid" Name="/rest/bpm/htm/*"/>
+      <Uri AffinityCookie="JSESSIONID" AffinityURLIdentifier="jsessionid" Name="/rest/bpm/htm/*.jsp"/>
+      <Uri AffinityCookie="JSESSIONID" AffinityURLIdentifier="jsessionid" Name="/rest/bpm/htm/*.jsv"/>
+      <Uri AffinityCookie="JSESSIONID" AffinityURLIdentifier="jsessionid" Name="/rest/bpm/htm/*.jsw"/>
+      <Uri AffinityCookie="JSESSIONID" AffinityURLIdentifier="jsessionid" Name="/rest/bpm/htm/j_security_check"/>
+      <Uri AffinityCookie="JSESSIONID" AffinityURLIdentifier="jsessionid" Name="/rest/bpm/htm/ibm_security_logout"/>
+      <Uri AffinityCookie="JSESSIONID" AffinityURLIdentifier="jsessionid" Name="/rest/bpm/htm/servlet/*"/>
+      <Uri AffinityCookie="JSESSIONID" AffinityURLIdentifier="jsessionid" Name="/HTMJAXWSAPI/*"/>
+      <Uri AffinityCookie="JSESSIONID" AffinityURLIdentifier="jsessionid" Name="/CEIDemoWeb/*"/>
+      <!--Uri AffinityCookie="JSESSIONID" AffinityURLIdentifier="jsessionid" Name="/ProcessOperatorWeb/*"/-->
+   </UriGroup>
+   
+   <UriGroup Name="default_host_TXAffinityCluster_URIs">
+       <Uri AffinityCookie="JSESSIONID" AffinityURLIdentifier="jsessionid" Name="/ProcessOperatorWeb/*"/>
+   </UriGroup>
+   
+   <Route ServerCluster="SingleCluster.AppTarget" UriGroup="default_host_SingleCluster.AppTarget_URIs" VirtualHostGroup="default_host"/>
+   
+   <Route ServerCluster="TXAffinityCluster" UriGroup="default_host_TXAffinityCluster_URIs" VirtualHostGroup="default_host"/>
+   
+   
+   <RequestMetrics armEnabled="false" loggingEnabled="false" rmEnabled="false" traceLevel="HOPS">
+      <filters enable="false" type="URI">
+         <filterValues enable="false" value="/snoop"/>
+         <filterValues enable="false" value="/hitcount"/>
+      </filters>
+      <filters enable="false" type="SOURCE_IP">
+         <filterValues enable="false" value="255.255.255.255"/>
+         <filterValues enable="false" value="254.254.254.254"/>
+      </filters>
+      <filters enable="false" type="JMS">
+         <filterValues enable="false" value="destination=aaa"/>
+      </filters>
+      <filters enable="false" type="WEB_SERVICES">
+         <filterValues enable="false" value="wsdlPort=aaa:op=bbb:nameSpace=ccc"/>
+      </filters>
+   </RequestMetrics>
+</Config>
