@@ -165,7 +165,7 @@ POSIX.AIO is an asynchronous I/O interface implemented as part of glibc. It also
 
 POSIX.AIO still support signal notficaiton, but that also have some problem, please refer to [link](http://davmac.org/davpage/linux/async-io.html) for more details about this topic.
 
-## Conjunction of Libev and Libeio
+## Integration of Libev and Libeio
 
 <img src="{{ site.url }}/assets/materials/inside-libev-libeio/inside-nodejs-conjuction-libev-libeio.png" alt="multiple-stakholders">
 
