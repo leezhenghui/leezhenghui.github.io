@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Boost I/O Strategy In Web Server - Intro to Libev and Libeio 
+title: Boost I/O Strategy In Web Server - Dive into Libev and Libeio 
 categories: [io-strategy]
 tags: [I/O, linux, perf, eventloop]
 series: [io-strategy]
