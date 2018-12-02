@@ -2,7 +2,7 @@
 layout: post
 title: Boost I/O Strategy In Web Server - Dive into Libev and Libeio 
 categories: [io-strategy]
-tags: [I/O, linux, perf, event-loop]
+tags: [I/O, linux, perf, event-loop, c/c++]
 series: [io-strategy]
 comments: true
 ---
@@ -76,7 +76,7 @@ libev - a high performance full-featured event-loop written in C.
 
 ### Framework Workflow 
 
-<img src="{{ site.url }}/assets/materials/inside-libev-libeio/event-loop-overall.png" alt="multiple-stakholders">
+<img src="{{ site.url }}/assets/materials/inside-libev-libeio/eventloop-overall.png" alt="multiple-stakholders">
 
 ### Data sturcture
 
