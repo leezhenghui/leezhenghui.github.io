@@ -20,11 +20,11 @@ Following my original plan, the 2nd post in this series should be an introductio
 
 ## Libev
 
-libev - a high performance full-featured event loop written in C.
+libev - a high performance full-featured event-loop written in C.
 
 > From [man](https://linux.die.net/man/3/ev)
 >
-> Libev supports "select", "poll", the Linux-specific "epoll", the BSD-specific "kqueue" and the Solaris-specific event port mechanisms for file descriptor events ("ev\_io"), the Linux "inotify" interface (for "ev\_stat"), Linux eventfd/signalfd (for faster and cleaner inter-thread wakeup ("ev\_async")/signal handling ("ev\_signal")) relative timers ("ev\_timer"), absolute timers with customised rescheduling ("ev\_periodic"), synchronous signals ("ev\_signal"), process status change events ("ev\_child"), and event watchers dealing with the event loop mechanism itself ("ev\_idle", "ev\_embed", "ev\_prepare" and "ev\_check" watchers) as well as file watchers ("ev\_stat") and even limited support for fork events ("ev\_fork").
+> Libev supports "select", "poll", the Linux-specific "epoll", the BSD-specific "kqueue" and the Solaris-specific event port mechanisms for file descriptor events ("ev\_io"), the Linux "inotify" interface (for "ev\_stat"), Linux eventfd/signalfd (for faster and cleaner inter-thread wakeup ("ev\_async")/signal handling ("ev\_signal")) relative timers ("ev\_timer"), absolute timers with customised rescheduling ("ev\_periodic"), synchronous signals ("ev\_signal"), process status change events ("ev\_child"), and event watchers dealing with the event-loop mechanism itself ("ev\_idle", "ev\_embed", "ev\_prepare" and "ev\_check" watchers) as well as file watchers ("ev\_stat") and even limited support for fork events ("ev\_fork").
 
 ### Components architecture
 
@@ -36,21 +36,21 @@ libev - a high performance full-featured event loop written in C.
 
   The non-pollable resoruces would be:
 
-    - The target file fd does not support the backend , e.g: the regular file to epoll in linux, therefore can't be pollable manner.
+    - The target file fd is not supported by the underlaying demultiplexer(in libev code,we call it `backend`), e.g: the regular disk file is not supported by epoll in linux.
 
       > ![Tips]({{ site.url }}/assets/ico/tip.png)
       >
-      > For the fd of regular disk file, it can't work with epoll, a EPERM error will returned if you do that. BTW, it can work with `poll` and `select` based backend to perform a pollable fashion, but the read/write operation actually running in a blocking I/O mode, that is definitely we need to avoid in a event-loop, as it will potentially introduce "world-stop"(assuming a single process/thread usage) situations and slow donw the whole event processing.
+      > For the fd of regular disk file, it can't work with epoll, a EPERM error will returned if you do that. BTW, `poll` and `select` based backend can support disk file fd, but the read/write operation actually running in a blocking I/O mode, that is definitely we need to be aware of, and in a single thread event-loop application, we need to avoid this kind of usage, as it may potentially introduce "world-stop" due to the I/O blocking operation(espcially for a disk file `read` call, I guess `write` operation may be better than `read` operation in this case, as it just put the data to memory buffer and return), and slow down the whole iteration of event processing.
 
     - The resources run in an ultimate async manner,  adopt to the pollable mode. e.g: signal.
  
 - <img src="{{ site.url }}/assets/materials/inside-libev-libeio/blockingio-convertor.png" alt="blockingio-convertor" width="110" height="50">
   
-  The blocking I/O fd(e.g: regular disk file, which does not work in a real non-blocking manner) is supported by libev with additional handling to align with other non-blocking I/O, keep them a same operation interface. However, this kind of usage is not recommended due to poor performance. Especially, when using `epoll` as backend, libev struggle to provide a compatible behavior with a fault-tolerance logic for EPERM" error(please refer to code line 120 and line 222 for more details). However, Some best practices on blocking I/O operation is, convert it to an async manner via multi-thread or signal, and adopt to event loop via either `eventfd` or a `self-pipe` patterns.
+  For regular disk file fd, which does not work in a real non-blocking manner, it is not supported by epoll directly. To unify the programming interface shape for all of fd, libev make some additional efforts to adopt it on epoll based demultiplexer, including provide fault-tolerance logic for EPERM" error and handle these I/O fds in a separate data model and put them to event-loop queue.(please refer to code line 120 and line 222 for more details).  Please keep in mind, run disk file fd in this way will get a poor performance. AFAIK, the best practice on blocking I/O operation is, convert it to an async fashion operation(either via multi-thread or signal) and adopt to event-loop processing via a `eventfd` or `pipe` file.
 
 - <img src="{{ site.url }}/assets/materials/inside-libev-libeio/signal-convertor.png" alt="signal-convertor" width="110" height="50">
 
-  There are two kinds of underlying techologies can be used in the convertor to adopt signal to the event loop processing.
+  There are two kinds of underlying techologies can be used in the convertor to adopt signal to the event-loop processing.
 
     - [A] signalfd
 
@@ -157,7 +157,7 @@ Libeio is event-based fully asynchronous I/O library for C
 
 <img src="{{ site.url }}/assets/materials/inside-libev-libeio/libeio-overall.png" alt="multiple-stakholders">
 
-Briefly, libeio will wrap a sync-operation and leverage userland thread pool to simulate an async invocation fashion.
+Briefly, libeio will wrap a sync-style operation and leverage userland thread pool to simulate an async invocation manner.
 
 ### Components Architecture 
 
@@ -194,10 +194,6 @@ BTW, besides callback notification, POSIX.AIO also supports signal notificaiton,
 #### init
 
 <img src="{{ site.url }}/assets/materials/inside-libev-libeio/flamegraph_init.svg" alt="multiple-stakholders">
-
-#### Regular prepare and check 
-
-<img src="{{ site.url }}/assets/materials/inside-libev-libeio/flamegraph_prepare_check.svg" alt="multiple-stakholders">
 
 #### Timer 
 
