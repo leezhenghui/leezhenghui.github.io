@@ -20,7 +20,7 @@ Following my original plan, the 2nd post in this series should be an introductio
 
 ## Libev
 
-libev - a high performance full-featured event loop written in C
+libev - a high performance full-featured event loop written in C.
 
 > From [man](https://linux.die.net/man/3/ev)
 >
@@ -64,7 +64,7 @@ libev - a high performance full-featured event loop written in C
 
 - <img src="{{ site.url }}/assets/materials/inside-libev-libeio/async-convertor.png" alt="async-convertor" width="110" height="50">
 
-  ev\_async provide a generic way to enable an naturally async source(e.g: the source trigger running in an other thread, it is in a signal context , etc) adopt to the event\_loop processing. Under the hood, the convertor actually use self-pipe pattern(either eventfd or built-in pipe) to achieve the goal.
+  ev\_async provide a generic way to enable an naturally async source(e.g: the source is triggerred by signal or running in an other thread) adopt to the event\_loop processing. Under the hood, the convertor actually leverage self-pipe pattern(either eventfd or built-in pipe) to achieve the transformation.
 
 - <img src="{{ site.url }}/assets/materials/inside-libev-libeio/fsstat-convertor.png" alt="fsstat-convertor" width="110" height="50">
 
@@ -112,11 +112,11 @@ Libev is using heap data structure to achieve the efficient query/store on order
 
 #### EV\_SIGNAL
 
-- Approach-A
+- Approach-A(signalfd)
 
   <img src="{{ site.url }}/assets/materials/inside-libev-libeio/libev-workflow-signal-signalfdbased.png" alt="multiple-stakholders">
 
-- Approach-B
+- Approach-B(built-in pipe pattern)
 
   <img src="{{ site.url }}/assets/materials/inside-libev-libeio/libev-workflow-signal-pipebased.png" alt="multiple-stakholders">
 
@@ -126,21 +126,21 @@ Libev is using heap data structure to achieve the efficient query/store on order
 
 #### EV\_CHILD
 
-- Approach-A
+- Approach-A(signalfd)
 
   <img src="{{ site.url }}/assets/materials/inside-libev-libeio/libev-workflow-child-signalfdbased.png" alt="multiple-stakholders">
 
-- Approach-B
+- Approach-B(built-in pipe pattern)
 
   <img src="{{ site.url }}/assets/materials/inside-libev-libeio/libev-workflow-child-pipebased.png" alt="multiple-stakholders">
 
 #### EV\_Stat
 
-- Approach-A
+- Approach-A(inotify)
 
   <img src="{{ site.url }}/assets/materials/inside-libev-libeio/libev-workflow-stat-inotifybased.png" alt="multiple-stakholders">
 
-- Approach-B
+- Approach-B(ride on timer)
 
   <img src="{{ site.url }}/assets/materials/inside-libev-libeio/libev-workflow-stat-timerbased.png" alt="multiple-stakholders">
 
