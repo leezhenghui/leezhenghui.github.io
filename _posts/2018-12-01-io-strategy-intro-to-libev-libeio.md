@@ -14,6 +14,10 @@ comments: true
 * Kramdown table of contents
 {:toc .toc}
 
+It has been a little bit long time since my [last post](https://leezhenghui.github.io/io-strategy/2017/11/11/io-strategy-motivation.html) for this series. My apologize for the later update. 
+
+Following my original plan, the 2nd post in this series should be an introduction of I/O models followed by recap the c10k problem, and after that we will explore some of well-used frameworks/products which developed by different programming languages to take a closer look from implementation perspective. Recently, I was invited to give a presentation on the topic of libev based eventloop in our team, this change my mind on the order, so we see this topic comes here. The content in this post is more suitable to the audiences who already have the backgroud knowledge of system I/O models(Blocking, Non-Blocking, Sync and Async), reactor pattern and some system programming experiences.
+
 ## Libev
 
 libev - a high performance full-featured event loop written in C
@@ -161,9 +165,9 @@ Briefly, libeio will wrap a sync-operation and leverage userland thread pool to 
 
 ### POSIX.AIO 
 
-POSIX.AIO is an asynchronous I/O interface implemented as part of glibc. It also provide a way to leverage thread pool internally to archive the async behavior. But seems it is not good enough. One of major problem in POSIX.AIO spawn  a new thread to do the callback. Saying if there are many concurrently requests, and each callback contains a long running logic. It will draw us back to request-per-thread mode. Libeio does not have this issue due to it's perfect design. As you can see, the callback still be called in the original thread, instead of the thread spwaned by libeio. 
+POSIX.AIO provides an asynchronous I/O interface implemented as part of glibc. It achieves this via using userland thread pool internally. But seems it is not good enough. If using callback function as completion notifiction, POSIX.AIO will spawn a new thread to do the callback. Imaging in a high concurrency case, each callback function contains a long running logic, this design will draw us back to request-per-thread mode. On the contrary, Libeio is implemented in the polling natural design. As you can see above, the callback function is executed in the original thread, instead of the thread spwaned by libeio, in such way, libeio can fully control the thread pool size and lifecycle.
 
-POSIX.AIO still support signal notficaiton, but that also have some problem, please refer to [link](http://davmac.org/davpage/linux/async-io.html) for more details about this topic.
+BTW, besides callback notification, POSIX.AIO also supports signal notificaiton, but that also have some problems, if you are interested in this topic, please refer to [link](http://davmac.org/davpage/linux/async-io.html) for more details.
 
 ## Integration of Libev and Libeio
 
