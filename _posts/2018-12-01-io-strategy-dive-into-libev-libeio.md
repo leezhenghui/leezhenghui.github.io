@@ -173,7 +173,7 @@ BTW, besides callback notification, POSIX.AIO also supports signal notificaiton,
 
 <img src="{{ site.url }}/assets/materials/inside-libev-libeio/inside-nodejs-conjuction-libev-libeio.png" alt="multiple-stakholders">
 
-## High level design to implement a TCP server on linux w/ event-loop
+## High level design of network stream abstraction layer based on libev 
 
 > ![Note]({{ site.url }}/assets/ico/note.png)
 >
