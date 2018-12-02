@@ -60,7 +60,7 @@ libev - a high performance full-featured event-loop written in C.
 
 - <img src="{{ site.url }}/assets/materials/inside-libev-libeio/child-convertor.png" alt="child-convertor" width="110" height="50">
 
-  Unix signals child process termination with `SIGCHLD`, the ev\_child actually initail a ev\_signal and listen on SIGCHLD, generate/consume child event accordingly. In libev implementation (L2466, childcb method), try to avoid in-lined loop in the callback method, instead puting a sig\_child event to event pending queue to make sure the childcb are called again in the same tick until all children have been reaped. Refer to the workflow details in later of this post. 
+  Unix signals child process termination with `SIGCHLD`, the ev\_child actually initail a ev\_signal and listen on SIGCHLD, generate/consume child event accordingly. In libev implementation (L2466, childcb method), try to avoid in-lined loop in the callback method, instead puting a sig\_child event to event pending queue to make sure the childcb are called again in the same tick until all children have been reaped. Refer to the workflow for the details in later of this post. 
 
 - <img src="{{ site.url }}/assets/materials/inside-libev-libeio/async-convertor.png" alt="async-convertor" width="110" height="50">
 
