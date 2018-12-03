@@ -14,7 +14,7 @@ comments: true
 * Kramdown table of contents
 {:toc .toc}
 
-It has been a little bit long time since my [last post](https://leezhenghui.github.io/io-strategy/2017/11/11/io-strategy-motivation.html) for this series. My apologize for the later update. 
+It has been a little bit long time since my [last post](https://leezhenghui.github.io/io-strategy/2017/11/11/io-strategy-motivation.html) for this series. My apologize for the late update. 
 
 Following my original plan, the 2nd post in this series should be an introduction of I/O models followed by recap of [c10k](https://en.wikipedia.org/wiki/C10k_problem) problem, and after that we will explore some of well-used frameworks/products based on different programming languages and take a closer look at the details from implementation perspective. Recently, I was invited to give a presentation on the topic of libev based event-loop in our team, the survey result seems many programers know about c10k and I/O models. This change my mind on the posts order, so we see this topic comes here. The content in this post is more suitable to the audiences who already have the backgroud knowledge of Linux system I/O models(Blocking, Non-Blocking, Sync and Async), reactor pattern and know about libev and libeio. If you have system programming experiences, that would be better.
 
