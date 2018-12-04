@@ -14,14 +14,14 @@ comments: true
 * Kramdown table of contents
 {:toc .toc}
 
-In the past a couple of years, I spent most of my time on the platform architecture design in a startups. That is a quite different experiences than my earlier workarea. We initialed the first project by four developers at the beginning, and build up everything from scratch, including devops and platform infrastructure. Many interesting things happened during this period. The question I asked the most by my team/myself is what is best technical architecture to build a scalable system in a startups in each growth phases. I'd like to jot down a series posts on this topic, including some hands-on practices(fully automated and easy to run) for demonstrations. 
+In the past a couple of years, I spent most of my time on the platform architecture design in a startups. That is a quite different experiences to my earlier workarea. We initialed the first project by four developers at the beginning, and build up everything from scratch, including DevOps and platform infrastructure. Many interesting things happened during this period. The question I asked the most by my team/myself is what is best technical architecture to build a scalable system in a startups in each growth phases. I'd like to jot down a series posts on this topic, including some hands-on practices(fully automated and easy to run) for demonstrations. 
 
-Firstly, let take a step back to have a look at the architecture challenges, why we care about scalalbility in software, what does scalability model say, what is typical application architectures for past, present and near-future.
+Firstly, let's take a step back to have a look at the architecture challenges, why we care about scalalbility in software, what does scalability model say, what is typical application architectures for past, present and near-future.
 
 ## Architecture Challenges 
 ---
 
-In earlier [post](https://leezhenghui.github.io/io-strategy/2017/11/11/io-strategy-motivation.html), we talked a little bit about hardware and software trends. Especially, as a response to hitting the ceiling in hardware field, today, to build a system with highly `scalability`, `reliability` and `availability`, the software architecture need to pursue `horizontal-scaling` strategy. However, realistically, for a complex and evolving application, tranditional architectures encounters many challenges, including: 
+In earlier [post](https://leezhenghui.github.io/io-strategy/2017/11/11/io-strategy-motivation.html), we talked a little bit about hardware and software trends, the free lunch supplied by hardware eventually will end someday. As a response to hitting the ceiling in hardware field. Today, in order to build a system with highly `scalability`, `reliability` and `availability`, the software architecture need to empower the capability of `horizontal-scaling`. However, realistically, for a complex and evolving application, tranditional architectures encounters many challenges, including: 
 - Slower team iteration. Application keep growing to huge codebase, either compiling or testing take too long time before pack/deploy a newer build driver.
 - Database grows too large. 
 - Programming language constrained. To avoid disrupting the others components, programmer cann't pick up a more suitable technical stack for the new feature development.
@@ -32,7 +32,7 @@ These problems eventually restrict/prevent a `fast`, `reliable` and `cost-effect
 
 <img src="{{ site.url }}/assets/materials/build-scalable-system/stone_and_sand bottles.jpg" alt="Stone_and_Sand_Fill_In_Bottle">
 
-Obviously, we can take benefits by breaking a coarse-grained service into smaller pieces. But there is no real free lunch, on the way to that, we need to resolve many architectural and operational challenges, includes how to ensure each component should be implmented in a highly autonomy fashion, that means in whole software lifecycle of a component, it should be independent to other components. In the meanwhile, some higher level architecture should provides the capability of components orchestration, ensure they work together seamlessly just like they are running in a single process space. Notable, the technical challenges come from both **runtime** and **data** parts.(more details will be covered on them in upcoming posts in this series).
+Obviously, we can take benefits by breaking a coarse-grained service into smaller pieces. But there is no real free lunch, on the way to that, we need to resolve many architectural and operational challenges, includes how to ensure each component should be implmented in a highly autonomy fashion, that means in whole software lifecycle of a component, it should be independent to other components. In the meanwhile, the overall architecture should provides the capability of components orchestration, ensure they work together seamlessly just like they are running in a single process space. To achieve this, both **runtime** and **data** layers need significant technical innovation.(more details will be covered on them in upcoming posts in this series).
 
 With the background requirements mentioned above, Microservices Architecture(MSA) bring up after SOA, and provide an architectural design pattern to guide programmers developing a modern application as a suite of small autonomy services, each running in its own process, own its database, implemented by appropriate technical stack, and communicating with lightweight mechanisms, such as HTTP, gRPC API. It grows increasingly in recent years and soon become an popular approach to build cloud-native applictions. Indeed, the rapidly growing of the cloud confirms that more and more applications either being built upon cloud-native technology or start to do the cloud transformation.
 
@@ -41,7 +41,7 @@ The MSA was not created from scratch, it actually is an extension/growth based o
 ## Application Architectures 
 ---
 
-The free lunch supplied by hardware eventually will end someday. The survival solution in software side is to improve software `scalability` via building up `horizontal-scaling` capability. Therefore, `scalability` as one of distributed system design principles become more and more important part in modern software architecture design. 
+`Scalability` as one of distributed system design principles become more and more important in modern software architecture design. 
 
 > ![Note]({{ site.url }}/assets/ico/note.png)
 >
@@ -150,7 +150,7 @@ I have ever worked on SOA field for quite a long time, that experience is expres
 
 From architcture perspective, I believe the purpose of SOA is to provide the scalabity in `Y-axis`. In real world, SOA commonly go to the `ESB` pattern with ESB product. The ESB product take over most of technical challenges as a centralized Bus, including inter-communication challenges between services invocation, data format/protocol transformations, logging, routing, some powerful ESB also provide workflow, transaction(XA based) and compansation handling(BPMN or BPEL), etc. Apparently, ESB bring much benefits, especially simplify the service(provider and consumer) design/implmentation, hide the most hard parts in the ESB. But the drawbacks is, the centralized ESB product take too much capabilities, the worse thing is it contains not only _non-functional features_ but also heavy _business logic_, soon or later it will grow up to an other new monolith, which is centralized and not easy to scale out. ESB somewhat terminate the SOA on the way of `Y-axis`. In `Z-axis`, SOA spec does not deal with database design for services, so the data partition still be a horizontal scaling, no much difference than monolith.
 
-### MSA
+### MSA & MSA-NG
 
 It is a pity that SOA did not exploit `Y-axis` extremely. The programmers see this problem and bring up `MSA`. MSA grow based on SOA.
 
@@ -178,7 +178,7 @@ The benefits of MSA:
 
 The drawbacks are:
 - Complex infrastructure support
-- Deployment is faster, but become complex, it heavliy replies on the cooperations from devops, including: CI/CD, orchestration(e.g: traffic control part), etc 
+- Deployment is faster, but become complex, it heavliy replies on the cooperations from DevOps, including: CI/CD, orchestration(e.g: traffic control part), etc 
 - Harder to test, especially, an end2end testing
 - Data consistency challenge
 
@@ -234,7 +234,7 @@ Below is a bird's-eye components architecture overview for a cloud-native platfo
 
 ### DevOps Pipeline
 
-<img src="{{ site.url }}/assets/materials/build-scalable-system/architecture-DevOps-workflow.png" alt="devops-pipeline">
+<img src="{{ site.url }}/assets/materials/build-scalable-system/architecture-DevOps-workflow.png" alt="DevOps-pipeline">
 
 ### Code checkin process(~8 developers, ~bi-weekly iteration)
 
