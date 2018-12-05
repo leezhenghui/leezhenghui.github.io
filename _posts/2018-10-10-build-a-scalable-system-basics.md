@@ -14,7 +14,7 @@ comments: true
 * Kramdown table of contents
 {:toc .toc}
 
-In the past a couple of years, I spent most of my time on the platform architecture design in a startups. That is a quite different experience to my earlier workarea. We initialed the first project by four developers at the beginning, and build up everything from scratch, including DevOps and platform infrastructure. Many interesting things happened during this period. The question I asked the most by my team/myself is what is best technical architecture to build a scalable system in a startups in each growth phases. I'd like to jot down a series posts on this topic, including some hands-on practices(fully automated and easy to run) for demonstrations. 
+In the past a couple of years, I spent most of my time on the platform architecture design in a startups. That is a quite different experience than my earlier workarea. We initialed the first project by four developers at the beginning, and build up everything from scratch, including DevOps and platform infrastructure. Many interesting things happened during this period. The question I asked the most by my team/myself is what is best technical architecture to build a scalable system in a startups in each growth phases. I'd like to jot down a series posts on this topic, including some hands-on practices(fully automated and easy to run) for demonstrations. 
 
 Firstly, let's take a step back to have a look at the architecture challenges, why we care about scalalbility in software, what does scalability model say, what is typical application architectures for past, present and near-future.
 
@@ -32,7 +32,7 @@ These problems eventually restrict/prevent a `fast`, `reliable` and `cost-effect
 
 <img src="{{ site.url }}/assets/materials/build-scalable-system/stone_and_sand bottles.jpg" alt="Stone_and_Sand_Fill_In_Bottle">
 
-Obviously, we can take benefits by breaking a coarse-grained service into smaller pieces. But there is no real free lunch, on the way to that, we need to resolve many architectural and operational challenges, includes how to ensure each component should be implmented in a highly autonomy fashion, that means in whole software lifecycle of a component, it should be independent to other components. In the meanwhile, the overall architecture should provides the capability of components orchestration, ensure they work together seamlessly just like they are running in a single process space. To achieve this, both **runtime** and **data** layers need significant technical innovation.(more details will be covered on them in upcoming posts in this series).
+Obviously, we can take benefits by breaking down a coarse-grained service into smaller pieces. But there is no real free lunch, on the way to that, we need to resolve many architectural and operational challenges, includes how to ensure each component should be implmented in a highly autonomy fashion, that means in whole software lifecycle of a component, it should be independent to other components. In the meanwhile, the overall architecture should provides the capability of components orchestration, ensure they work together seamlessly just like they are running in a single process space. To achieve this, both **runtime** and **data** layers need significant technical innovation.(more details will be covered on them in upcoming posts in this series).
 
 With the background requirements mentioned above, Microservices Architecture(MSA) bring up after SOA, and provide an architectural design pattern to guide programmers developing a modern application as a suite of small autonomy services, each running in its own process, own its database, implemented by appropriate technical stack, and communicating with lightweight mechanisms, such as HTTP, gRPC API. It grows increasingly in recent years and soon become an popular approach to build cloud-native applictions. Indeed, the rapidly growing of the cloud confirms that more and more applications either being built upon cloud-native technology or start to do the cloud transformation.
 
@@ -165,7 +165,7 @@ From pure techincal point of view, service definition in MSA extends service con
 7. Edge service(API) need involve a gateway pattern, but the gateway should contain only non-functional functionalities.
 8. The micro-services also give suggestion on the team size, the "two-pizza" team rule implies team growing big will bring much communication efforts, which will finally slow down the development and hurt the efficiency. 
 
-What is the biggest difference between SOA and MSA? IMO, **"MSA make the magic in Top-Down fashion"**(from business model to technical model), but SOA is likely playing the game in **Down-Top** fashion(from technical model to business model). Frankly speaking, in a long time, I did not pay attention on this difference, but when I try to figure out why MSA can make a smaller and autonomy service, I realized I must have missed something here... Yes, Top-Down mode can break a system into highly decoupled&autonomy smaller pieces via DDD(Domain Driven Design) methodology, in this way, we can statisfy service-per-database principle and make the servie autonomy.(BTW, Eric\_Evans published his book [Domain-Driven Design: Tackling Complexity in the Heart of Software](http://dddcommunity.org/book/evans_2003/) was at 2004, but seems it is becoming popular with MSA). On the contrary, use the "down-top", we only can get the coarse-grained service, these services may  (paritial)share with same data model, could not be totally decoupled and not autonomy. Sharing the same data model among different servcies will introduce more complexities in data consistency, this is one of reason for SOA pick up a centralized ESB product which can provide an UoW(Unit of Work, e.g: `two-phase-commit`) capability across service communication boundaries to guarantee data consistency. 
+What is the biggest difference between SOA and MSA? IMO, **"MSA make the magic in Top-Down fashion"**(from business model to technical model), but SOA is likely playing the game in **Down-Top** fashion(from technical model to business model). Frankly speaking, in a long time, I did not pay attention on this difference, but when I try to figure out why MSA can make a smaller and autonomy service, I realized I must have missed something here... Yes, Top-Down mode can break down a system into highly decoupled&autonomy smaller pieces via DDD(Domain Driven Design) methodology, in this way, we can statisfy service-per-database principle and make the servie autonomy.(BTW, Eric\_Evans published his book [Domain-Driven Design: Tackling Complexity in the Heart of Software](http://dddcommunity.org/book/evans_2003/) was at 2004, but seems it is becoming popular with MSA). On the contrary, use the "down-top", we only can get the coarse-grained service, these services may  (paritial)share with same data model, could not be totally decoupled and not autonomy. Sharing the same data model among different servcies will introduce more complexities in data consistency, this is one of reason for SOA pick up a centralized ESB product which can provide an UoW(Unit of Work, e.g: `two-phase-commit`) capability across service communication boundaries to guarantee data consistency. 
 
 > ![Note]({{ site.url }}/assets/ico/note.png)
 >
@@ -197,8 +197,7 @@ To implement a microservices architecture, we need to resolve both `runtime` and
     - Service registry
     - Naming Service(using service name to present an service endpoint address)
     - Load Balancer
-    - Cascading failure prevention(circuit breaker)
-    - Resiliency feature(retries/failure or latency tolerance)
+    - Resiliency features(retries/failure or latency tolerance/circuit breaker)
     - Distributed tracing
     - Aggregated logging
     - Traffic Shapping 
@@ -243,7 +242,7 @@ Below is a bird's-eye components architecture overview for a cloud-native platfo
 
 <img src="{{ site.url }}/assets/materials/build-scalable-system/architecture-DevOps-workflow.png" alt="DevOps-pipeline">
 
-### Code checkin process(~8 developers, ~bi-weekly iteration)
+### Code checkin process
 
 MSA gives us the suggestion on the team size, the "two-pizza" team rule implies team growing big will bring much communication efforts, which will finally slow down the development and hurt the efficiency. 
 
