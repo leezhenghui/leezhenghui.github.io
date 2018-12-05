@@ -82,10 +82,10 @@ The MSA was not created from scratch, it actually is an extension/growth based o
 - Horizontal Data Partitioning - Shards (`Z-axis`)
   > *From [microservices.io](https://microservices.io/articles/scalecube.html)*
   >
-	> *When using `Z-axis` scaling each server runs an identical copy of the code. In this respect, it’s similar to `X-axis` scaling. The big difference is that each server is responsible for only a subset of the data. Some component of the system is responsible for routing each request to the appropriate server. `Z-axis` splits are commonly used to scale databases. Data is partitioned (a.k.a. sharded) across a set of servers based on an attribute of each record.*
+	> *When using `Z-axis` scaling each server runs an identical copy of the code. In this respect, it’s similar to `X-axis` scaling. The big difference is that each server is responsible for only a subset of the data. Some component of the system is responsible for routing each request to the appropriate server. `Z-axis` scaling splits are commonly used to scale databases. Data is partitioned (a.k.a. sharded) across a set of servers based on an attribute of each record.*
 	>
 
-  Something need to clarify is, the `Z-axis` splits database specific to a **horizontal** approach. It defines a routing criteria based on entity type or an attribute in then entity, then the request will be routed to appropriate database or table accordingly. For a cross-partitions query request, the router send the request to all of partitions, a query aggregator will receive and combines all of results from each of them. In this way, we actually partition the **rows** between the partitioned databases or tables. Generally, we want to achieve this with a transparent approach to upper business logic layers. For example, in Java, we can do this via 
+  Something need to clarify is, the `Z-axis` scaling splits database specific to a **horizontal** approach. It defines a routing criteria based on entity type or an attribute in then entity, then the request will be routed to appropriate database or table accordingly. For a cross-partitions query request, the router send the request to all of partitions, a query aggregator will receive and combines all of results from each of them. In this way, we actually partition the **rows** between the partitioned databases or tables. Generally, we want to achieve this with a transparent approach to upper business logic layers. For example, in Java, we can do this via 
 	
    - [1] Instrument DB-Driver(e.g: JDBC library) and inject a DB/Table router there. Sharding logic hosted in database driver.
 
@@ -99,7 +99,7 @@ The MSA was not created from scratch, it actually is an extension/growth based o
 
      <img src="{{ site.url }}/assets/materials/build-scalable-system/sharding-proxy.png" alt="sharding_proxy" width="600" height="300">
 	 
-   IMO, in either way, `Z-axis` actually does not offer to reduce the application implementation complexity(we can argue). Do a transformation from monolith to MSA, we usually need **vertical** splits on the data model and database to satisfy the database-per-service principle firstly. That need to be done by `Y-axis` with microservices data model design methodology(e.g: `Domain Driven Design`), I will introduce this topic in later post for data challenge part. 
+   IMO, in either way, `Z-axis` scaling actually does not offer to reduce the application implementation complexity(we can argue). Do a transformation from monolith to MSA, we usually need **vertical** splits on the data model and database to satisfy the database-per-service principle firstly. That need to be done by `Y-axis` scaling with microservices data model design methodology(e.g: `Domain Driven Design`), I will introduce this topic in later post for data challenge part. 
 
 > ![Tips]({{ site.url }}/assets/ico/tip.png)
 >
@@ -114,7 +114,7 @@ Broadly speaking, we have three kinds of architectures for enterpise application
 
 ### Monolith
 
-The monolithic architecture makes sense for simple and lightweight applications. Even today, it is still applicable. Monolithic architecture can be horizontally scaled via `X-axis`. It usually the same data models/data store for all components running in a single process. The `Z-axis` is also applicable but sometimes the effect is limited by lack of `Y-axis` scaling. In the monolith view of the world, the inter-communication for subsystems is pretty easy, as it was an in-process space function call. There are not many upstream dependencies. We usually hardcode the configuration into a property file, put a load balancer in front of it and we scale horizontally by adding more monoliths.
+The monolithic architecture makes sense for simple and lightweight applications. Even today, it is still applicable. Monolithic architecture can be horizontally scaled via `X-axis`. It usually the same data models/data store for all components running in a single process. The `Z-axis` scaling is also applicable but sometimes the effect is limited by lack of `Y-axis` scaling. In the monolith view of the world, the inter-communication for subsystems is pretty easy, as it was an in-process space function call. There are not many upstream dependencies. We usually hardcode the configuration into a property file, put a load balancer in front of it and we scale horizontally by adding more monoliths.
 
 Monolith has a number of benefits, When the application in **smaller codebase** phase:
 
@@ -148,11 +148,11 @@ With the **codebase growing**, some drawbacks will meet:
 
 I have ever worked on SOA/ESB field for quite a long time, that experience is expressive. I was deeply attracted by the SOA design and implementation at that time. Our SOA product provides a standard way to encapsulate our implementation into **component**, we can declare a component by **interface**, and decoupled with it's **implemnetation**, the implementation could be any lanaguages, like: Java, MFC(Mediation Flow Component, one of declare language for ESB), BPEL, BPMN and Script. It also supports different interaction style(sync, async oneway, deferred-response and callback) as well rich QoSs, in the meanwhile, easy to expose as **service** via various transport/communication protocols(e.g: Corba, JMS, Restful, JAX-RPC, JAX-WS, TCP, MQ, JCA etc). This much reduce the complexity to build up a distrubted system. All the things looks perfect. 
 
-SOA follow the way of `Y-axis` to provide scalability. It eventually get to `ESB` pattern with ESB product. The ESB product take over most of technical challenges as a centralized Bus, including inter-communication challenges between services invocation, data format/protocol transformations, logging, routing, some powerful ESB also provide workflow, UoW(Unit of Work which is two-phase-commit based) and compansation handling(BPMN or BPEL), etc. Apparently, ESB bring much benefits, especially simplify the service(provider and consumer) design/implmentation, hide the most hard parts in the ESB. But the drawbacks is, the centralized ESB product take too much capabilities, the worse thing is it contains not only _non-functional features_ but also heavy _business logic_, soon or later it will grow up to an other new monolith, which is centralized and not easy to scale out. ESB somewhat terminate the SOA on the way of `Y-axis`. In `Z-axis`, SOA spec does not deal with database design for services, so the data partition still be a horizontal scaling, no much difference than monolith.
+SOA coressponds the `Y-axis` scaling to provide scalability. It eventually get to `ESB` pattern with ESB product. The ESB product take over most of technical challenges as a centralized Bus, including inter-communication challenges between services invocation, data format/protocol transformations, logging, routing, some powerful ESB also provide workflow, UoW(Unit of Work which is two-phase-commit based) and compansation handling(BPMN or BPEL), etc. Apparently, ESB bring much benefits, especially simplify the service(provider and consumer) design/implmentation, hide the most hard parts in the ESB. But the drawbacks is, the centralized ESB product take too much capabilities, the worse thing is it contains not only _non-functional features_ but also heavy _business logic_, soon or later it will grow up to an other new monolith, which is centralized and not easy to scale out. ESB somewhat terminate the SOA on the way of `Y-axis` scaling. In `Z-axis` scaling of the Scale Cube, SOA spec does not deal with database design for services, so the data partition still be a horizontal scaling, no much difference than monolith.
 
 ### MSA & MSA-ng
 
-It is a pity that SOA did not exploit `Y-axis` scalability extremely. The programmers see this problem and bring up `MSA`. MSA grow based on SOA.
+It is a pity that SOA did not exploit `Y-axis` scaling of the Scale Cube extremely. The programmers see this problem and bring up `MSA`. MSA grow based on SOA.
 
 From pure techincal point of view, service definition in MSA extends service concept in SOA, but add below properties/restrictions: 
 
@@ -174,7 +174,7 @@ What is the biggest difference between SOA and MSA? IMO, **"MSA make the magic i
 > "Two-phase commit is the anti-availability protocol."
 >
 
-The MSA is a better choice for complex, evolving applications, and tranditional monolith does not scale anymore. MSA is a exploiting in `Y-axis`. To satisfy the autonomy and database-per-service principle, A `vertical splits` on database in the entire system should be a prerequisite. Of course, `Z-axis` is also applicable on the `vertically splitted` data model/store.
+The MSA is a better choice for complex, evolving applications, and tranditional monolith does not scale anymore. MSA is a exploiting in `Y-axis` scaling. To satisfy the autonomy and database-per-service principle, A `vertical splits` on database in the entire system should be a prerequisite. Of course, `Z-axis` scaling is also applicable on the `vertically splitted` data model/store.
 
 The benefits of MSA:
 - Better agility
