@@ -32,6 +32,9 @@ These problems eventually restrict/prevent a `fast`, `reliable` and `cost-effect
 
 <img src="{{ site.url }}/assets/materials/build-scalable-system/stone_and_sand bottles.jpg" alt="Stone_and_Sand_Fill_In_Bottle">
 
+> ![Tips]({{ site.url }}/assets/ico/tip.png)
+> My apologize that I forgot where I find the this picture, just remember the feeling when I happened to see it :-) . It is so suitable to put here. I can't find the owner of the pic by google, if you know, please let me know. thanks.
+
 Obviously, we can take benefits by breaking down a coarse-grained service into smaller pieces. But there is no real free lunch, on the way to that, we need to resolve many architectural and operational challenges, includes how to ensure each component should be implmented in a highly autonomy fashion, that means in whole software lifecycle of a component, it should be independent to other components. In the meanwhile, the overall architecture should provides the capability of components orchestration, ensure they work together seamlessly just like they are running in a single process space. To achieve this, both **runtime** and **data** layers need significant technical innovation.(more details will be covered on them in upcoming posts in this series).
 
 With the background requirements mentioned above, Microservices Architecture(MSA) bring up after SOA, and provide an architectural design pattern to guide programmers developing a modern application as a suite of small autonomy services, each running in its own process, own its database, implemented by appropriate technical stack, and communicating with lightweight mechanisms, such as HTTP, gRPC API. It grows increasingly in recent years and soon become an popular approach to build cloud-native applictions. Indeed, the rapidly growing of the cloud confirms that more and more applications either being built upon cloud-native technology or start to do the cloud transformation.
