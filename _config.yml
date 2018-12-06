@@ -28,7 +28,7 @@ description: "Zhenghui Lee's weblog"
 keywords: 'technology,blog'
 author:
   name: Zhenghui Lee
-  job_title: Engineer 
+  job_title: Software Architect
   location:
   email: leezhenghui@gmail.com
   social_links:
@@ -49,7 +49,7 @@ author:
 home:
   section1: '<style>img{border-radius: 50%;}</style><a href="/blog"><img src="//www.gravatar.com/avatar/4381600ea126cafa87fa729b75312b10?s=150" style="width:220px"></a>'
   section2: <h1>ZHENGHUI LEE</h1>
-  section3: <h2>Engineer</h2>
+  section3: <h2>Software Architect</h2>
 blog:
   cc_license: http://creativecommons.org/licenses/by-sa/4.0/ # A link to CC License of your choice.
   cc_license_image: /assets/images/theme/cc-by-sa.png # An image of your CC License. 
