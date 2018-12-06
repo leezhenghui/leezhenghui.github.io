@@ -203,17 +203,17 @@ To implement a microservices architecture, we need to resolve both `runtime` and
     - Traffic Shapping 
     - etc
 
-  - There are three typical refernce architecture pattern in MSA to resolve above problems.
+  - There are three typical reference architecture modes in MSA to resolve above problems.
   
-    - Gateway Pattern
+    - Gateway Mode 
     
       In this pattern, application relies on gateway(public and/or private) for the service communications. Logically, we still have a centralized point in the topology, event that point is easy for horizontal-scaling.
     
-    - RPC-Router Pattern
+    - Embedded Router Mode 
     
-      In this pattern, application relies on a specific RPC framework for the resolution, e.g: in java, spring-cloud and relevant plugins features, in golang, go-micro, etc. Usually, it is programming lanauge specific.
+      In this pattern, application relies on a embedded router(commonly, delivered as RPC framework) for the resolution, e.g: in java, spring-cloud and relevant plugins features, in golang, go-micro, etc. Usually, it is programming lanauge specific.
     
-    - Service Mesh pattern
+    - Service Mesh Mode 
     
       Today, MSA is on the way to Service Mesh, service mesh deliver an exciting solution in MSA. In the diagram above, I mark it as `microservices-ng`.  Not like the other patterns, service mesh puts the solution implemention down to a lower infrastructure layer, this part of work is totally decoupled from business logic code and programming-language-neutral. From conceptual perspective, I am not sure whether we can call it `ESB 2.0`, It delivered similar features around servie communication,  but in a totally different way,  means NOT like ESB product in SOA, servie mesh is a part of infrastructure layer feature, attach to each service via sidecar pattern, work in a decentralized mannder and focus on cross-cutting concerns of service intercommunications without any business logic involved. I will elaborate more details in my next post regarding runtime part challenges in this series.
   
