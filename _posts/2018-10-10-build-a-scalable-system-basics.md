@@ -261,7 +261,7 @@ To answer the question, you need to ask yourself two questions?
 
 2. How many resources you want to invest to this project at the beginning phase(usually for a quick business verification)?
 
-If answer to Q1 is no, or you can't invest enough resources to support a MSA relevant infrastructure and opertional layers work, I'd like you go with Monolith. otherwise, pick up MSA please. 
+If answer to question-1 is no, or you can't invest enough resources to support a MSA relevant infrastructure and opertional layers work, I'd like you go with Monolith. otherwise, pick up MSA please. 
 
 Per my personal experiences, many B2C business requirements in our company come without a clear business model, business guys want to figure out the valuable parts and settle down the business models via quick iterations. So at the beginning, We can't completely identify the context boundaries among the components via DDD methodology, in the meanwhile, we are asked to make a quick delivery for business result verification with less resources investment. In this kind of case, it is more suitable to go with Monolith. But keep in mind following below principles will make it easier when you want to move to MSA shortly.  
 
@@ -273,6 +273,6 @@ Per my personal experiences, many B2C business requirements in our company come 
 
 So far, we walk through the scalability model, typical application archiectures, roughly explanations for each architectures and finally give my answer to the question of `can go with MSA on my new project`. In a nutshell, MSA is not a silver bullet for all of architecture challenges. But it does can empower your team to reach new levels of scale and agility.
 
-In next post, let's explore the runtime challenges in MSA, and the technical stack we choose for a startups in MSA.
+In next post, let's explore the runtime challenges in MSA, and what aspects we need to consider to make a decision of architecture mode for MSA.
 
 {% include common/series.html %}
