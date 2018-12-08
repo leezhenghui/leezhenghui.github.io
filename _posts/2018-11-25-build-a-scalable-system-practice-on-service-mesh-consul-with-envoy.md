@@ -16,7 +16,7 @@ comments: true
 
 In last [post](https://leezhenghui.github.io/microservices/2018/11/20/build-a-scalable-system-practice-on-service-mesh-consul-builtin-proxy.html), I introduced the service mesh mode via a PoC sample with consult connect, it's builtin proxy and nomad.  This post will focus on the PoC sample for service mesh mode with envoy proxy, which will provide a production grade solution for a mixed languages development challenges in MSA.
 
-All of the sample source code is hosted on [repsoitry](https://github.com/leezhenghui/hello-serivcemesh-envoy.git), To simplify the sample content, I did not introduce envoy compilation in this sample context, you should follow the envoy developer guide to build out a envoy binary to run the sample, and also,  if you are interested in aggregated logging, performance analysis, please refer to earlier posts. 
+All of the sample source code is hosted on [repsoitry](https://github.com/leezhenghui/hello-servicemesh-envoy.git), To simplify the sample content, I did not introduce envoy compilation in this sample context, you should follow the envoy developer guide to build out a envoy binary to run the sample, and also,  if you are interested in aggregated logging, performance analysis, please refer to earlier posts. 
 
 ## Recall the service mesh mode
 
