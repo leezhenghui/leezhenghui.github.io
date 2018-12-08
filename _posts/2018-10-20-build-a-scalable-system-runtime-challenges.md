@@ -452,7 +452,7 @@ In MSA, the opertion team do need a real-time monitor to report the API invocati
 
 To make a decision, you need to ask youself by below questions:
 
-1. Can we achieve a fully containerization on all of applications(either legacy or new created)
+1. Can we achieve a fully containerization on all of applications(both legacy and new created)
 
 2. How many resources your corporation can invest to operation team.
 
