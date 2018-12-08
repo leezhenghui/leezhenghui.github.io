@@ -200,7 +200,7 @@ The namespaces-related system calls are listed below:
 >
 > Please note nsenter(1) is the command line equivalent of setns(2) and unshare(1) is the equivalent of unshare(2) syscall. 
 
-Please refer to section [namespaces in practice](https://leezhenghui.github.io/microservices/2018/10/20/build-a-scalable-system-runtime-challenges#heading-cgroups-in-practice) for the guidance samples:
+Please refer to section [namespaces in practice](https://leezhenghui.github.io/microservices/2018/10/20/build-a-scalable-system-runtime-challenges#heading-namespaces-in-practice) for the practical samples:
 
   - The sample based on `diyC` which will show you the system call usages of namesapces.
 
@@ -239,7 +239,7 @@ cpu    cpu,cpuacct  devices  hugetlb  net_cls  net_prio          pids
 >
 > There are actually two versions of the implementation [v1](https://www.kernel.org/doc/Documentation/cgroup-v1/) and [v2](https://www.kernel.org/doc/Documentation/cgroup-v2.txt) where the main difference is that v1 operates on thread level but v2 is simpler and considers only processes.
 
-Please refer to section [cgroups in practice](https://leezhenghui.github.io/microservices/2018/10/20/build-a-scalable-system-runtime-challenges#heading-cgroups-in-practice) for a step-by-step demo which will walk you through the basic usage of cgroups.
+Please refer to section [cgroups in practice](https://leezhenghui.github.io/microservices/2018/10/20/build-a-scalable-system-runtime-challenges#heading-cgroups-in-practice) for a practical sample which walk you through the basic usage of cgroups.
 
 The container is a mainstream topic in cloud, We explored them with practicial examples for the underlying techonlogies, this does not only help us understanding how the container works under the hood, but also can help us make more correct decision on technology strategy in each growth phases.
 
