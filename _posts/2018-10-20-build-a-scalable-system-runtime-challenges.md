@@ -2,7 +2,7 @@
 layout: post
 title: Build a Modern Scalable System - Runtime Challenges 
 categories: [microservices]
-tags: [architecture, microservices]
+tags: [architecture, microservices, servicemesh]
 series: [build-scalable-system]
 comments: true
 ---

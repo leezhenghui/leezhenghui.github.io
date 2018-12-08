@@ -1,8 +1,8 @@
 ---
 layout: post
-title: Build a Modern Scalable System - Practice on Gateway Mode For Mixed-Languages Case 
+title: Build a Modern Scalable System - Practice on Service Mesh Mode with Consul and Nomad 
 categories: [microservices]
-tags: [architecture, microservices, java, gateway]
+tags: [architecture, microservices, java, gateway, servicemesh]
 series: [build-scalable-system]
 comments: true
 ---
@@ -14,19 +14,27 @@ comments: true
 * Kramdown table of contents
 {:toc .toc}
 
-In last [post](https://leezhenghui.github.io/microservices/2018/10/27/build-a-scalable-system-practice-on-springcloud.html), I introduced the embedded router mode via spring-cloud PoC sample.  This post will focus on the PoC sample for gateway mode, which can provide a solution for a mixed languages development challenges in MSA.
+In last [post](https://leezhenghui.github.io/microservices/2018/11/01/build-a-scalable-system-practice-on-gateway-mode-for-mixed-lang.html), I introduced the gateway mode via a PoC sample containing java and node.js services.  This post will focus on the PoC sample for service mesh mode, which can provide a solution for a mixed languages development challenges in MSA.
 
-All of the sample source code is hosted on [repsoitry](https://github.com/leezhenghui/hello-msaproxy.git), it is automated, and easy to run. To simplify the sample content, I just keep the gateway-mode related features in it, if you are interested in aggregated logging, performance analysis, please refer to earlier posts. 
+All of the sample source code is hosted on [repsoitry](https://github.com/leezhenghui/hello-serivcemesh.git), it is automated, and easy to run. To simplify the sample content, I just keep the gateway-mode related features in it, if you are interested in aggregated logging, performance analysis, please refer to earlier posts. 
 
-## Recall the gateway mode
+## Recall the service mesh mode
 
-<img src="{{ site.url }}/assets/materials/build-scalable-system/architecture-gateway-mode.png" alt="leaky-bucket-algorithm.jpeg">
+<img src="{{ site.url }}/assets/materials/build-scalable-system/architecture-servicemesh-mode.png" alt="leaky-bucket-algorithm.jpeg">
 
 ## PoC sample
 
 ### Scenario overview
 
-<img src="{{ site.url }}/assets/materials/build-scalable-system/architecture-msaproxy-components.png" alt="architecture-msaproxy-components.png">
+<img src="{{ site.url }}/assets/materials/build-scalable-system/architecture-servicemesh-components.png" alt="architecture-servicemesh-components.png">
+
+### Sidecar Tasks 
+
+<img src="{{ site.url }}/assets/materials/build-scalable-system/architecture-sidecar-proxy-with-taskgroup.png" alt="architecture-servicemesh-components.png">
+
+>
+> The sample is based on `consul connect` and it's builtin proxy for the serviemesh. We want to use it to demonsrate the service mesh concepts for a hybrid environments(docker is not the only packing method, mixed deployable types for the service orchestration which could not be achieved by k8s only. cloud-native and on-premise co-exists). Please note, Consule connect was introduced in Consul 1.2 and be marked as beta quality for now, thus, not ready to be used in a production environment.
+
 
 ### Soruce code structure 
 
@@ -67,22 +75,7 @@ ops
 ├── deployable        // nomad job definition files(hcl) for microservices
 ├── deps              // binary dependences, which cache it locally to reduce(avoid) network deps during demonstration
 ├── dist              // pkgs publish folder, nginx is started on this folder to simulate a pkg repository
-└── svc-ref-register  // internal domain name registry by service short name 
 ```
-
-## Load Balancer upstream dynamic update
-
-- Nginx/HAProxy with Consul Template
-
-- Nginx with Custom Module
-  > - [Dynamic Nginx Upstreams for Consul via lua-nginx-module by Zachary Schneider](https://medium.com/@sigil66/dynamic-nginx-upstreams-from-consul-via-lua-nginx-module-2bebc935989b)
-  > - [Nginx upsync module](https://github.com/weibocom/nginx-upsync-module)
-  > - [Nginx Pro DNS resolution](https://www.nginx.com/blog/service-discovery-nginx-plus-srv-records-consul-dns/)
-  > - [ngx\_http\_set\_backend](https://github.com/robinmonjo/ngx_http_l) which inspired binding Nginx modules in C to Consul in Golang
-
-- HAProxy 1.8
-
-  > HAProxy 1.8 brings resolution for ports through SRV records and support for EDNS, making it pair perfectly with Consul.
 
 ## Run the Sample 
 
@@ -176,10 +169,11 @@ All of service instances are using dynamic ports in this sample to demonstrate t
 
 ### Result of Service Discovery and Load Balance
 
-<img src="{{ site.url }}/assets/materials/build-scalable-system/lb-result-gateway-poc-sample.png" alt="lb-result-gateway-poc-sample.png">
+<img src="{{ site.url }}/assets/materials/build-scalable-system/lb-result-servicemesh.png" alt="architecture-servicemesh-components.png">
+
 
 ## Wrapping up
 
-In this post, we introduce the gateway mode via PoC sample, in next post, we will take a hands-on practice on service mesh mode for a mixed programming language scenario.
+In this post, we introduce the service mesh mode via PoC sample, in next post, we will take a hands-on practice on service mesh mode with `envoy proxy` for a mixed programming language scenario.
 
 {% include common/series.html %}
