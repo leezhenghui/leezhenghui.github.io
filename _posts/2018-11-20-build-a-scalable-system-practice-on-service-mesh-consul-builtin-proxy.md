@@ -22,6 +22,8 @@ All of the sample source code is hosted on [repsoitry](https://github.com/leezhe
 
 <img src="{{ site.url }}/assets/materials/build-scalable-system/architecture-servicemesh-mode.png" alt="leaky-bucket-algorithm.jpeg">
 
+Please refer to my early post [reference-modes-for-msa-service-communication](https://leezhenghui.github.io/microservices/2018/10/20/build-a-scalable-system-runtime-challenges.html#heading-reference-modes-for-msa-service-communication) for more details about the MSA runtime challenges.
+
 ## PoC sample
 
 ### Scenario overview
