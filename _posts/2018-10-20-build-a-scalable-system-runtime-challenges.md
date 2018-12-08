@@ -186,7 +186,7 @@ The namespaces-related system calls are listed below:
 
 - `clone()`
 
-  creates a new process and a new namespace; the newly created process is attached to the new namespace. The process creation and process termination methods, fork() and exit(), were patched to handle the new namespace CLONE|_NEW* flags.
+  creates a new process and a new namespace; the newly created process is attached to the new namespace. The process creation and process termination methods, fork() and exit(), were patched to handle the new namespace CLONE\_NEW* flags.
 
 - `unshare()`
 
