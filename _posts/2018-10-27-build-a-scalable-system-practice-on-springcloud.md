@@ -472,7 +472,7 @@ Result:
 
 ## Run sample
 
-### Run the sample in standalone mode(simulate the work on dev laptop)
+### Run the sample in standalone mode(simulate the work on dev sandbox env)
 
 #### Start Consul (listening on port 8500)
 
