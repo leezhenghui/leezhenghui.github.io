@@ -2,7 +2,7 @@
 layout: post
 title: Build a Modern Scalable System - Practice on Service Mesh Mode with Consul and Nomad 
 categories: [microservices]
-tags: [architecture, microservices, java, gateway, servicemesh]
+tags: [architecture, microservices, java, nomad, consul, servicemesh]
 series: [build-scalable-system]
 comments: true
 ---

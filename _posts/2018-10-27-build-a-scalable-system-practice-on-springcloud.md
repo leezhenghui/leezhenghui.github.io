@@ -2,7 +2,7 @@
 layout: post
 title: Build a Modern Scalable System - Practice on Embedded Router Mode w/ Spring-Cloud 
 categories: [microservices]
-tags: [architecture, microservices, spring, java]
+tags: [architecture, microservices, spring, java, flamegraph]
 series: [build-scalable-system]
 comments: true
 ---
