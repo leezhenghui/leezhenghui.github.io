@@ -147,6 +147,16 @@ Implementing an AOP framework to advise method execution, the proxy pattern is p
 > 
 > In a pure java world, using dynamical proxy way for AOP implementation, it usually be used in conjunction with a IoC container, which can take over the responsibility of proxy instance construction and injection. Hide these implementation details and provide a clean/easy-to-use programming model to developer.
 
+## Event-Driven(Kafka)
+
+> *From Christian Posta*
+>
+> [Microservices should be event-driven](http://blog.christianposta.com/microservices/why-microservices-should-be-event-driven-autonomy-vs-authority/)
+
+Event-driven is a very important approach to decopule the data model among servcies and keep data consistency in a eventaully consistency fashion. I also demonstrate it in this sample via Kafka transactional message. This demon feature is delivered by a customzied annotation based AOP interceptor, you can find both simple AOP-Framework and the interceptor in **"modules/ifw.lib"**
+
+<img src="{{ site.url }}/assets/materials/build-scalable-system/architecture-sample-eventdriven-with-kafka-aop.png" alt="architecture-sample-eventdriven-with-kafka-aop.png">
+
 ## Circuit Breaker(Hystrix)
 
 ### Scenario
