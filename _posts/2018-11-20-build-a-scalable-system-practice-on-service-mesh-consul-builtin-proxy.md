@@ -16,7 +16,7 @@ comments: true
 
 In last [post](https://leezhenghui.github.io/microservices/2018/11/01/build-a-scalable-system-practice-on-gateway-mode-for-mixed-lang.html), I introduced the gateway mode via a PoC sample containing java and node.js services.  This post will focus on the PoC sample for service mesh mode, which can provide a solution for a mixed languages development challenges in MSA.
 
-All of the sample source code is hosted on [repsoitry](https://github.com/leezhenghui/hello-servicemesh.git), it is automated, and easy to run. To simplify the sample content, I just keep the gateway-mode related features in it, if you are interested in aggregated logging, performance analysis, please refer to earlier posts. 
+All of the sample source code is hosted on [repsoitry](https://github.com/leezhenghui/hello-servicemesh.git), it is automated, and easy to run. To simplify the sample content, I just keep the service-mesh related features in it, if you are interested in aggregated logging, performance analysis, please refer to earlier posts. 
 
 ## Recall the service mesh mode
 
