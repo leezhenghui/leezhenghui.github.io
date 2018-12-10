@@ -98,7 +98,7 @@ ops
 |                        |            Evn-Spec Config| Spring-profiles    |All
 |    Intercommunication  |Edge-Servie(API) Gateway   | Zuul               |api.gateway
 |                        |Service Discovery/Registry | Consul             |All
-|                        |        Load Balance       | Consul, Spring, Robbon|api.gateway, calculator.ui
+|                        |        Load Balance       | Consul, Spring, Ribbon|api.gateway, calculator.ui
 |                        |     Event-Driven/Messaging| Kafka(transactional message)|ifw.lib(counter interceptor), calculator.ui
 |                        |        Circuit Breakers   | Spring, Hystrix    |api.gateway, calculator.ui
 |                        |        Distributed Tracing| OpenTracing, Kafka, Zipkin|calculator.ui(HTTP), add.svc(HTTP), sub.svc(HTTP), api.gateway(Kafka), zipkin.server
