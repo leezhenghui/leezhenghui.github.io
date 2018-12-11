@@ -426,7 +426,7 @@ Typically, the traffic routing strategies include `transparent forwarding` and `
 
 - `transparent forwarding` needs involve the traffic hijack setting(e.g: via [iptables](https://en.wikipedia.org/wiki/Iptables) or [BPF/XDP](https://www.iovisor.org/technology/xdp)) during the initial phase of service orchestration.
 
- In linux, there are two typical approaches to enable transparent proxy via iptable, 
+    In linux, there are two typical approaches to enable transparent proxy via iptable, 
 
   1. iptables +	REDIRECT(NAT-based under the hood), e.g:
 
