@@ -459,7 +459,7 @@ Typically, the traffic routing strategies include `transparent forwarding` and `
  
      In this way, the proxy program can read original IP:Port information via `SO_ORIGINAL_DST` socket option, e.g: 
  
-     ```
+     ```c
      static int
      getdestaddr(int fd, struct sockaddr_storage *destaddr)
      {
@@ -477,37 +477,37 @@ Typically, the traffic routing strategies include `transparent forwarding` and `
      }
      ```
 
-     > Notable, SO_ORIGINAL_DST only apply to TCP and SCTP protocol, for UDP, it does not work. Below is relevant kernel code:
-     > 
-		 > ```c
-     > /* Reversing the socket's dst/src point of view gives us the reply mapping. */
-     > static int
-     > getorigdst(struct sock *sk, int optval, void __user *user, int *len)
-     > {
-     > 	const struct inet_sock *inet = inet_sk(sk);
-     > 	const struct nf_conntrack_tuple_hash *h;
-     > 	struct nf_conntrack_tuple tuple;
-     > 
-     > 	memset(&tuple, 0, sizeof(tuple));
-     > 
-     > 	lock_sock(sk);
-     > 	tuple.src.u3.ip = inet->inet_rcv_saddr;
-     > 	tuple.src.u.tcp.port = inet->inet_sport;
-     > 	tuple.dst.u3.ip = inet->inet_daddr;
-     > 	tuple.dst.u.tcp.port = inet->inet_dport;
-     > 	tuple.src.l3num = PF_INET;
-     > 	tuple.dst.protonum = sk->sk_protocol;
-     > 	release_sock(sk);
-     > 
-     > 	/* We only do TCP and SCTP at the moment: is there a better way? */
-     > 	if (tuple.dst.protonum != IPPROTO_TCP &&
-     > 	    tuple.dst.protonum != IPPROTO_SCTP) {
-     > 		pr_debug("SO_ORIGINAL_DST: Not a TCP/SCTP socket\n");
-     > 		return -ENOPROTOOPT;
-     > }
-     > ```
-		 >
-     > So that, for UDP, we need to refer to `TProxy` approach.
+     Notable, SO_ORIGINAL_DST only apply to TCP and SCTP protocol, for UDP, it does not work. Below is relevant kernel code:
+     
+		 ```c
+     /* Reversing the socket's dst/src point of view gives us the reply mapping. */
+     static int
+     getorigdst(struct sock *sk, int optval, void __user *user, int *len)
+     {
+     	const struct inet_sock *inet = inet_sk(sk);
+     	const struct nf_conntrack_tuple_hash *h;
+     	struct nf_conntrack_tuple tuple;
+     
+     	memset(&tuple, 0, sizeof(tuple));
+     
+     	lock_sock(sk);
+     	tuple.src.u3.ip = inet->inet_rcv_saddr;
+     	tuple.src.u.tcp.port = inet->inet_sport;
+     	tuple.dst.u3.ip = inet->inet_daddr;
+     	tuple.dst.u.tcp.port = inet->inet_dport;
+     	tuple.src.l3num = PF_INET;
+     	tuple.dst.protonum = sk->sk_protocol;
+     	release_sock(sk);
+     
+     	/* We only do TCP and SCTP at the moment: is there a better way? */
+     	if (tuple.dst.protonum != IPPROTO_TCP &&
+     	    tuple.dst.protonum != IPPROTO_SCTP) {
+     		pr_debug("SO_ORIGINAL_DST: Not a TCP/SCTP socket\n");
+     		return -ENOPROTOOPT;
+     }
+     ```
+		 
+     So that, for UDP, we need to refer to `TProxy` approach.
 
   2. iptable + TPROXY, e.g:
 
@@ -541,13 +541,13 @@ Typically, the traffic routing strategies include `transparent forwarding` and `
 
        To be able to get the original destination, on the UDP socket, set this option before binding:
 
-       ```
+       ```c
        int enable = 1;
        setsockopt(sockfd, SOL_IP, IP_RECVORIGDSTADDR, (const char*)&enable, sizeof(enable));
        ```
        and then call `recvmsg` to receive message, read `msghdr` in the message and iterate `cmsghdr` to obtain the orignal address and port. 
 
-       ```
+       ```c
        static int
        get_dstaddr(struct msghdr *msg, struct sockaddr_storage *dstaddr)
        {
@@ -568,7 +568,6 @@ Typically, the traffic routing strategies include `transparent forwarding` and `
            return 1;
        }
        ```
-
   > 
   > If you are interested in the transparent proxy implementation, the [ss-redir](https://github.com/shadowsocks/shadowsocks-libev.git) is a good sample for reference, which is using `iptables + REDIRECT` as TCP proxy and `iptables + TProxy` as UDP proxy.
   
