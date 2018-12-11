@@ -103,11 +103,11 @@ ops
 |                        |        Circuit Breakers   | Spring, Hystrix    |api.gateway, calculator.ui
 |                        |        Distributed Tracing| OpenTracing, Kafka, Zipkin|calculator.ui(HTTP), add.svc(HTTP), sub.svc(HTTP), api.gateway(Kafka), zipkin.server
 | Service Orchestration  |Service Scheduling         | Nomad              |Hybrid deployables support, standalone, container.
-|                        |Centralized Logging        | Nomad(Sidecar Task), Filebeat, Kafka, ELK|calculator.ui(local file), add.svc(local file), sub.svc(local file), api.gateway(Kafka)
+|                        |Aggregated Logging        | Nomad(Sidecar Task), Filebeat, Kafka, ELK|calculator.ui(local file), add.svc(local file), sub.svc(local file), api.gateway(Kafka)
 | Operation              |Service Admin| Springboot-Admin, Spring-acutator|All
 |                        |Service allocation status| Nomad, Hashi-ui|All
 |                        |Distributed Tracing Reporter|Zipkin-ui |All
-|                        |Centralized Logging Query| ELK, Kibana|All
+|                        |Aggregated Logging Query| ELK, Kibana|All
 |                        |Overall System(Linux) profiling|nmon|All
 |                        |Process full stack(java, c, kernel) profiling| perf_event, framegraph|All
 |                        |Java heap analysis| IBM JDK|
@@ -156,6 +156,10 @@ Implementing an AOP framework to advise method execution, the proxy pattern is p
 Event-driven is a very important approach to decopule the data model among servcies and keep data consistency in a eventaully consistency fashion. I also demonstrate it in this sample via Kafka transactional message. This demon feature is delivered by a customzied annotation based AOP interceptor, you can find both simple AOP-Framework and the interceptor in **"modules/ifw.lib"**
 
 <img src="{{ site.url }}/assets/materials/build-scalable-system/architecture-sample-eventdriven-with-kafka-aop.png" alt="architecture-sample-eventdriven-with-kafka-aop.png">
+
+## Aggregated Logging(Sidecar Task + Kafka + ELK)
+
+<img src="{{ site.url }}/assets/materials/build-scalable-system/architecture-aggregated-logging-scenario.png" alt="architecture-aggregated-logging-scenario.png">
 
 ## Circuit Breaker(Hystrix)
 
@@ -734,7 +738,7 @@ Open browser on host machine with url `http://10.10.10.200:9411`
 
 <img src="{{ site.url }}/assets/materials/build-scalable-system/zipkin-nomad-java-driver.png" alt="zipkin-nomad-java-driver.png">
 
-#### Centralized logging
+#### Aggregated logging
 
 Open browser on host machine with url `http://10.10.10.200:5601`
 
