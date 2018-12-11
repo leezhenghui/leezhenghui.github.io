@@ -431,41 +431,98 @@ Typically, the traffic routing strategies include `transparent forwarding` and `
   1. iptables +	REDIRECT(NAT-based under the hood), e.g:
 
      ```
-     sudo iptables -t nat -N RDRTCHAIN
-     sudo iptables -t nat -A RDRTCHAIN -d x.x.x.x -j RETURN #Proxy Server tcp
-     sudo iptables -t nat -A RDRTCHAIN -d 0.0.0.0/8 -j RETURN
-     sudo iptables -t nat -A RDRTCHAIN -d 10.0.0.0/8 -j RETURN
-     sudo iptables -t nat -A RDRTCHAIN -d 127.0.0.0/8 -j RETURN
-     sudo iptables -t nat -A RDRTCHAIN -d 169.254.0.0/16 -j RETURN
-     sudo iptables -t nat -A RDRTCHAIN -d 172.16.0.0/12 -j RETURN
-     sudo iptables -t nat -A RDRTCHAIN -d 192.168.0.0/16 -j RETURN
-     sudo iptables -t nat -A RDRTCHAIN -d 224.0.0.0/4 -j RETURN
-     sudo iptables -t nat -A RDRTCHAIN -d 240.0.0.0/4 -j RETURN
-     sudo iptables -t nat -A RDRTCHAIN -p tcp -j REDIRECT –to-ports 12345
+     # Create new chain
+     iptables -t nat -N SHADOWSOCKS
+
+     # Ignore your shadowsocks server's addresses
+     # It's very IMPORTANT, just be careful.
+     iptables -t nat -A SHADOWSOCKS -d 123.123.123.123 -j RETURN
+     
+     # Ignore LANs and any other addresses you'd like to bypass the proxy
+     # See Wikipedia and RFC5735 for full list of reserved networks.
+     # See ashi009/bestroutetb for a highly optimized CHN route list.
+     iptables -t nat -A SHADOWSOCKS -d 0.0.0.0/8 -j RETURN
+     iptables -t nat -A SHADOWSOCKS -d 10.0.0.0/8 -j RETURN
+     iptables -t nat -A SHADOWSOCKS -d 127.0.0.0/8 -j RETURN
+     iptables -t nat -A SHADOWSOCKS -d 169.254.0.0/16 -j RETURN
+     iptables -t nat -A SHADOWSOCKS -d 172.16.0.0/12 -j RETURN
+     iptables -t nat -A SHADOWSOCKS -d 192.168.0.0/16 -j RETURN
+     iptables -t nat -A SHADOWSOCKS -d 224.0.0.0/4 -j RETURN
+     iptables -t nat -A SHADOWSOCKS -d 240.0.0.0/4 -j RETURN
+
+     # Anything else should be redirected to shadowsocks's local port
+     iptables -t nat -A SHADOWSOCKS -p tcp -j REDIRECT --to-ports 12345
+
+     # Apply the rules
+     iptables -t nat -A PREROUTING -p tcp -j SHADOWSOCKS
      ```
  
      In this way, the proxy program can read original IP:Port information via `SO_ORIGINAL_DST` socket option, e.g: 
  
      ```
-     getsockopt (clifd, SOL_IP, SO_ORIGINAL_DST, &orig_addr, &sin_size);
+     static int
+     getdestaddr(int fd, struct sockaddr_storage *destaddr)
+     {
+         socklen_t socklen = sizeof(*destaddr);
+         int error         = 0;
+     
+         error = getsockopt(fd, SOL_IPV6, IP6T_SO_ORIGINAL_DST, destaddr, &socklen);
+         if (error) { // Didn't find a proper way to detect IP version.
+             error = getsockopt(fd, SOL_IP, SO_ORIGINAL_DST, destaddr, &socklen);
+             if (error) {
+                 return -1;
+             }
+         }
+         return 0;
+     }
      ```
+
+     > Notable, SO_ORIGINAL_DST only apply to TCP and SCTP protocol, for UDP, it does not work. Below is relevant kernel code:
+     > 
+		 > ```c
+     > /* Reversing the socket's dst/src point of view gives us the reply mapping. */
+     > static int
+     > getorigdst(struct sock *sk, int optval, void __user *user, int *len)
+     > {
+     > 	const struct inet_sock *inet = inet_sk(sk);
+     > 	const struct nf_conntrack_tuple_hash *h;
+     > 	struct nf_conntrack_tuple tuple;
+     > 
+     > 	memset(&tuple, 0, sizeof(tuple));
+     > 
+     > 	lock_sock(sk);
+     > 	tuple.src.u3.ip = inet->inet_rcv_saddr;
+     > 	tuple.src.u.tcp.port = inet->inet_sport;
+     > 	tuple.dst.u3.ip = inet->inet_daddr;
+     > 	tuple.dst.u.tcp.port = inet->inet_dport;
+     > 	tuple.src.l3num = PF_INET;
+     > 	tuple.dst.protonum = sk->sk_protocol;
+     > 	release_sock(sk);
+     > 
+     > 	/* We only do TCP and SCTP at the moment: is there a better way? */
+     > 	if (tuple.dst.protonum != IPPROTO_TCP &&
+     > 	    tuple.dst.protonum != IPPROTO_SCTP) {
+     > 		pr_debug("SO_ORIGINAL_DST: Not a TCP/SCTP socket\n");
+     > 		return -ENOPROTOOPT;
+     > }
+     > ```
+		 >
+     > So that, for UDP, we need to refer to `TProxy` approach.
 
   2. iptable + TPROXY, e.g:
 
      ```
-     sudo ip route add local 0.0.0.0/0 dev lo table 100
-     sudo ip rule add fwmark 1 table 100
-     sudo iptables -t mangle -N TPPCHAIN
-     sudo iptables -t mangle -A TPPCHAIN -d 0.0.0.0/8 -j RETURN
-     sudo iptables -t mangle -A TPPCHAIN -d 10.0.0.0/8 -j RETURN
-     sudo iptables -t mangle -A TPPCHAIN -d 127.0.0.0/8 -j RETURN
-     sudo iptables -t mangle -A TPPCHAIN -d 169.254.0.0/16 -j RETURN
-     sudo iptables -t mangle -A TPPCHAIN -d 172.16.0.0/12 -j RETURN
-     sudo iptables -t mangle -A TPPCHAIN -d 192.168.0.0/16 -j RETURN
-     sudo iptables -t mangle -A TPPCHAIN -d 224.0.0.0/4 -j RETURN
-     sudo iptables -t mangle -A TPPCHAIN -d 240.0.0.0/4 -j RETURN
-     sudo iptables -t mangle -A TPPCHAIN -p udp -j TPROXY –on-port 10053 –tproxy-mark 0x01/0x01
-     sudo iptables -t mangle -A PREROUTING -p udp -j TPPCHAIN
+     # Create new chain
+     iptables -t mangle -N SHADOWSOCKS
+
+     # Add any UDP rules
+     ip route add local default dev lo table 100
+     ip rule add fwmark 1 lookup 100
+     iptables -t mangle -A SHADOWSOCKS -p udp --dport 53 -j TPROXY --on-port 12345 --tproxy-mark 0x01/0x01
+
+     # Apply the rules
+     iptables -t nat -A PREROUTING -p tcp -j SHADOWSOCKS
+     iptables -t mangle -A PREROUTING -j SHADOWSOCKS
      ```
 
      Set `IP_TRANSPARENT` to enable the proxy listenting all of IP packages.
@@ -490,6 +547,28 @@ Typically, the traffic routing strategies include `transparent forwarding` and `
        setsockopt(sockfd, SOL_IP, IP_RECVORIGDSTADDR, (const char*)&enable, sizeof(enable));
        ```
        and then call `recvmsg` to receive message, read `msghdr` in the message and iterate `cmsghdr` to obtain the orignal address and port. 
+
+       ```
+       static int
+       get_dstaddr(struct msghdr *msg, struct sockaddr_storage *dstaddr)
+       {
+           struct cmsghdr *cmsg;
+       
+           for (cmsg = CMSG_FIRSTHDR(msg); cmsg; cmsg = CMSG_NXTHDR(msg, cmsg)) {
+               if (cmsg->cmsg_level == SOL_IP && cmsg->cmsg_type == IP_RECVORIGDSTADDR) {
+                   memcpy(dstaddr, CMSG_DATA(cmsg), sizeof(struct sockaddr_in));
+                   dstaddr->ss_family = AF_INET;
+                   return 0;
+               } else if (cmsg->cmsg_level == SOL_IPV6 && cmsg->cmsg_type == IPV6_RECVORIGDSTADDR) {
+                   memcpy(dstaddr, CMSG_DATA(cmsg), sizeof(struct sockaddr_in6));
+                   dstaddr->ss_family = AF_INET6;
+                   return 0;
+               }
+           }
+       
+           return 1;
+       }
+       ```
 
   > 
   > If you are interested in the transparent proxy implementation, the [ss-redir](https://github.com/shadowsocks/shadowsocks-libev.git) is a good sample for reference, which is using `iptables + REDIRECT` as TCP proxy and `iptables + TProxy` as UDP proxy.
