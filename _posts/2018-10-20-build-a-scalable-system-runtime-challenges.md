@@ -426,6 +426,74 @@ Typically, the traffic routing strategies include `transparent forwarding` and `
 
 - `transparent forwarding` needs involve the traffic hijack setting(e.g: via [iptables](https://en.wikipedia.org/wiki/Iptables) or [BPF/XDP](https://www.iovisor.org/technology/xdp)) during the initial phase of service orchestration.
 
+ In linux, there are two typical approaches to enable transparent proxy via iptable, 
+
+  1. iptables +	REDIRECT(NAT-based under the hood), e.g:
+
+     ```
+     sudo iptables -t nat -N RDRTCHAIN
+     sudo iptables -t nat -A RDRTCHAIN -d x.x.x.x -j RETURN #Proxy Server tcp
+     sudo iptables -t nat -A RDRTCHAIN -d 0.0.0.0/8 -j RETURN
+     sudo iptables -t nat -A RDRTCHAIN -d 10.0.0.0/8 -j RETURN
+     sudo iptables -t nat -A RDRTCHAIN -d 127.0.0.0/8 -j RETURN
+     sudo iptables -t nat -A RDRTCHAIN -d 169.254.0.0/16 -j RETURN
+     sudo iptables -t nat -A RDRTCHAIN -d 172.16.0.0/12 -j RETURN
+     sudo iptables -t nat -A RDRTCHAIN -d 192.168.0.0/16 -j RETURN
+     sudo iptables -t nat -A RDRTCHAIN -d 224.0.0.0/4 -j RETURN
+     sudo iptables -t nat -A RDRTCHAIN -d 240.0.0.0/4 -j RETURN
+     sudo iptables -t nat -A RDRTCHAIN -p tcp -j REDIRECT –to-ports 12345
+     ```
+ 
+     In this way, the proxy program can read original IP:Port information via `SO_ORIGINAL_DST` socket option, e.g: 
+ 
+     ```
+     getsockopt (clifd, SOL_IP, SO_ORIGINAL_DST, &orig_addr, &sin_size);
+     ```
+
+  2. iptable + TPROXY, e.g:
+
+     ```
+     sudo ip route add local 0.0.0.0/0 dev lo table 100
+     sudo ip rule add fwmark 1 table 100
+     sudo iptables -t mangle -N TPPCHAIN
+     sudo iptables -t mangle -A TPPCHAIN -d 0.0.0.0/8 -j RETURN
+     sudo iptables -t mangle -A TPPCHAIN -d 10.0.0.0/8 -j RETURN
+     sudo iptables -t mangle -A TPPCHAIN -d 127.0.0.0/8 -j RETURN
+     sudo iptables -t mangle -A TPPCHAIN -d 169.254.0.0/16 -j RETURN
+     sudo iptables -t mangle -A TPPCHAIN -d 172.16.0.0/12 -j RETURN
+     sudo iptables -t mangle -A TPPCHAIN -d 192.168.0.0/16 -j RETURN
+     sudo iptables -t mangle -A TPPCHAIN -d 224.0.0.0/4 -j RETURN
+     sudo iptables -t mangle -A TPPCHAIN -d 240.0.0.0/4 -j RETURN
+     sudo iptables -t mangle -A TPPCHAIN -p udp -j TPROXY –on-port 10053 –tproxy-mark 0x01/0x01
+     sudo iptables -t mangle -A PREROUTING -p udp -j TPPCHAIN
+     ```
+
+     Set `IP_TRANSPARENT` to enable the proxy listenting all of IP packages.
+
+     ```
+     setsockopt(server_socket,SOL_IP, IP_TRANSPARENT,&opt,sizeof(opt));
+     ```
+
+     and then:
+
+     - For TCP
+
+       From here on, the socket returned by accept is automatically bound to the original destination and connected to the source, so using it for transparent proxying requires no more work on this side of the proxy.
+       In order to get the original destination of the socket as a sockaddr_in structure, call getsockname() on the socket returned by accept() as usual.
+
+     - For UDP
+
+       To be able to get the original destination, on the UDP socket, set this option before binding:
+
+       ```
+       int enable = 1;
+       setsockopt(sockfd, SOL_IP, IP_RECVORIGDSTADDR, (const char*)&enable, sizeof(enable));
+       ```
+       and then call `recvmsg` to receive message, read `msghdr` in the message and iterate `cmsghdr` to obtain the orignal address and port. 
+
+  > 
+  > If you are interested in the transparent proxy implementation, the [ss-redir](https://github.com/shadowsocks/shadowsocks-libev.git) is a good sample for reference, which is using `iptables + REDIRECT` as TCP proxy and `iptables + TProxy` as UDP proxy.
+  
 - `explicitly call` needs a detailed bootstrap contract between orchestrator and application. Application accept these parameters(e.g: via environment variables) during bootstrap, get each endpoint address of local sidecar proxy for the target services and talk to these endpoint addresses just like talking to remote services directly.
 
 ## DevOps Concerns 
