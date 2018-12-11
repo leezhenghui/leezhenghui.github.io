@@ -477,37 +477,37 @@ Typically, the traffic routing strategies include `transparent forwarding` and `
      }
      ```
 
-     Notable, SO_ORIGINAL_DST only apply to TCP and SCTP protocol, for UDP, it does not work. Below is relevant kernel code:
-     
-		 ```c
-     /* Reversing the socket's dst/src point of view gives us the reply mapping. */
-     static int
-     getorigdst(struct sock *sk, int optval, void __user *user, int *len)
-     {
-     	const struct inet_sock *inet = inet_sk(sk);
-     	const struct nf_conntrack_tuple_hash *h;
-     	struct nf_conntrack_tuple tuple;
-     
-     	memset(&tuple, 0, sizeof(tuple));
-     
-     	lock_sock(sk);
-     	tuple.src.u3.ip = inet->inet_rcv_saddr;
-     	tuple.src.u.tcp.port = inet->inet_sport;
-     	tuple.dst.u3.ip = inet->inet_daddr;
-     	tuple.dst.u.tcp.port = inet->inet_dport;
-     	tuple.src.l3num = PF_INET;
-     	tuple.dst.protonum = sk->sk_protocol;
-     	release_sock(sk);
-     
-     	/* We only do TCP and SCTP at the moment: is there a better way? */
-     	if (tuple.dst.protonum != IPPROTO_TCP &&
-     	    tuple.dst.protonum != IPPROTO_SCTP) {
-     		pr_debug("SO_ORIGINAL_DST: Not a TCP/SCTP socket\n");
-     		return -ENOPROTOOPT;
-     }
-     ```
-		 
-     So that, for UDP, we need to refer to `TProxy` approach.
+    > Notable, SO_ORIGINAL_DST only apply to TCP and SCTP protocol, for UDP, it does not work. Below is relevant kernel code:
+    >
+    >  ```c
+    >  /* Reversing the socket's dst/src point of view gives us the reply mapping. */
+    >  static int
+    >  getorigdst(struct sock *sk, int optval, void __user *user, int *len)
+    >  {
+    >  	const struct inet_sock *inet = inet_sk(sk);
+    >  	const struct nf_conntrack_tuple_hash *h;
+    >  	struct nf_conntrack_tuple tuple;
+    >  
+    >  	memset(&tuple, 0, sizeof(tuple));
+    >  
+    >  	lock_sock(sk);
+    >  	tuple.src.u3.ip = inet->inet_rcv_saddr;
+    >  	tuple.src.u.tcp.port = inet->inet_sport;
+    >  	tuple.dst.u3.ip = inet->inet_daddr;
+    >  	tuple.dst.u.tcp.port = inet->inet_dport;
+    >  	tuple.src.l3num = PF_INET;
+    >  	tuple.dst.protonum = sk->sk_protocol;
+    >  	release_sock(sk);
+    >  
+    >  	/* We only do TCP and SCTP at the moment: is there a better way? */
+    >  	if (tuple.dst.protonum != IPPROTO_TCP &&
+    >  	    tuple.dst.protonum != IPPROTO_SCTP) {
+    >  		pr_debug("SO_ORIGINAL_DST: Not a TCP/SCTP socket\n");
+    >  		return -ENOPROTOOPT;
+    >  }
+    >  ```
+    >
+    > So that, for UDP, we need to refer to `TProxy` approach.
 
   2. iptable + TPROXY, e.g:
 
