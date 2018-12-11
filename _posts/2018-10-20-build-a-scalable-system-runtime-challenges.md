@@ -521,7 +521,6 @@ Typically, the traffic routing strategies include `transparent forwarding` and `
      iptables -t mangle -A SHADOWSOCKS -p udp --dport 53 -j TPROXY --on-port 12345 --tproxy-mark 0x01/0x01
 
      # Apply the rules
-     iptables -t nat -A PREROUTING -p tcp -j SHADOWSOCKS
      iptables -t mangle -A PREROUTING -j SHADOWSOCKS
      ```
 
