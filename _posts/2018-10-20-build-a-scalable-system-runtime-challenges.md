@@ -196,6 +196,8 @@ The namespaces-related system calls are listed below:
 
   It is a system call to attache the calling process to an existing namespace; prototype: `int setns(int fd, int nstype);`
 
+	The `setns` systemcall allows a process to choose *some* of namespaces and share with others. e.g: two processes each has it's own PID namespace, but share a network namespace, like the `Pod` behavior in Kubernetes.
+
 
 >
 > Please note nsenter(1) is the command line equivalent of setns(2) and unshare(1) is the equivalent of unshare(2) syscall. 
