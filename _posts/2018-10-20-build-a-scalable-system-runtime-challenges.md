@@ -426,150 +426,8 @@ Typically, the traffic routing strategies include `transparent forwarding` and `
 
 - `transparent forwarding` needs involve the traffic hijack setting(e.g: via [iptables](https://en.wikipedia.org/wiki/Iptables) or [BPF/XDP](https://www.iovisor.org/technology/xdp)) during the initial phase of service orchestration.
 
-    In linux, there are two typical approaches to enable transparent proxy via iptable, 
+    In linux, there are two typical approaches to enable transparent proxy via iptables - `iptables + REDIRECT` and `iptables + TProxy`.  The way of getting original destination is quite different in both approaches. If you are interested in this, please refer to section [transparent proxy with iptables](https://leezhenghui.github.io/microservices/2018/10/20/build-a-scalable-system-runtime-challenges#heading-transparent-proxy-with-iptables) for more details.
 
-  1. iptables +	REDIRECT(NAT-based under the hood), e.g:
-
-     ```
-     # Create new chain
-     iptables -t nat -N SHADOWSOCKS
-
-     # Ignore your shadowsocks server's addresses
-     # It's very IMPORTANT, just be careful.
-     iptables -t nat -A SHADOWSOCKS -d 123.123.123.123 -j RETURN
-     
-     # Ignore LANs and any other addresses you'd like to bypass the proxy
-     # See Wikipedia and RFC5735 for full list of reserved networks.
-     # See ashi009/bestroutetb for a highly optimized CHN route list.
-     iptables -t nat -A SHADOWSOCKS -d 0.0.0.0/8 -j RETURN
-     iptables -t nat -A SHADOWSOCKS -d 10.0.0.0/8 -j RETURN
-     iptables -t nat -A SHADOWSOCKS -d 127.0.0.0/8 -j RETURN
-     iptables -t nat -A SHADOWSOCKS -d 169.254.0.0/16 -j RETURN
-     iptables -t nat -A SHADOWSOCKS -d 172.16.0.0/12 -j RETURN
-     iptables -t nat -A SHADOWSOCKS -d 192.168.0.0/16 -j RETURN
-     iptables -t nat -A SHADOWSOCKS -d 224.0.0.0/4 -j RETURN
-     iptables -t nat -A SHADOWSOCKS -d 240.0.0.0/4 -j RETURN
-
-     # Anything else should be redirected to shadowsocks's local port
-     iptables -t nat -A SHADOWSOCKS -p tcp -j REDIRECT --to-ports 12345
-
-     # Apply the rules
-     iptables -t nat -A PREROUTING -p tcp -j SHADOWSOCKS
-     ```
- 
-     In this way, the proxy program can read original IP:Port information via `SO_ORIGINAL_DST` socket option, e.g: 
- 
-     ```c
-     static int
-     getdestaddr(int fd, struct sockaddr_storage *destaddr)
-     {
-         socklen_t socklen = sizeof(*destaddr);
-         int error         = 0;
-     
-         error = getsockopt(fd, SOL_IPV6, IP6T_SO_ORIGINAL_DST, destaddr, &socklen);
-         if (error) { // Didn't find a proper way to detect IP version.
-             error = getsockopt(fd, SOL_IP, SO_ORIGINAL_DST, destaddr, &socklen);
-             if (error) {
-                 return -1;
-             }
-         }
-         return 0;
-     }
-     ```
-
-    > Notable, SO_ORIGINAL_DST only apply to TCP and SCTP protocol, for UDP, it does not work. Below is relevant kernel code:
-    >
-    >  ```c
-    >  /* Reversing the socket's dst/src point of view gives us the reply mapping. */
-    >  static int
-    >  getorigdst(struct sock *sk, int optval, void __user *user, int *len)
-    >  {
-    >  	const struct inet_sock *inet = inet_sk(sk);
-    >  	const struct nf_conntrack_tuple_hash *h;
-    >  	struct nf_conntrack_tuple tuple;
-    >  
-    >  	memset(&tuple, 0, sizeof(tuple));
-    >  
-    >  	lock_sock(sk);
-    >  	tuple.src.u3.ip = inet->inet_rcv_saddr;
-    >  	tuple.src.u.tcp.port = inet->inet_sport;
-    >  	tuple.dst.u3.ip = inet->inet_daddr;
-    >  	tuple.dst.u.tcp.port = inet->inet_dport;
-    >  	tuple.src.l3num = PF_INET;
-    >  	tuple.dst.protonum = sk->sk_protocol;
-    >  	release_sock(sk);
-    >  
-    >  	/* We only do TCP and SCTP at the moment: is there a better way? */
-    >  	if (tuple.dst.protonum != IPPROTO_TCP &&
-    >  	    tuple.dst.protonum != IPPROTO_SCTP) {
-    >  		pr_debug("SO_ORIGINAL_DST: Not a TCP/SCTP socket\n");
-    >  		return -ENOPROTOOPT;
-    >  }
-    >  ```
-    >
-    > So that, for UDP, we need to refer to `TProxy` approach.
-
-  2. iptable + TPROXY, e.g:
-
-     ```
-     # Create new chain
-     iptables -t mangle -N SHADOWSOCKS
-
-     # Add any UDP rules
-     ip route add local default dev lo table 100
-     ip rule add fwmark 1 lookup 100
-     iptables -t mangle -A SHADOWSOCKS -p udp --dport 53 -j TPROXY --on-port 12345 --tproxy-mark 0x01/0x01
-
-     # Apply the rules
-     iptables -t mangle -A PREROUTING -j SHADOWSOCKS
-     ```
-
-     Set `IP_TRANSPARENT` to enable the proxy listenting all of IP packages.
-
-     ```
-     setsockopt(server_socket,SOL_IP, IP_TRANSPARENT,&opt,sizeof(opt));
-     ```
-
-     and then:
-
-     - For TCP
-
-       From here on, the socket returned by accept is automatically bound to the original destination and connected to the source, so using it for transparent proxying requires no more work on this side of the proxy.
-       In order to get the original destination of the socket as a sockaddr_in structure, call getsockname() on the socket returned by accept() as usual.
-
-     - For UDP
-
-       To be able to get the original destination, on the UDP socket, set this option before binding:
-
-       ```c
-       int enable = 1;
-       setsockopt(sockfd, SOL_IP, IP_RECVORIGDSTADDR, (const char*)&enable, sizeof(enable));
-       ```
-       and then call `recvmsg` to receive message, read `msghdr` in the message and iterate `cmsghdr` to obtain the orignal address and port. 
-
-       ```c
-       static int
-       get_dstaddr(struct msghdr *msg, struct sockaddr_storage *dstaddr)
-       {
-           struct cmsghdr *cmsg;
-       
-           for (cmsg = CMSG_FIRSTHDR(msg); cmsg; cmsg = CMSG_NXTHDR(msg, cmsg)) {
-               if (cmsg->cmsg_level == SOL_IP && cmsg->cmsg_type == IP_RECVORIGDSTADDR) {
-                   memcpy(dstaddr, CMSG_DATA(cmsg), sizeof(struct sockaddr_in));
-                   dstaddr->ss_family = AF_INET;
-                   return 0;
-               } else if (cmsg->cmsg_level == SOL_IPV6 && cmsg->cmsg_type == IPV6_RECVORIGDSTADDR) {
-                   memcpy(dstaddr, CMSG_DATA(cmsg), sizeof(struct sockaddr_in6));
-                   dstaddr->ss_family = AF_INET6;
-                   return 0;
-               }
-           }
-       
-           return 1;
-       }
-       ```
-  > 
-  > If you are interested in the transparent proxy implementation, the [ss-redir](https://github.com/shadowsocks/shadowsocks-libev.git) is a good sample for reference, which is using `iptables + REDIRECT` as TCP proxy and `iptables + TProxy` as UDP proxy.
   
 - `explicitly call` needs a detailed bootstrap contract between orchestrator and application. Application accept these parameters(e.g: via environment variables) during bootstrap, get each endpoint address of local sidecar proxy for the target services and talk to these endpoint addresses just like talking to remote services directly.
 
@@ -1162,5 +1020,150 @@ In this sample, we will create a cgroup to restrict the memory usage of a proces
   root         8  0.0  0.3  19940  3816 ?        S    07:48   0:00 /bin/bash
   root        11  0.0  0.3  36084  3292 ?        R+   07:48   0:00 ps aux
   ```
+
+### Transparent proxy with iptables 
+
+1. iptables +	REDIRECT(NAT-based under the hood), e.g:
+
+   ```
+   # Create new chain
+   iptables -t nat -N SHADOWSOCKS
+
+   # Ignore your shadowsocks server's addresses
+   # It's very IMPORTANT, just be careful.
+   iptables -t nat -A SHADOWSOCKS -d 123.123.123.123 -j RETURN
+
+   # Ignore LANs and any other addresses you'd like to bypass the proxy
+   # See Wikipedia and RFC5735 for full list of reserved networks.
+   # See ashi009/bestroutetb for a highly optimized CHN route list.
+   iptables -t nat -A SHADOWSOCKS -d 0.0.0.0/8 -j RETURN
+   iptables -t nat -A SHADOWSOCKS -d 10.0.0.0/8 -j RETURN
+   iptables -t nat -A SHADOWSOCKS -d 127.0.0.0/8 -j RETURN
+   iptables -t nat -A SHADOWSOCKS -d 169.254.0.0/16 -j RETURN
+   iptables -t nat -A SHADOWSOCKS -d 172.16.0.0/12 -j RETURN
+   iptables -t nat -A SHADOWSOCKS -d 192.168.0.0/16 -j RETURN
+   iptables -t nat -A SHADOWSOCKS -d 224.0.0.0/4 -j RETURN
+   iptables -t nat -A SHADOWSOCKS -d 240.0.0.0/4 -j RETURN
+
+   # Anything else should be redirected to shadowsocks's local port
+   iptables -t nat -A SHADOWSOCKS -p tcp -j REDIRECT --to-ports 12345
+
+   # Apply the rules
+   iptables -t nat -A PREROUTING -p tcp -j SHADOWSOCKS
+   ```
+
+   In this way, the proxy program can read original IP:Port information via `SO_ORIGINAL_DST` socket option, e.g: 
+
+   ```c
+   static int
+   getdestaddr(int fd, struct sockaddr_storage *destaddr)
+   {
+       socklen_t socklen = sizeof(*destaddr);
+       int error         = 0;
+
+       error = getsockopt(fd, SOL_IPV6, IP6T_SO_ORIGINAL_DST, destaddr, &socklen);
+       if (error) { // Didn't find a proper way to detect IP version.
+           error = getsockopt(fd, SOL_IP, SO_ORIGINAL_DST, destaddr, &socklen);
+           if (error) {
+               return -1;
+           }
+       }
+       return 0;
+   }
+   ```
+
+   > Notable, SO_ORIGINAL_DST only apply to TCP and SCTP protocol, for UDP, it does not work. Below is relevant kernel code:
+   >
+   >  ```c
+   >  /* Reversing the socket's dst/src point of view gives us the reply mapping. */
+   >  static int
+   >  getorigdst(struct sock *sk, int optval, void __user *user, int *len)
+   >  {
+   >  	const struct inet_sock *inet = inet_sk(sk);
+   >  	const struct nf_conntrack_tuple_hash *h;
+   >  	struct nf_conntrack_tuple tuple;
+   >
+   >  	memset(&tuple, 0, sizeof(tuple));
+   >
+   >  	lock_sock(sk);
+   >  	tuple.src.u3.ip = inet->inet_rcv_saddr;
+   >  	tuple.src.u.tcp.port = inet->inet_sport;
+   >  	tuple.dst.u3.ip = inet->inet_daddr;
+   >  	tuple.dst.u.tcp.port = inet->inet_dport;
+   >  	tuple.src.l3num = PF_INET;
+   >  	tuple.dst.protonum = sk->sk_protocol;
+   >  	release_sock(sk);
+   >
+   >  	/* We only do TCP and SCTP at the moment: is there a better way? */
+   >  	if (tuple.dst.protonum != IPPROTO_TCP &&
+   >  	    tuple.dst.protonum != IPPROTO_SCTP) {
+   >  		pr_debug("SO_ORIGINAL_DST: Not a TCP/SCTP socket\n");
+   >  		return -ENOPROTOOPT;
+   >  }
+   >  ```
+   >
+   > So that, for UDP, we need to refer to `TProxy` approach.
+
+2. iptable + TPROXY, e.g:
+
+   ```
+   # Create new chain
+   iptables -t mangle -N SHADOWSOCKS
+
+   # Add any UDP rules
+   ip route add local default dev lo table 100
+   ip rule add fwmark 1 lookup 100
+   iptables -t mangle -A SHADOWSOCKS -p udp --dport 53 -j TPROXY --on-port 12345 --tproxy-mark 0x01/0x01
+
+   # Apply the rules
+   iptables -t mangle -A PREROUTING -j SHADOWSOCKS
+   ```
+
+   Set `IP_TRANSPARENT` to enable the proxy listenting all of IP packages.
+
+   ```
+   setsockopt(server_socket,SOL_IP, IP_TRANSPARENT,&opt,sizeof(opt));
+   ```
+
+   and then:
+
+   - For TCP
+
+     From here on, the socket returned by accept is automatically bound to the original destination and connected to the source, so using it for transparent proxying requires no more work on this side of the proxy.
+     In order to get the original destination of the socket as a sockaddr_in structure, call getsockname() on the socket returned by accept() as usual.
+
+   - For UDP
+
+     To be able to get the original destination, on the UDP socket, set this option before binding:
+
+     ```c
+     int enable = 1;
+     setsockopt(sockfd, SOL_IP, IP_RECVORIGDSTADDR, (const char*)&enable, sizeof(enable));
+     ```
+     and then call `recvmsg` to receive message, read `msghdr` in the message and iterate `cmsghdr` to obtain the orignal address and port. 
+
+     ```c
+     static int
+     get_dstaddr(struct msghdr *msg, struct sockaddr_storage *dstaddr)
+     {
+         struct cmsghdr *cmsg;
+
+         for (cmsg = CMSG_FIRSTHDR(msg); cmsg; cmsg = CMSG_NXTHDR(msg, cmsg)) {
+             if (cmsg->cmsg_level == SOL_IP && cmsg->cmsg_type == IP_RECVORIGDSTADDR) {
+                 memcpy(dstaddr, CMSG_DATA(cmsg), sizeof(struct sockaddr_in));
+                 dstaddr->ss_family = AF_INET;
+                 return 0;
+             } else if (cmsg->cmsg_level == SOL_IPV6 && cmsg->cmsg_type == IPV6_RECVORIGDSTADDR) {
+                 memcpy(dstaddr, CMSG_DATA(cmsg), sizeof(struct sockaddr_in6));
+                 dstaddr->ss_family = AF_INET6;
+                 return 0;
+             }
+         }
+
+         return 1;
+     }
+     ```
+>
+> If you are interested in the transparent proxy implementation, the [ss-redir](https://github.com/shadowsocks/shadowsocks-libev.git) is a good sample for reference, which is using `iptables + REDIRECT` as TCP proxy and `iptables + TProxy` as UDP proxy.
 
 {% include common/series.html %}
