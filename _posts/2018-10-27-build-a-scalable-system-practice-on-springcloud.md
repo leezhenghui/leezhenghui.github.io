@@ -190,7 +190,7 @@ Event-driven is a very important approach to decopule the data model among servc
 <img src="{{ site.url }}/assets/materials/build-scalable-system/hystrix-turbine-2.png" alt="hystrix-turbine-2.png">
 
 
-## Distributed Tracing
+## Distributed Tracing(OpenTracing)
 
 Microservices architecture faces certain challenges that are not common for monolithic systems – one of them is traceability of end-to-end transaction that is executed in distributed environment and that can potentially involve invocation of large number of diverse applications and services. In case of performance degradation or fatal exception thrown that is experienced in end-to-end solution, identication of bottleneck component/failure point become more and more diffcult. `Distributed tracking` is used to resolve the problems in this area.
 
