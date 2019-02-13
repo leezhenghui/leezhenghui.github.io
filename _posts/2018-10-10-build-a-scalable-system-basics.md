@@ -222,6 +222,8 @@ To implement a microservices architecture, we need to resolve both `runtime` and
   
 - Data part, the challenges mainly include:
 
+  - Data model vertical splits(Database-per-service): Domain driven design 
+
   - Write challenge: Consistency problem
 
   - Read challenge: Cross-service query problem
