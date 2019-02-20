@@ -275,7 +275,7 @@ In addition, on Linux, Nomad provides a ligthweight isolation solution "chroot +
 
 ## Communication(calling service) in MSA
 
-In monoliths, the communication between components actually will turn to the function call within the same process space. The compiler and linker help on the translating between virtual memory address marker to the function symbols. FFrom monoliths point of view, there are not many external services dependences, so we can hardcode the dependences static IP/Port in configuration files. We can put a LB in front of these monolith instances for a horizontal-scaling, all of these are fine.  But after we split monolith into microservices. All above options are unacceptable. 
+In monoliths, the communication between components actually will turn to the function call within the same process space. The compiler and linker help on the translations between virtual memory address marker to the function symbols. From SOA point of view, there are not many external services dependences, so we can hardcode the dependences static IP/Port in configuration files. We also can put a LB in front of these monolith/SOA instances for a horizontal-scaling, all of these are fine. But after we adopt the application to microservices pattern. All above options are unacceptable.
 
 ### Client-side service discovery 
 
