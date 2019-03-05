@@ -100,16 +100,6 @@ The event sources are where the tracing data comes from, tracing framework runni
 
 	DTrace has long provided a C API for defining the DTrace-equivalent of USDT probes through the `DTRACE_PROBE` macro. The Linux tracing ecosystem developers decided to stay source-compatible with that API, so any `DTRACE_PROBE` macros are automatically converted to USDT probes! Adding probes to your own code is possible with SystemTap's API and the collection of DTRACE_PROBE() macros. USDT probes can help you troubleshoot your applications in production with minimal run-time overhead.
 
-```
-TODO: delete
-
--  USDT (user-level static tracing)
-
-   This seems to be a function which originally existed in Dtrace, and it is supported by SystemTap . In addition, perf is also supporting recently [lwn article](https://lwn.net/Articles/618956/).
-
-	 Events perf listin SDT appear as SDT events in.
-```
-
 ### Tracing Frameworks
 
 #### In-tree
@@ -364,16 +354,6 @@ TODO: delete
    > From [dtrace blog](http://dtrace.org/blogs/dap/2011/12/13/usdt-providers-redux/)
    >
    > USDT (Userland Statically Defined Tracing) is the mechanism by which application developers embed DTrace probes directly into an application. This allows users to trace semantically meaningful operations like “request-start”, rather than having to know which function implements the operation. More importantly, since USDT probes are part of the source code, scripts that use them continue working even as the underlying software evolves and the implementing functions are renamed and deleted.
-
-
-    ```
-	  TO DELETE
-
-    Why we have dynamical solution(e.g: uprobe) but still need static way, in a nutshell, the static can help us built a more stable application.
-
-		A probe is when the kernel dynamically modifies your assembly program at runtime (like, it changes the instructions) in order to enable tracing
-		A tracepoint is something you compile into your program. When someone using your program wants to see when that tracepoint is hit and extract data, they can “enable” or “activate” the tracepoint to start using it.
-		```
 
 ### How does USDT works 
 
