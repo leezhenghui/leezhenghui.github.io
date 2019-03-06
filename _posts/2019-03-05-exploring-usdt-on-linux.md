@@ -367,9 +367,7 @@ The event sources are where the tracing data comes from, tracing framework runni
 
 - After deregister the probe, USDT will instrument the instruction from `int3` back to `nop`, no event get generated anymore.
 
-### Hello World for USDT in Linux
-
-**Prerequsites(Ubuntu):**
+### Prerequsites(e.g: Ubuntu)
 
 ```bash
 sudo apt-get install systemtap-sdt-dev
