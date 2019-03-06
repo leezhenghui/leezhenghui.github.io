@@ -21,7 +21,7 @@ Before we dig into USDT with more details, let's take a step back to have a look
 
 > ![Tips]({{ site.url }}/assets/ico/tip.png)
 >
-> THANKS to [Brendan Gregg's Blog](http://www.brendangregg.com/blog/index.html) provide so much wonderful articles to help learning the knowledges in this area
+> THANKS to [Brendan Gregg's Blog](http://www.brendangregg.com/blog/index.html) providing so much wonderful articles to help learning the knowledges in this interesting field. 
 
 ## Tracing System
 
