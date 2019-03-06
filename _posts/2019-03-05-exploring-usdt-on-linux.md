@@ -358,6 +358,10 @@ The event sources are where the tracing data comes from, tracing framework runni
    > From [dtrace blog](http://dtrace.org/blogs/dap/2011/12/13/usdt-providers-redux/)
    >
    > USDT (Userland Statically Defined Tracing) is the mechanism by which application developers embed DTrace probes directly into an application. This allows users to trace semantically meaningful operations like “request-start”, rather than having to know which function implements the operation. More importantly, since USDT probes are part of the source code, scripts that use them continue working even as the underlying software evolves and the implementing functions are renamed and deleted.
+   
+	 > From [LWN doc](https://lwn.net/Articles/753601/)
+   >
+   > The origins of USDT probes can be found in Sun's DTrace utility. While DTrace can't claim to have invented static tracepoints (various implementations are described in the "related work" section of the original DTrace paper), it certainly made them much more popular. With the emergence of DTrace, many applications began adding USDT probes to important functions to aid with tracing and diagnosing run-time behavior. Given that, it's perhaps not surprising that these probes are usually enabled (as part of configuring the build) with the --enable-dtrace switch. 
 
 ### Inside USDT 
 
@@ -367,9 +371,9 @@ The event sources are where the tracing data comes from, tracing framework runni
 
 - During compilation, the source code with USDT trace point will be translated into a `nop` instruction, in the meanwhile, the USDT metadata will be stored in the ELF's `.note.stapstd` section.
 
-- When register a probe, USDT tool(usually implemented based on `uprobe` under the hood) will read the ELF `.note.stapstd` section, and instrument the instruction from `nop` to `breakpoint`(`int3` on x86) for . So whenever control reaches the marker, the interrupt handler for int3 is called, and by turn the uprobe and attached eBPF program get called in kernel to process the events.
+- When register a probe, USDT tool(usually implemented based on `uprobe` under the hood) will read the ELF `.note.stapstd` section, and instrument the instruction from `nop` to `breakpoint`(`int3` on x86) for . So whenever control reaches the marker, the interrupt handler for int3 is called, and by turn the uprobe and attached eBPF program get called in kernel to process the events. If the USDT probe associated with semaphores, the front-ends need to incrementing the semaphore’s location via poking /proc/$PID/mem to enable the probe.
 
-- After deregister the probe, USDT will instrument the instruction from `breakpoint` back to `nop`, no event get generated anymore.
+- After deregister the probe, USDT will instrument the instruction from `breakpoint` back to `nop`, no event get generated anymore, in the meanwhile, decrementing the semaphore's location to detach the current probe. 
 
 ### Prerequsites(e.g: Ubuntu)
 
@@ -1298,6 +1302,8 @@ And the same for the uretprobe would be:
 > 
 > Add probe calls, via DTRACE_PROBE macros to the source code of the application.  Compile code to object file (*.o) Use dtrace command line tool to convert the object file. This involves stubbing out the assembler function calls, and creating a table in the ELF file enumerating the probes.  Create (link) the application binary, with a special object file (drti.o). drti.o runs before main() and takes the table of probes, and lets the kernel know (via an ioctl() to the dtrace driver) of the probes.  Run the application: drti.o takes control and issues the ioctl() of the probes. Whilst the application is running, you can use "dtrace -l" to see the probes. Probes are a function of the pid provider, so you will see a new suite of probes for each process running with USDT, and as many probes as there are DTRACE_PROBE calls in the source code.  Whilst the application is running, you can use dtrace to monitor these probes at any granularity you like (eg all probes from the process, or specific probes from all such processes).  When a dtrace monitors the probe, the site where the call instruction is placed is modified and an INT3 (breakpoint instruction) is placed at the site of what was the original CALL instruction. When the breakpoint is hit, the dtrace driver takes control and actions the probe. This is very similar to how a kernel FBT probe works, except the breakpoint happened in user space. At the point of breakpoint execution, any D script associated with the probe is invoked. The target application is frozen until the D script completes, allowing it to take a static snapshot of any details it likes. Typically, this might include taking a user stack dump (ustack()).  Terminating a dtrace which is probing the application will remove the breakpoints and restore the NOP instructions.
 
+[^1]: http://www.brendangregg.com/blog/2015-07-08/choosing-a-linux-tracer
+
 [^2]: https://jvns.ca/blog/2017/07/05/linux-tracing-systems
 
 [^3]: http://nova.polymtl.ca/~suchakra/eBPF-5May2017.pdf
@@ -1333,3 +1339,10 @@ And the same for the uretprobe would be:
 [^18]: https://www.slideshare.net/goldshtn/modern-linux-tracing-landscape-66299948 
 
 [^19]: https://github.com/dtrace4linux/linux/blob/master/doc/usdt.html
+
+[^20]: https://dzone.com/articles/next-generation-linux-tracing 
+
+[^21]: http://www.joelfernandes.org/linuxinternals/2018/02/10/usdt-notes.html 
+
+[^22]: https://lwn.net/Articles/753601/ 
+
