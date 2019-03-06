@@ -351,6 +351,12 @@ The event sources are where the tracing data comes from, tracing framework runni
     >
 	  > bpftrace employs various techniques for efficiency, minimizing the instrumentation overhead. Summary statistics are stored in kernel BPF maps, which are asynchronously copied from kernel to user-space, only when needed. Other data, and asynchronous actions, are passed from kernel to user-space via the perf output buffer.
 
+    > ![Tips]({{ site.url }}/assets/ico/tip.png)
+		>
+    > As Brendan mentioned in his blog - [Linux Extended BPF (eBPF) Tracing Tools](http://www.brendangregg.com/ebpf.html#bpftrace)
+		>
+    > bpftrace is ideal for ad hoc instrumentation with powerful custom one-liners and short scripts, whereas bcc is ideal for complex tools and daemons. 
+
 	  Please refer to [Brendan Gregg's Blog- dtrace-for-linux-2018](http://www.brendangregg.com/blog/2018-10-08/dtrace-for-linux-2018.html) for a detailed instruction about bpftrace.
 
 ## USDT
