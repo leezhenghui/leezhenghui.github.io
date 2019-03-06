@@ -19,7 +19,9 @@ So what is the proper way to allow programmer declare and embed the trace points
 
 Before we dig into USDT with more details, let's take a step back to have a look at the big picture of tracing in Linux.
 
-(thanks to [Brendan Gregg's Blog](http://www.brendangregg.com/blog/index.html) provide so much wonderful articles to help learning the knowledges in this area)
+> ![Tips]({{ site.url }}/assets/ico/tip.png)
+>
+> THANKS to [Brendan Gregg's Blog](http://www.brendangregg.com/blog/index.html) provide so much wonderful articles to help learning the knowledges in this area
 
 ## Tracing System
 
