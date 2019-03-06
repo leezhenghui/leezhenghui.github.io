@@ -359,7 +359,7 @@ The event sources are where the tracing data comes from, tracing framework runni
    >
    > USDT (Userland Statically Defined Tracing) is the mechanism by which application developers embed DTrace probes directly into an application. This allows users to trace semantically meaningful operations like “request-start”, rather than having to know which function implements the operation. More importantly, since USDT probes are part of the source code, scripts that use them continue working even as the underlying software evolves and the implementing functions are renamed and deleted.
 
-### How does USDT works 
+### Inside USDT 
 
 <img src="{{ site.url }}/assets/materials/explore-usdt-on-linux/linux-tracing-usdt.png" alt="linux-tracing-usdt.png">
 
@@ -373,6 +373,21 @@ The event sources are where the tracing data comes from, tracing framework runni
 
 ### Prerequsites(e.g: Ubuntu)
 
+Ubuntu
+
+```
+ubuntu@ubuntu-xenial:~$ uname  -a
+Linux ubuntu-xenial 4.10.17-custom #1 SMP Sat Jul 22 14:41:19 UTC 2017 x86_64 x86_64 x86_64 GNU/Linux
+ubuntu@ubuntu-xenial:~$ ls
+ls           lsattr       lsblk        lsb_release  lscpu        lshw         lsinitramfs  lsipc        lslocks      lslogins     lsmod        lsof         lspci        lspgpot      lsusb        
+ubuntu@ubuntu-xenial:~$ lsb_release -a
+No LSB modules are available.
+Distributor ID: Ubuntu
+Description:    Ubuntu 16.04.2 LTS
+Release:        16.04
+Codename:       xenial
+```
+
 ```bash
 sudo apt-get install systemtap-sdt-dev
 ```
@@ -382,6 +397,17 @@ sudo apt-get install systemtap-sdt-dev
 >  - dtrace command wrapper (only if you need Semaphore feature)
 >
 > all of these things can help us genarate expected elf file with markers, that is, generate `nop` instruction in the place where we can register a probe, and node section in elf to list these marker locations.
+
+The source code used by this practices:
+
+- [build.sh]({{ site.url }}/assets/materials/explore-usdt-on-linux/build.sh) 
+- [tick-dtrace.d]({{ site.url }}/assets/materials/explore-usdt-on-linux/tick-dtrace.d) 
+- [tick-main.c]({{ site.url }}/assets/materials/explore-usdt-on-linux/tick-main.c) 
+
+The compiled executable:
+
+[tick]({{ site.url }}/assets/materials/explore-usdt-on-linux/tick)
+
 
 ### Sample w/o Semaphore support
 
@@ -526,9 +552,9 @@ stapsdt              0x0000003e       NT_STAPSDT (SystemTap probe descriptors)
 	Arguments: -4@-4(%rbp)
 ```
 
-### Register USDT probe via ftrace
+### Register USDT probe via ftrace(basically, ftrace+uprobe)
 
-USDT probes are static tracing markers placed in an executable or library. The probes are just nop instructions emitted by the compiler, whose locations are recorded in the notes section of the ELF binary. Tracing apps can instrumentthese locations and retrieve probe arguments. Specifically, uprobes (which BPF already supports) can be used to instrument the traced location.
+USDT probes are static tracing markers placed in an executable or library. The probes are just nop instructions emitted by the compiler, whose locations are recorded in the notes section of the ELF binary. Tracing apps can instrument these locations and retrieve probe arguments. Specifically, uprobes (which BPF already supports) can be used to instrument the traced location.
 
 1. On target app side: comipler puts a `nop` in the location which use macro and also records the info to elf metadata
 
@@ -756,9 +782,9 @@ USDT probes are static tracing markers placed in an executable or library. The p
 
   > ![Tips]({{ site.url }}/assets/ico/tip.png)
   >
-  > Actually, the suggested way to do the USDT probe is via bcc or bpftrace frontend tools. I demonstrate it with a ftrace here, because the hacking steps can show us with more information which can help us understand how does USDT work inside. If you are interested in this, please refer to blogs [hacking-linux-usdt-ftrace](http://www.brendangregg.com/blog/2015-07-03/hacking-linux-usdt-ftrace.html) and [linux-ftrace-uprobe](http://www.brendangregg.com/blog/2015-06-28/linux-ftrace-uprobe.html) for more details.
+  > Actually, the better way to do the USDT probe is via bcc or bpftrace frontend tools. I still would like to demonstrate it with a ftrace here, because the hacking steps can show us with more information which can greatly help us understand how USDT works inside. If you are interested in this, please refer to blogs [hacking-linux-usdt-ftrace](http://www.brendangregg.com/blog/2015-07-03/hacking-linux-usdt-ftrace.html) and [linux-ftrace-uprobe](http://www.brendangregg.com/blog/2015-06-28/linux-ftrace-uprobe.html) for more details.
 
-### Register USDT probe via bcc 
+### Register USDT probe via bcc(basically, eBPF+uprobe) 
 
 - Use bcc tool for the tracking 
 
