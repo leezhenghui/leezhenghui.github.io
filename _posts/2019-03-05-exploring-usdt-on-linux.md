@@ -237,7 +237,7 @@ The event sources are where the tracing data comes from, tracing framework runni
 
      Please refer to good article [ftrace: trace your kernel functions](https://jvns.ca/blog/2017/03/19/getting-started-with-ftrace/) for more details.
 
-  -  [perf-tools](https://github.com/brendangregg/perf-tools) (for ftrace and perf\_event)
+  -  [perf-tools](https://github.com/brendangregg/perf-tools) (a wrapper of ftrace and perf\_event)
 
      <img src="{{ site.url }}/assets/materials/explore-usdt-on-linux/perf-tools_2016.png" alt="perf-tools_2016.png">
      
