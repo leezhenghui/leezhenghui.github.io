@@ -1,0 +1,434 @@
+#!/bin/bash
+#
+# usdt - trace user statically defined tracepoints. User-level dynamic tracing.
+#        Written using Linux ftrace. Experimental.
+#
+# WARNING: This is a proof of concept for USDT tracing from Linux ftrace, and
+# is not safe to use in production environments. In particular, the -i option
+# sets memory semaphores by piping the output of printf through dd and then
+# to process memory via /proc/PID/mem. Yes, this program pipes the output of
+# the shell directly over top of live process memory. If you don't understand
+# how insane this is, please don't run this program. If you do understand how
+# insane this is, then you won't run it anyway. This program exists to be read
+# and not run -- to demonstrate the steps required to do USDT tracing for
+# someone who is going to do this properly in another tool.
+echo please read the WARNINGS at the top of this script. exiting...
+exit
+#
+# See http://www.brendangregg.com/blog/2015-07-03/hacking-linux-usdt-ftrace.html
+#
+# USAGE: ./usdt [-FhHsv] [-d secs] [-p pid] {-l target |
+#               usdt_definition [filter]}
+#
+# Run "usdt -h" for full usage.
+#
+# MORE WARNINGS: This also uses dynamic tracing of user-level functions, using
+# relatively new kernel code. I have seen this cause target processes to fail,
+# either entering endless spin loops or crashing on illegal instructions. I
+# believe newer kernels (post 4.0) are relatively safer, but use caution. Test
+# in a lab environment, and know what you are doing, before use.
+#
+# REQUIREMENTS: FTRACE and UPROBE CONFIG, which you may already have on recent
+# kernel versions, readelf(1), file(1), ldconfig(8), objdump(1), and some
+# version of awk. Also, currently only executes on Linux 4.0+ (see WARNING)
+# unless -F is used.
+#
+# From perf-tools: https://github.com/brendangregg/perf-tools
+#
+# See the usdt(8) man page (in perf-tools) for more info.
+#
+# COPYRIGHT: Copyright (c) 2015 Brendan Gregg.
+#
+#  This program is free software; you can redistribute it and/or
+#  modify it under the terms of the GNU General Public License
+#  as published by the Free Software Foundation; either version 2
+#  of the License, or (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this program; if not, write to the Free Software Foundation,
+#  Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+#
+#  (http://www.gnu.org/copyleft/gpl.html)
+#
+# 28-Jul-2015	Brendan Gregg	Created this.
+
+### default variables
+tracing=/sys/kernel/debug/tracing
+flock=/var/tmp/.ftrace-lock; wroteflock=0
+opt_duration=0; duration=; opt_pid=0; pid=; opt_filter=0; filter=
+opt_view=0; opt_headers=0; opt_stack=0; dmesg=2; debug=0; opt_force=0
+opt_list=0; opt_verbose_list=0; opt_isenabled=0; target=
+PATH=$PATH:/usr/bin:/sbin	# ensure we find objdump, ldconfig
+trap ':' INT QUIT TERM PIPE HUP	# sends execution to end tracing section
+
+function usage {
+	cat <<-END >&2
+	USAGE: usdt [-FhHisv] [-d secs] [-p PID] {[-lL] target |
+	            usdt_definition [filter]}
+	                 -F              # force. trace despite warnings.
+	                 -d seconds      # trace duration, and use buffers
+	                 -i              # enable isenabled probes. Needs -p.
+	                                 # WARNING: writes to target memory.
+	                 -l target       # list usdt probes from this executable
+	                 -L target       # list usdt probes and arguments
+	                 -p PID          # PID to match on I/O issue
+	                 -v              # view format file (don't trace)
+	                 -H              # include column headers
+	                 -s              # show user stack traces
+	                 -h              # this usage message
+	
+	Note that these examples may need modification to match your kernel
+	version's function names and platform's register usage.
+	   eg,
+	       # list USDT probes in node
+	           usdt -l /opt/node/node
+	       # trace the node gc__start probe (gc-start):
+	           usdt node:gc__start
+	       # trace gc-start for process 1182 only:
+	           usdt -p 1182 node:gc_start
+	       # trace the node:http__client__request isenabled probe:
+	           usdt -i node:http__client__request
+	See the man page and example file for more info, and also:
+	http://www.brendangregg.com/blog/2015-07-03/hacking-linux-usdt-ftrace.html
+END
+	exit
+}
+
+function warn {
+	if ! eval "$@"; then
+		echo >&2 "WARNING: command failed \"$@\""
+	fi
+}
+
+function end {
+	# disable tracing
+	echo 2>/dev/null
+	echo "Ending tracing..." 2>/dev/null
+	cd $tracing
+	warn "echo 0 > events/uprobes/$uname/enable"
+	if (( opt_filter )); then
+		warn "echo 0 > events/uprobes/$uname/filter"
+	fi
+	warn "echo -:$uname >> uprobe_events"
+	(( opt_stack )) && warn "echo 0 > options/userstacktrace"
+	warn "echo > trace"
+	(( wroteflock )) && warn "rm $flock"
+	if (( opt_pid && opt_isenabled && sema )); then
+		sema_down $pid $sema
+	fi
+}
+
+function die {
+	echo >&2 "$@"
+	exit 1
+}
+
+function edie {
+	# die with a quiet end()
+	echo >&2 "$@"
+	exec >/dev/null 2>&1
+	end
+	exit 1
+}
+
+function set_path {
+	name=$1
+
+	path=$(which $name)
+	if [[ "$path" == "" ]]; then
+		path=$(ldconfig -v 2>/dev/null | awk -v lib=$name '
+		    $1 ~ /:/ { sub(/:/, "", $1); path = $1 }
+		    { sub(/\..*/, "", $1); }
+		    $1 == lib { print path "/" $3 }')
+		if [[ "$path" == "" ]]; then
+			die "ERROR: binary \"$name\" ambiguous."\
+			    "Program or library? Try a full path."
+		fi
+	fi
+
+	if [[ ! -x $path ]]; then
+		die "ERROR: resolved \"$name\" to \"$path\", but file missing"
+	fi
+}
+
+function set_addr_sema {
+	path=$1
+	probe=$2
+	provider=$3
+
+	set -- $(readelf -n $path | awk -v tprob=$probe -v tprov=$provider '
+	    $1 == "Provider:" { provider = $2 }
+	    $1 == "Name:" { probe = $2 }
+	    $1 == "Location:" { gsub(/,/, ""); loc = $2; sema = $6 }
+	    $1 == "Arguments:" {
+	        if (provider == tprov && probe == tprob) {
+	            print loc, sema
+	            exit
+	        }
+	    }')
+	addr=$1; sema=$2
+
+	[[ "$addr" == "" ]] && die "ERROR: couldn't parse \"readelf -n\" to"\
+	    "locate USDT probe location"
+	addr=0x$( printf "%x" $addr )		# strip leading zeros
+
+	type=$(file $path)
+	if [[ "$type" != *shared?object* ]]; then
+		# subtract the base mapping address. see Documentation/trace/
+		# uprobetracer.txt for background.
+		base=$(objdump -x $path | awk '
+		    $1 == "LOAD" && $3 ~ /^[0x]*$/ { print $5 }')
+		[[ "$base" != 0x* ]] && die "ERROR: finding base load addr"\
+		    "for $path."
+		addr=$(( addr - base ))
+		if (( addr < 0 )); then
+			echo "WARNING: problems removing base addr from $sym." \
+			    "Trying untransposed addr."
+			addr=$(( addr + base ))
+		fi
+		addr=0x$( printf "%x" $addr)
+	fi
+}
+
+function sema_up {
+	pid=$1
+	sema=$2
+
+	# read value
+	count=$(dd if=/proc/$pid/mem bs=1 count=1 skip=$((sema)) 2>/dev/null | \
+	    od -d | awk '{ print $2; exit }')
+	[[ "$count" == "" ]] && die "ERROR: reading semaphore for -i option"
+
+	# write value
+	(( count++ ))
+	printf "\x$count" | dd of=/proc/$pid/mem bs=1 count=1 seek=$((sema)) \
+	    >/dev/null 2>&1
+}
+
+function sema_down {
+	pid=$1
+	sema=$2
+
+	# read value
+	count=$(dd if=/proc/$pid/mem bs=1 count=1 skip=$((sema)) 2>/dev/null | \
+	    od -d | awk '{ print $2; exit }')
+	[[ "$count" == "" ]] && die "ERROR: decrementing sema for -i; may be" \
+	    "left enabled (perf overhead)."
+
+	# write value
+	(( count-- ))
+	printf "\x$count" | dd of=/proc/$pid/mem bs=1 count=1 seek=$((sema)) \
+	    >/dev/null 2>&1
+}
+
+function list_usdt {
+	target=$1
+	verbose=$2
+
+	readelf -n $target | awk -v verbose=$verbose '
+	    BEGIN {
+	        if (verbose) {
+	            printf "%-32s %s\n", "PROBE", "ARGUMENTS"
+	        } else {
+	            printf "%s\n", "PROBE"
+	        }
+	    }
+	    $1 == "Provider:" { provider = $2 }
+	    $1 == "Name:" { name = $2 }
+	    $1 == "Arguments:" {
+	        if (verbose) {
+	            arguments = $0; sub(/.*Arguments: /, "", arguments)
+	            printf "%-32s %s\n", provider ":" name, arguments
+	        } else {
+	            printf "%s\n", provider ":" name
+	        }
+	    }'
+}
+
+### process options
+while getopts Fd:hHil:L:p:sv opt
+do
+	case $opt in
+	F)	opt_force=1 ;;
+	d)	opt_duration=1; duration=$OPTARG ;;
+	i)	opt_isenabled=1 ;;
+	p)	opt_pid=1; pid=$OPTARG ;;
+	l)	opt_list=1; target=$OPTARG ;;
+	L)	opt_verbose_list=1; target=$OPTARG ;;
+	H)	opt_headers=1 ;;
+	s)	opt_stack=1 ;;
+	v)	opt_view=1 ;;
+	h|?)	usage ;;
+	esac
+done
+shift $(( $OPTIND - 1 ))
+uprobe=$1
+shift
+if (( $# )); then
+	opt_filter=1
+	filter=$1
+fi
+
+### handle listing
+[[ "$opt_list" == 1 && "$uprobe" != "" ]] && die "ERROR: -l takes a target only"
+if (( opt_list || opt_verbose_list )); then
+	if [[ "$target" != */* ]]; then
+		set_path $target
+		target=$path
+	fi
+	if [[ ! -x $target ]]; then
+		die "ERROR: target binary $target missing or not executable"
+	fi
+	list_usdt $target $opt_verbose_list
+	exit
+fi
+
+### option logic
+[[ "$uprobe" == "" ]] && usage
+(( opt_pid && opt_filter )) && die "ERROR: use either -p or a filter."
+(( opt_duration && opt_view )) && die "ERROR: use either -d or -v."
+(( opt_isenabled && !opt_pid )) && die "ERROR: -i currently needs a -p PID."
+if (( opt_pid )); then
+	# convert to filter
+	opt_filter=1
+	filter="common_pid == $pid"
+fi
+if [[ "$uprobe" != *:* ]]; then
+	echo >&2 "ERROR: invalid usdt probe (include provider:probe; see -h)"
+	usage
+fi
+#
+# Parse the following:
+# node:gc__start
+# /opt/node/node node:gc__start
+# node:gc__start %si
+# /opt/node/node node:gc__start %si
+# node:gc__start si=%si
+# node:http__client__request +2(+0(%ax)):string
+# node:http__client__request req=+2(+0(%ax)):string
+# ... and examples from USAGE message
+# The following code is not as complicated as it looks.
+#
+set -- $uprobe
+if [[ $1 == */* ]]; then
+	path=$1
+	shift
+	uprobe="$@"
+fi
+provider=${uprobe%%:*}
+urest="${uprobe#*:} "
+set -- $urest
+probe=$1
+shift
+uargs="$@"
+
+# fix path if needed
+if [[ "$path" == "" ]]; then
+	# default: binary name == provider name
+	set_path $provider
+fi 
+uname="${provider}_$probe"
+
+# set addr and sema
+set_addr_sema $path $probe $provider
+
+# construct uprobe
+uprobe="p:$uname $path:$addr"
+[[ "$uargs" != "" ]] && uprobe="$uprobe $uargs"
+
+if (( debug )); then
+	echo "uname: \"$uname\", uprobe: \"$uprobe\""
+fi
+
+### check kernel version
+ver=$(uname -r)
+maj=${ver%%.*}
+if (( opt_force == 0 && $maj < 4 )); then
+	cat <<-END >&2
+	ERROR: Kernel version >= 4.0 preferred (you have $ver). Aborting.
+	
+	Background: uprobes were first added in 3.5. I've tested them on 3.13,
+	and found them unsafe, as they can crash or lock up processes, which can
+	effectively lock up the system. On 4.0, uprobes seem much safer (but may
+	not be 100%). They may be safer (safe?) on other 3.x kernels, but I
+	don't know. You can use -F to force tracing, but you've been warned.
+END
+	exit
+fi
+
+### check permissions
+cd $tracing || die "ERROR: accessing tracing. Root user? Kernel has FTRACE?
+    debugfs mounted? (mount -t debugfs debugfs /sys/kernel/debug)"
+
+if (( !opt_view )); then
+	if (( opt_duration )); then
+		echo "Tracing uprobe $uname for $duration seconds (buffered)..."
+	else
+		echo "Tracing uprobe $uname ($uprobe). Ctrl-C to end."
+	fi
+fi
+
+### increment sema if requested
+if (( opt_pid && opt_isenabled && sema )); then
+	mempath=/proc/$pid/mem
+	if [[ ! -w $mempath ]]; then
+		die "ERROR: -i used, but can't write to $mempath"
+	fi
+	sema_up $pid $sema
+fi
+
+### ftrace lock
+[[ -e $flock ]] && die "ERROR: ftrace may be in use by PID $(cat $flock) $flock"
+echo $$ > $flock || die "ERROR: unable to write $flock."
+wroteflock=1
+
+### setup and begin tracing
+echo nop > current_tracer
+if ! echo "$uprobe" >> uprobe_events; then
+	echo >&2 "ERROR: adding uprobe \"$uprobe\"."
+	if (( dmesg )); then
+		echo >&2 "Last $dmesg dmesg entries (might contain reason):"
+		dmesg | tail -$dmesg | sed 's/^/    /'
+	fi
+	edie "Exiting."
+fi
+if (( opt_view )); then
+	cat events/uprobes/$uname/format
+	edie ""
+fi
+if (( opt_filter )); then
+	if ! echo "$filter" > events/uprobes/$uname/filter; then
+		edie "ERROR: setting filter or -p. Exiting."
+	fi
+fi
+if (( opt_stack )); then
+	if ! echo 1 > options/userstacktrace; then
+		edie "ERROR: enabling stack traces (-s). Exiting"
+	fi
+fi
+if ! echo 1 > events/uprobes/$uname/enable; then
+	edie "ERROR: enabling uprobe $uname. Exiting."
+fi
+
+### print trace buffer
+warn "echo > trace"
+if (( opt_duration )); then
+	sleep $duration
+	if (( opt_headers )); then
+		cat trace
+	else
+		grep -v '^#' trace
+	fi
+else
+	# trace_pipe lack headers, so fetch them from trace
+	(( opt_headers )) && cat trace
+	cat trace_pipe
+fi
+
+### end tracing
+end
