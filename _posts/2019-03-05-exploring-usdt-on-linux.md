@@ -378,8 +378,7 @@ Ubuntu
 ```
 ubuntu@ubuntu-xenial:~$ uname  -a
 Linux ubuntu-xenial 4.10.17-custom #1 SMP Sat Jul 22 14:41:19 UTC 2017 x86_64 x86_64 x86_64 GNU/Linux
-ubuntu@ubuntu-xenial:~$ ls
-ls           lsattr       lsblk        lsb_release  lscpu        lshw         lsinitramfs  lsipc        lslocks      lslogins     lsmod        lsof         lspci        lspgpot      lsusb        
+
 ubuntu@ubuntu-xenial:~$ lsb_release -a
 No LSB modules are available.
 Distributor ID: Ubuntu
@@ -406,7 +405,7 @@ The source code used by this practices:
 
 The compiled executable:
 
-[tick]({{ site.url }}/assets/materials/explore-usdt-on-linux/tick)
+- [tick]({{ site.url }}/assets/materials/explore-usdt-on-linux/tick)
 
 
 ### Sample w/o Semaphore support
