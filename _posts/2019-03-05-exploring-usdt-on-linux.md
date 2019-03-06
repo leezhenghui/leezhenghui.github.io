@@ -15,9 +15,11 @@ comments: true
 
 Improve the observability and traceability of system software has become an important objective for building large complex infrastructure software. Minimizing the system overhead caused by monitoring is challenging but rewarding, as it can greatly help on the performance analysis and troubleshooting on production environment. On Linux, some well-known tracing tools like [`strace`](https://en.wikipedia.org/wiki/Strace) and [`ltrace`](https://en.wikipedia.org/wiki/Ltrace) can be used to tell what system calls are being made and what dynamic library calls are being made, these information are useful but still limited, also, turning on these kinds of tools will introduce an significant performance impact, this make them not very suitable for problem debugging or monitoring on the production environment. 
 
-So what is the proper way to allow programmer declare and embed the trace points into userland application, as long as instrument these trace points with an appropriate low-overhead probe during runtime, people can get the expected information about what application is doing.  The [`USDT`](http://www.solarisinternals.com/wiki/index.php/DTrace_Topics_USDT#USDT)(Userland Statically Defined Tracing) provided by [`DTrace`](http://dtrace.org/blogs/about/) under BSD/Solaris is a successful technical reference implementation to empower this kind of feature to us. Unfortunately, for a long time, Linux did not provide out-of-box USDT probe due to insufficient support of kernel and frontend. However, in the last several years, with the continuous enhancement of kernel envent sources(e.g: `uprobe`) and [eBPF](https://lwn.net/Articles/740157/),  as well as the frontend tools such as [bcc](https://github.com/iovisor/bcc/blob/master/README.md)/[bpftrace](https://github.com/iovisor/bpftrace) being implemented based on eBPF, `USDT` finally comes to Linux application. In this post, I will start with the Linux Tracing system concepts introductions, and then explore how USDT works in Linux.
+So what is the proper way to allow programmer declare and embed the trace points into userland application, as long as instrument these trace points with an appropriate low-overhead probe during runtime, people can get the expected information about what application is doing.  The [`USDT`](http://www.solarisinternals.com/wiki/index.php/DTrace_Topics_USDT#USDT)(Userland Statically Defined Tracing) provided by [`DTrace`](http://dtrace.org/blogs/about/) under BSD/Solaris is a successful technical reference implementation to empower this kind of feature to us. Unfortunately, for a long time, Linux did not provide out-of-box USDT probe due to insufficient support of kernel and frontend. However, in the last several years, with the continuous enhancement of kernel envent sources(e.g: `uprobe`) and [eBPF](https://lwn.net/Articles/740157/),  as well as the frontend tools such as [bcc](https://github.com/iovisor/bcc/blob/master/README.md)/[bpftrace](https://github.com/iovisor/bpftrace) being implemented based on eBPF, `USDT` finally comes to Linux application. In this post, I will start with the Linux Tracing system concepts introductions, and then explore how USDT works in Linux. 
 
 Before we dig into USDT with more details, let's take a step back to have a look at the big picture of tracing in Linux.
+
+(thanks to [Brendan Gregg's Blog](http://www.brendangregg.com/blog/index.html) provide so much wonderful articles to help learning the knowledges in this area)
 
 ## Tracing System
 
@@ -375,7 +377,7 @@ sudo apt-get install systemtap-sdt-dev
 
 > Actually the only thing we can obtain from systemtap-std-dev is
 >  - sys/sdt.h 
->  - dtrace command wrapper 
+>  - dtrace command wrapper (only if you need Semaphore feature)
 >
 > all of these things can help us genarate expected elf file with markers, that is, generate `nop` instruction in the place where we can register a probe, and node section in elf to list these marker locations.
 
@@ -1056,7 +1058,7 @@ In this post, we covered below contents which related to in linux tracing
 
 - Programmatically enabled USDT probe 
 
-[Brendan Gregg's Blog](http://www.brendangregg.com/blog/index.html) provide a lots of awesome topics regarding linux tracing, if you want to a in-depth learning about linux tracing, that is the best place to subscribe.
+[Brendan Gregg's Blog](http://www.brendangregg.com/blog/index.html) provide a lots of awesome topics regarding linux tracing, if you want an in-depth/thoroughly learning about linux tracing, that is the best place to subscribe.
 
 
 ## Appendix
