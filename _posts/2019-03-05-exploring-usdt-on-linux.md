@@ -335,11 +335,11 @@ The event sources are where the tracing data comes from, tracing framework runni
 	  >
     > usdt:library_path:[probe_namespace]:probe_name
 		> 
-		> usdt: Static Tracing, User-Level Arguments
-		>
-		> e.g:
-		>
-		> bpftrace -e 'usdt:/root/tick:loop { printf("%s: %d\n", str(arg0), arg1); }'
+    > usdt: Static Tracing, User-Level Arguments
+    >
+    > e.g:
+    >
+    > bpftrace -e 'usdt:/root/tick:loop { printf("%s: %d\n", str(arg0), arg1); }'
     
     <img src="{{ site.url }}/assets/materials/explore-usdt-on-linux/bpftrace_internals_2018.png" alt="bpftrace_internals_2018.png">
 
