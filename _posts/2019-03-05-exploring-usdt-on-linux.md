@@ -59,7 +59,7 @@ The event sources are where the tracing data comes from, tracing framework runni
 
 <img src="{{ site.url }}/assets/materials/explore-usdt-on-linux/linux-tracing-tracing-tech-stack.png" alt="linux-tracing-tracing-tech-stack.png">
 
-### Linux Event Sources
+### Event Sources
 
 - tracepoints (kernel static tracing)
 
@@ -359,13 +359,13 @@ The event sources are where the tracing data comes from, tracing framework runni
 
 <img src="{{ site.url }}/assets/materials/explore-usdt-on-linux/linux-tracing-usdt.png" alt="linux-tracing-usdt.png">
 
-- In authoring time, Using macro `DTRACE_PROBE` to delcare a USDT trace point at appropriate souce code location
+- In authoring time, Using macro `DTRACE_PROBE()` to delcare a USDT trace point at appropriate souce code location
 
-- During compiling, the source code with USDT trace point will be translated into a `nop` instruction, in the meanwhile, the USDT metadata will be stored in the ELF's `.note.stapstd` section.
+- During compilation, the source code with USDT trace point will be translated into a `nop` instruction, in the meanwhile, the USDT metadata will be stored in the ELF's `.note.stapstd` section.
 
-- When register a probe, USDT tool(usually based on uprobe under the hood) will read the ELF `.note.stapstd` section, and instrument the instruction from `nop` to `int3`. So whenever control reaches the marker, the interrupt handler for int3 is called, and by turn the uprobe and attached eBPF program get called in kernel to generate/summary the events.
+- When register a probe, USDT tool(usually implemented based on `uprobe` under the hood) will read the ELF `.note.stapstd` section, and instrument the instruction from `nop` to `breakpoint`(`int3` on x86) for . So whenever control reaches the marker, the interrupt handler for int3 is called, and by turn the uprobe and attached eBPF program get called in kernel to process the events.
 
-- After deregister the probe, USDT will instrument the instruction from `int3` back to `nop`, no event get generated anymore.
+- After deregister the probe, USDT will instrument the instruction from `breakpoint` back to `nop`, no event get generated anymore.
 
 ### Prerequsites(e.g: Ubuntu)
 
