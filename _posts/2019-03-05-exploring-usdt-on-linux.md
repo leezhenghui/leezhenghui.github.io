@@ -405,7 +405,7 @@ sudo apt-get install systemtap-sdt-dev
 >  - sys/sdt.h 
 >  - dtrace command wrapper (only if you need Semaphore feature)
 >
-> all of these things can help us genarate expected elf file with markers, that is, generate `nop` instruction in the place where we can register a probe, and node section in elf to list these marker locations.
+> all of these things can help us genarate expected elf file with markers, that is, generate `nop` instruction in the place where uprobe module can instrument a breakpoint instruction(int3 on x86) when registering a probe, and node section in elf to list these marker locations.
 
 The source code used by this practices:
 
