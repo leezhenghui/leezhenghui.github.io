@@ -1083,7 +1083,7 @@ PID     TID     COMM            FUNC             -
 
 ```
 
-/proc/<pid>/maps
+/proc/$(pgrep node)/maps
 
 ```
 22aa4a80000-22aa4b00000 rw-p 00000000 00:00 0 
@@ -1538,6 +1538,92 @@ And the same for the uretprobe would be:
 > From [dtrace4linux doc](https://github.com/dtrace4linux/linux/blob/master/doc/usdt.html)
 > 
 > Add probe calls, via DTRACE_PROBE macros to the source code of the application.  Compile code to object file (*.o) Use dtrace command line tool to convert the object file. This involves stubbing out the assembler function calls, and creating a table in the ELF file enumerating the probes.  Create (link) the application binary, with a special object file (drti.o). drti.o runs before main() and takes the table of probes, and lets the kernel know (via an ioctl() to the dtrace driver) of the probes.  Run the application: drti.o takes control and issues the ioctl() of the probes. Whilst the application is running, you can use "dtrace -l" to see the probes. Probes are a function of the pid provider, so you will see a new suite of probes for each process running with USDT, and as many probes as there are DTRACE_PROBE calls in the source code.  Whilst the application is running, you can use dtrace to monitor these probes at any granularity you like (eg all probes from the process, or specific probes from all such processes).  When a dtrace monitors the probe, the site where the call instruction is placed is modified and an INT3 (breakpoint instruction) is placed at the site of what was the original CALL instruction. When the breakpoint is hit, the dtrace driver takes control and actions the probe. This is very similar to how a kernel FBT probe works, except the breakpoint happened in user space. At the point of breakpoint execution, any D script associated with the probe is invoked. The target application is frozen until the D script completes, allowing it to take a static snapshot of any details it likes. Typically, this might include taking a user stack dump (ustack()).  Terminating a dtrace which is probing the application will remove the breakpoints and restore the NOP instructions.
+
+### Compile executable with "--with-dtrace" option
+
+E.g: compile node.js
+
+configure --with-dtrace
+
+readelf
+
+```
+vagrant@ubuntu-bionic:~/node$ readelf -n out/Release/node
+
+Displaying notes found in: .note.ABI-tag
+	Owner                 Data size       Description
+GNU                  0x00000010       NT_GNU_ABI_TAG (ABI version tag)
+	OS: Linux, ABI: 3.2.0
+
+	Displaying notes found in: .note.gnu.build-id
+	Owner                 Data size       Description
+GNU                  0x00000014       NT_GNU_BUILD_ID (unique build ID bitstring)
+	Build ID: b48d322dc7ed39c3bd817023186e22456d6cd468
+
+	Displaying notes found in: .note.stapsdt
+	Owner                 Data size       Description
+stapsdt              0x0000003c       NT_STAPSDT (SystemTap probe descriptors)
+	Provider: node
+	Name: gc__start
+	Location: 0x000000000073c3e4, Base: 0x0000000001e07840, Semaphore: 0x00000000022ca4dc
+	Arguments: 4@%esi 4@%edx 8@%rdi
+stapsdt              0x0000003b       NT_STAPSDT (SystemTap probe descriptors)
+	Provider: node
+	Name: gc__done
+	Location: 0x000000000073c3f4, Base: 0x0000000001e07840, Semaphore: 0x00000000022ca4de
+	Arguments: 4@%esi 4@%edx 8@%rdi
+stapsdt              0x00000067       NT_STAPSDT (SystemTap probe descriptors)
+	Provider: node
+	Name: http__server__response
+	Location: 0x000000000073c9c6, Base: 0x0000000001e07840, Semaphore: 0x00000000022ca4d6
+	Arguments: 8@%rax 8@-1128(%rbp) -4@-1132(%rbp) -4@-1136(%rbp)
+stapsdt              0x00000068       NT_STAPSDT (SystemTap probe descriptors)
+	Provider: node
+	Name: net__server__connection
+	Location: 0x000000000073d096, Base: 0x0000000001e07840, Semaphore: 0x00000000022ca4d0
+	Arguments: 8@%rax 8@-1128(%rbp) -4@-1132(%rbp) -4@-1136(%rbp)
+stapsdt              0x00000061       NT_STAPSDT (SystemTap probe descriptors)
+	Provider: node
+	Name: net__stream__end
+	Location: 0x000000000073d766, Base: 0x0000000001e07840, Semaphore: 0x00000000022ca4d2
+	Arguments: 8@%rax 8@-1128(%rbp) -4@-1132(%rbp) -4@-1136(%rbp)
+stapsdt              0x00000060       NT_STAPSDT (SystemTap probe descriptors)
+	Provider: node
+	Name: http__client__response
+	Location: 0x000000000073de83, Base: 0x0000000001e07840, Semaphore: 0x00000000022ca4da
+	Arguments: 8@%rdx 8@-1128(%rbp) -4@%eax -4@-1136(%rbp)
+stapsdt              0x00000089       NT_STAPSDT (SystemTap probe descriptors)
+	Provider: node
+	Name: http__client__request
+	Location: 0x000000000073e7b2, Base: 0x0000000001e07840, Semaphore: 0x00000000022ca4d8
+	Arguments: 8@%rax 8@%rdx 8@-2184(%rbp) -4@-2188(%rbp) 8@-2232(%rbp) 8@-2240(%rbp) -4@-2192(%rbp)
+stapsdt              0x00000089       NT_STAPSDT (SystemTap probe descriptors)
+	Provider: node
+	Name: http__server__request
+	Location: 0x000000000073f323, Base: 0x0000000001e07840, Semaphore: 0x00000000022ca4d4
+	Arguments: 8@%r13 8@%rax 8@-4392(%rbp) -4@-4396(%rbp) 8@-4352(%rbp) 8@-4360(%rbp) -4@-4400(%rbp)
+```
+
+compile without "--with-dtrace"
+
+readelf
+
+```
+vagrant@ubuntu-bionic:~/node$ which node
+/usr/local/bin/node
+vagrant@ubuntu-bionic:~/node$ readelf -n `which node`
+
+Displaying notes found in: .note.ABI-tag
+	Owner                 Data size       Description
+GNU                  0x00000010       NT_GNU_ABI_TAG (ABI version tag)
+	OS: Linux, ABI: 3.2.0
+
+	Displaying notes found in: .note.gnu.build-id
+	Owner                 Data size       Description
+GNU                  0x00000014       NT_GNU_BUILD_ID (unique build ID bitstring)
+	Build ID: 01e04169abbfe5467e81d09cf895b9aaa9820732
+
+```
 
 [^1]: http://www.brendangregg.com/blog/2015-07-08/choosing-a-linux-tracer
 
