@@ -1059,7 +1059,7 @@ setInterval(waiter, 750);
 Run the bcc trace with below command:
 
 ```
-sudo trace -p $(pgrep node) 'u::firstProbe "%d - %s", arg1, arg2'
+sudo ./trace.py -p $(pgrep node) 'u::firstProbe "%d - %s", arg1, arg2'
 
 Output:
 
@@ -1081,6 +1081,237 @@ PID     TID     COMM            FUNC             -
 2255    2255    node            firstProbe       85 - My little string
 2255    2255    node            firstProbe       84 - My little string
 
+```
+
+/proc/<pid>/maps
+
+```
+22aa4a80000-22aa4b00000 rw-p 00000000 00:00 0 
+6389d580000-6389d600000 rw-p 00000000 00:00 0 
+74280e80000-74280f00000 ---p 00000000 00:00 0 
+a9a83180000-a9a83200000 ---p 00000000 00:00 0 
+eb584a00000-eb584a80000 ---p 00000000 00:00 0 
+14cafbcef000-14cafbcf0000 ---p 00000000 00:00 0 
+14cafbcf0000-14cafbcf8000 rw-p 00000000 00:00 0 
+14cafbcf8000-14cafbcfb000 ---p 00000000 00:00 0 
+1778f4f80000-1778f5000000 rw-p 00000000 00:00 0 
+1b4015200000-1b4015280000 rw-p 00000000 00:00 0 
+2032e2880000-2032e2900000 rw-p 00000000 00:00 0 
+24f7e5297000-24f7e5300000 ---p 00000000 00:00 0 
+24f7e5300000-24f7e5303000 rw-p 00000000 00:00 0 
+24f7e5303000-24f7e5304000 ---p 00000000 00:00 0 
+24f7e5304000-24f7e537f000 r-xp 00000000 00:00 0 
+24f7e537f000-24f7e5380000 ---p 00000000 00:00 0 
+24f7e5380000-24f7e5383000 rw-p 00000000 00:00 0 
+24f7e5383000-24f7e5384000 ---p 00000000 00:00 0 
+24f7e5384000-24f7e53ff000 r-xp 00000000 00:00 0 
+24f7e53ff000-24f7ed297000 ---p 00000000 00:00 0 
+2a2dd2000000-2a2dd2080000 ---p 00000000 00:00 0 
+2a63e3f00000-2a63e3f80000 rw-p 00000000 00:00 0 
+2e846de80000-2e846de83000 rw-p 00000000 00:00 0 
+2f0322200000-2f0322280000 rw-p 00000000 00:00 0 
+30706a880000-30706a900000 ---p 00000000 00:00 0 
+33080e980000-33080ea00000 rw-p 00000000 00:00 0 
+3574daf80000-3574dafb9000 rw-p 00000000 00:00 0 
+359866800000-359866880000 rw-p 00000000 00:00 0 
+37e7b1200000-37e7b1203000 rw-p 00000000 00:00 0 
+37e7b1203000-37e7b1280000 r--p 00000000 00:00 0 
+3dca47980000-3dca47a00000 ---p 00000000 00:00 0 
+55e9b0709000-55e9b272a000 r-xp 00000000 08:01 63273                      /usr/local/bin/node
+55e9b292a000-55e9b29bb000 r--p 02021000 08:01 63273                      /usr/local/bin/node
+55e9b29bb000-55e9b29d1000 rw-p 020b2000 08:01 63273                      /usr/local/bin/node
+55e9b29d1000-55e9b29eb000 rw-p 00000000 00:00 0 
+55e9b469c000-55e9b4796000 rw-p 00000000 00:00 0                          [heap]
+7fc9ac000000-7fc9ac021000 rw-p 00000000 00:00 0 
+7fc9ac021000-7fc9b0000000 ---p 00000000 00:00 0 
+7fc9b0000000-7fc9b0021000 rw-p 00000000 00:00 0 
+7fc9b0021000-7fc9b4000000 ---p 00000000 00:00 0 
+7fc9b4000000-7fc9b4021000 rw-p 00000000 00:00 0 
+7fc9b4021000-7fc9b8000000 ---p 00000000 00:00 0 
+7fc9b8000000-7fc9b8021000 rw-p 00000000 00:00 0 
+7fc9b8021000-7fc9bc000000 ---p 00000000 00:00 0 
+7fc9bc000000-7fc9bc021000 rw-p 00000000 00:00 0 
+7fc9bc021000-7fc9c0000000 ---p 00000000 00:00 0 
+7fc9c0bca000-7fc9c0bcb000 r-xp 00000000 08:01 99                         /tmp/nodeProvider-BG8PLL.so
+7fc9c0bcb000-7fc9c0dca000 ---p 00001000 08:01 99                         /tmp/nodeProvider-BG8PLL.so
+7fc9c0dca000-7fc9c0dcb000 rw-p 00000000 08:01 99                         /tmp/nodeProvider-BG8PLL.so
+7fc9c0dcb000-7fc9c0de7000 r-xp 00000000 08:01 2183                       /lib/x86_64-linux-gnu/libz.so.1.2.11
+7fc9c0de7000-7fc9c0fe6000 ---p 0001c000 08:01 2183                       /lib/x86_64-linux-gnu/libz.so.1.2.11
+7fc9c0fe6000-7fc9c0fe7000 r--p 0001b000 08:01 2183                       /lib/x86_64-linux-gnu/libz.so.1.2.11
+7fc9c0fe7000-7fc9c0fe8000 rw-p 0001c000 08:01 2183                       /lib/x86_64-linux-gnu/libz.so.1.2.11
+7fc9c0fe8000-7fc9c1001000 r-xp 00000000 08:01 6203                       /usr/lib/x86_64-linux-gnu/libelf-0.170.so
+7fc9c1001000-7fc9c1200000 ---p 00019000 08:01 6203                       /usr/lib/x86_64-linux-gnu/libelf-0.170.so
+7fc9c1200000-7fc9c1201000 r--p 00018000 08:01 6203                       /usr/lib/x86_64-linux-gnu/libelf-0.170.so
+7fc9c1201000-7fc9c1202000 rw-p 00019000 08:01 6203                       /usr/lib/x86_64-linux-gnu/libelf-0.170.so
+7fc9c1202000-7fc9c1208000 r-xp 00000000 08:01 62807                      /usr/lib/libstapsdt.so.0
+7fc9c1208000-7fc9c1407000 ---p 00006000 08:01 62807                      /usr/lib/libstapsdt.so.0
+7fc9c1407000-7fc9c1408000 r--p 00005000 08:01 62807                      /usr/lib/libstapsdt.so.0
+7fc9c1408000-7fc9c1409000 rw-p 00006000 08:01 62807                      /usr/lib/libstapsdt.so.0
+7fc9c1409000-7fc9c1410000 r-xp 00000000 08:01 555899                     /home/vagrant/labs/hello-nodejs-usdt/node_modules/usdt/build/Release/usdt.node
+7fc9c1410000-7fc9c160f000 ---p 00007000 08:01 555899                     /home/vagrant/labs/hello-nodejs-usdt/node_modules/usdt/build/Release/usdt.node
+7fc9c160f000-7fc9c1610000 r--p 00006000 08:01 555899                     /home/vagrant/labs/hello-nodejs-usdt/node_modules/usdt/build/Release/usdt.node
+7fc9c1610000-7fc9c1611000 rw-p 00007000 08:01 555899                     /home/vagrant/labs/hello-nodejs-usdt/node_modules/usdt/build/Release/usdt.node
+7fc9c1611000-7fc9c1612000 ---p 00000000 00:00 0 
+7fc9c1612000-7fc9c1e12000 rw-p 00000000 00:00 0 
+7fc9c1e12000-7fc9c1e13000 ---p 00000000 00:00 0 
+7fc9c1e13000-7fc9c2613000 rw-p 00000000 00:00 0 
+7fc9c2613000-7fc9c2614000 ---p 00000000 00:00 0 
+7fc9c2614000-7fc9c2e14000 rw-p 00000000 00:00 0 
+7fc9c2e14000-7fc9c2e15000 ---p 00000000 00:00 0 
+7fc9c2e15000-7fc9c3615000 rw-p 00000000 00:00 0 
+7fc9c3615000-7fc9c3616000 ---p 00000000 00:00 0 
+7fc9c3616000-7fc9c3e16000 rw-p 00000000 00:00 0 
+7fc9c3e16000-7fc9c3ffd000 r-xp 00000000 08:01 2077                       /lib/x86_64-linux-gnu/libc-2.27.so
+7fc9c3ffd000-7fc9c41fd000 ---p 001e7000 08:01 2077                       /lib/x86_64-linux-gnu/libc-2.27.so
+7fc9c41fd000-7fc9c4201000 r--p 001e7000 08:01 2077                       /lib/x86_64-linux-gnu/libc-2.27.so
+7fc9c4201000-7fc9c4203000 rw-p 001eb000 08:01 2077                       /lib/x86_64-linux-gnu/libc-2.27.so
+7fc9c4203000-7fc9c4207000 rw-p 00000000 00:00 0 
+7fc9c4207000-7fc9c4221000 r-xp 00000000 08:01 2178                       /lib/x86_64-linux-gnu/libpthread-2.27.so
+7fc9c4221000-7fc9c4420000 ---p 0001a000 08:01 2178                       /lib/x86_64-linux-gnu/libpthread-2.27.so
+7fc9c4420000-7fc9c4421000 r--p 00019000 08:01 2178                       /lib/x86_64-linux-gnu/libpthread-2.27.so
+7fc9c4421000-7fc9c4422000 rw-p 0001a000 08:01 2178                       /lib/x86_64-linux-gnu/libpthread-2.27.so
+7fc9c4422000-7fc9c4426000 rw-p 00000000 00:00 0 
+7fc9c4426000-7fc9c443d000 r-xp 00000000 08:01 2090                       /lib/x86_64-linux-gnu/libgcc_s.so.1
+7fc9c443d000-7fc9c463c000 ---p 00017000 08:01 2090                       /lib/x86_64-linux-gnu/libgcc_s.so.1
+7fc9c463c000-7fc9c463d000 r--p 00016000 08:01 2090                       /lib/x86_64-linux-gnu/libgcc_s.so.1
+7fc9c463d000-7fc9c463e000 rw-p 00017000 08:01 2090                       /lib/x86_64-linux-gnu/libgcc_s.so.1
+7fc9c463e000-7fc9c47db000 r-xp 00000000 08:01 2081                       /lib/x86_64-linux-gnu/libm-2.27.so
+7fc9c47db000-7fc9c49da000 ---p 0019d000 08:01 2081                       /lib/x86_64-linux-gnu/libm-2.27.so
+7fc9c49da000-7fc9c49db000 r--p 0019c000 08:01 2081                       /lib/x86_64-linux-gnu/libm-2.27.so
+7fc9c49db000-7fc9c49dc000 rw-p 0019d000 08:01 2081                       /lib/x86_64-linux-gnu/libm-2.27.so
+7fc9c49dc000-7fc9c4b55000 r-xp 00000000 08:01 5028                       /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.25
+7fc9c4b55000-7fc9c4d55000 ---p 00179000 08:01 5028                       /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.25
+7fc9c4d55000-7fc9c4d5f000 r--p 00179000 08:01 5028                       /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.25
+7fc9c4d5f000-7fc9c4d61000 rw-p 00183000 08:01 5028                       /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.25
+7fc9c4d61000-7fc9c4d65000 rw-p 00000000 00:00 0 
+7fc9c4d65000-7fc9c4d6c000 r-xp 00000000 08:01 2180                       /lib/x86_64-linux-gnu/librt-2.27.so
+7fc9c4d6c000-7fc9c4f6b000 ---p 00007000 08:01 2180                       /lib/x86_64-linux-gnu/librt-2.27.so
+7fc9c4f6b000-7fc9c4f6c000 r--p 00006000 08:01 2180                       /lib/x86_64-linux-gnu/librt-2.27.so
+7fc9c4f6c000-7fc9c4f6d000 rw-p 00007000 08:01 2180                       /lib/x86_64-linux-gnu/librt-2.27.so
+7fc9c4f6d000-7fc9c4f70000 r-xp 00000000 08:01 2080                       /lib/x86_64-linux-gnu/libdl-2.27.so
+7fc9c4f70000-7fc9c516f000 ---p 00003000 08:01 2080                       /lib/x86_64-linux-gnu/libdl-2.27.so
+7fc9c516f000-7fc9c5170000 r--p 00002000 08:01 2080                       /lib/x86_64-linux-gnu/libdl-2.27.so
+7fc9c5170000-7fc9c5171000 rw-p 00003000 08:01 2080                       /lib/x86_64-linux-gnu/libdl-2.27.so
+7fc9c5171000-7fc9c5198000 r-xp 00000000 08:01 2073                       /lib/x86_64-linux-gnu/ld-2.27.so
+7fc9c5389000-7fc9c5390000 rw-p 00000000 00:00 0 
+7fc9c5393000-7fc9c5394000 ---p 00000000 00:00 0 
+7fc9c5394000-7fc9c5398000 rw-p 00000000 00:00 0 
+7fc9c5398000-7fc9c5399000 r--p 00027000 08:01 2073                       /lib/x86_64-linux-gnu/ld-2.27.so
+7fc9c5399000-7fc9c539a000 rw-p 00028000 08:01 2073                       /lib/x86_64-linux-gnu/ld-2.27.so
+7fc9c539a000-7fc9c539b000 rw-p 00000000 00:00 0 
+7ffcc59d5000-7ffcc59f6000 rw-p 00000000 00:00 0                          [stack]
+7ffcc59f9000-7ffcc59fc000 r--p 00000000 00:00 0                          [vvar]
+7ffcc59fc000-7ffcc59fe000 r-xp 00000000 00:00 0                          [vdso]
+ffffffffff600000-ffffffffff601000 r-xp 00000000 00:00 0                  [vsyscall]
+```
+
+readelf
+
+```
+vagrant@ubuntu-bionic:~$ readelf -n /tmp/nodeProvider-BG8PLL.so
+
+Displaying notes found in: .note.stapsdt
+	Owner                 Data size       Description
+stapsdt              0x0000003f       NT_STAPSDT (SystemTap probe descriptors)
+	Provider: nodeProvider
+	Name: firstProbe
+	Location: 0x0000000000000260, Base: 0x0000000000000318, Semaphore: 0x0000000000000000
+	Arguments: -4@%rdi 8@%rsi
+										
+```
+
+tplist
+
+```
+sudo ./tools/tplist.py  -p 2836
+
+/tmp/nodeProvider-BG8PLL.so nodeProvider:firstProbe
+/lib/x86_64-linux-gnu/libc-2.27.so libc:setjmp
+/lib/x86_64-linux-gnu/libc-2.27.so libc:longjmp
+/lib/x86_64-linux-gnu/libc-2.27.so libc:longjmp_target
+/lib/x86_64-linux-gnu/libc-2.27.so libc:memory_mallopt_arena_max
+/lib/x86_64-linux-gnu/libc-2.27.so libc:memory_mallopt_arena_test
+/lib/x86_64-linux-gnu/libc-2.27.so libc:memory_tunable_tcache_max_bytes
+/lib/x86_64-linux-gnu/libc-2.27.so libc:memory_tunable_tcache_count
+/lib/x86_64-linux-gnu/libc-2.27.so libc:memory_tunable_tcache_unsorted_limit
+/lib/x86_64-linux-gnu/libc-2.27.so libc:memory_mallopt_trim_threshold
+/lib/x86_64-linux-gnu/libc-2.27.so libc:memory_mallopt_top_pad
+/lib/x86_64-linux-gnu/libc-2.27.so libc:memory_mallopt_mmap_threshold
+/lib/x86_64-linux-gnu/libc-2.27.so libc:memory_mallopt_mmap_max
+/lib/x86_64-linux-gnu/libc-2.27.so libc:memory_mallopt_perturb
+/lib/x86_64-linux-gnu/libc-2.27.so libc:memory_heap_new
+/lib/x86_64-linux-gnu/libc-2.27.so libc:memory_sbrk_less
+/lib/x86_64-linux-gnu/libc-2.27.so libc:memory_arena_reuse
+/lib/x86_64-linux-gnu/libc-2.27.so libc:memory_arena_reuse_wait
+/lib/x86_64-linux-gnu/libc-2.27.so libc:memory_arena_new
+/lib/x86_64-linux-gnu/libc-2.27.so libc:memory_arena_reuse_free_list
+/lib/x86_64-linux-gnu/libc-2.27.so libc:memory_arena_retry
+/lib/x86_64-linux-gnu/libc-2.27.so libc:memory_heap_free
+/lib/x86_64-linux-gnu/libc-2.27.so libc:memory_heap_less
+/lib/x86_64-linux-gnu/libc-2.27.so libc:memory_heap_more
+/lib/x86_64-linux-gnu/libc-2.27.so libc:memory_sbrk_more
+/lib/x86_64-linux-gnu/libc-2.27.so libc:memory_mallopt_free_dyn_thresholds
+/lib/x86_64-linux-gnu/libc-2.27.so libc:memory_malloc_retry
+/lib/x86_64-linux-gnu/libc-2.27.so libc:memory_memalign_retry
+/lib/x86_64-linux-gnu/libc-2.27.so libc:memory_realloc_retry
+/lib/x86_64-linux-gnu/libc-2.27.so libc:memory_calloc_retry
+/lib/x86_64-linux-gnu/libc-2.27.so libc:memory_mallopt
+/lib/x86_64-linux-gnu/libc-2.27.so libc:memory_mallopt_mxfast
+/lib/x86_64-linux-gnu/libc-2.27.so libc:lll_lock_wait_private
+/lib/x86_64-linux-gnu/libpthread-2.27.so libpthread:pthread_start
+/lib/x86_64-linux-gnu/libpthread-2.27.so libpthread:pthread_create
+/lib/x86_64-linux-gnu/libpthread-2.27.so libpthread:pthread_join
+/lib/x86_64-linux-gnu/libpthread-2.27.so libpthread:pthread_join_ret
+/lib/x86_64-linux-gnu/libpthread-2.27.so libpthread:mutex_init
+/lib/x86_64-linux-gnu/libpthread-2.27.so libpthread:mutex_destroy
+/lib/x86_64-linux-gnu/libpthread-2.27.so libpthread:mutex_acquired
+/lib/x86_64-linux-gnu/libpthread-2.27.so libpthread:mutex_entry
+/lib/x86_64-linux-gnu/libpthread-2.27.so libpthread:mutex_timedlock_entry
+/lib/x86_64-linux-gnu/libpthread-2.27.so libpthread:mutex_timedlock_acquired
+/lib/x86_64-linux-gnu/libpthread-2.27.so libpthread:mutex_release
+/lib/x86_64-linux-gnu/libpthread-2.27.so libpthread:rwlock_destroy
+/lib/x86_64-linux-gnu/libpthread-2.27.so libpthread:rdlock_entry
+/lib/x86_64-linux-gnu/libpthread-2.27.so libpthread:rdlock_acquire_read
+/lib/x86_64-linux-gnu/libpthread-2.27.so libpthread:wrlock_entry
+/lib/x86_64-linux-gnu/libpthread-2.27.so libpthread:wrlock_acquire_write
+/lib/x86_64-linux-gnu/libpthread-2.27.so libpthread:rwlock_unlock
+/lib/x86_64-linux-gnu/libpthread-2.27.so libpthread:cond_init
+/lib/x86_64-linux-gnu/libpthread-2.27.so libpthread:cond_destroy
+/lib/x86_64-linux-gnu/libpthread-2.27.so libpthread:cond_wait
+/lib/x86_64-linux-gnu/libpthread-2.27.so libpthread:cond_signal
+/lib/x86_64-linux-gnu/libpthread-2.27.so libpthread:cond_broadcast
+/lib/x86_64-linux-gnu/libpthread-2.27.so libpthread:lll_lock_wait_private
+/lib/x86_64-linux-gnu/libpthread-2.27.so libpthread:lll_lock_wait
+/lib/x86_64-linux-gnu/libm-2.27.so libm:slowatan2
+/lib/x86_64-linux-gnu/libm-2.27.so libm:slowatan2_inexact
+/lib/x86_64-linux-gnu/libm-2.27.so libm:slowlog_inexact
+/lib/x86_64-linux-gnu/libm-2.27.so libm:slowlog
+/lib/x86_64-linux-gnu/libm-2.27.so libm:slowatan_inexact
+/lib/x86_64-linux-gnu/libm-2.27.so libm:slowatan
+/lib/x86_64-linux-gnu/libm-2.27.so libm:slowtan
+/lib/x86_64-linux-gnu/libm-2.27.so libm:slowasin
+/lib/x86_64-linux-gnu/libm-2.27.so libm:slowacos
+/lib/x86_64-linux-gnu/libm-2.27.so libm:slowsin
+/lib/x86_64-linux-gnu/libm-2.27.so libm:slowcos
+/lib/x86_64-linux-gnu/libm-2.27.so libm:slowexp_p6
+/lib/x86_64-linux-gnu/libm-2.27.so libm:slowexp_p32
+/lib/x86_64-linux-gnu/libm-2.27.so libm:slowpow_p10
+/lib/x86_64-linux-gnu/libm-2.27.so libm:slowpow_p32
+/usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.25 libstdcxx:catch
+/usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.25 libstdcxx:throw
+/usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.25 libstdcxx:rethrow
+/lib/x86_64-linux-gnu/ld-2.27.so rtld:init_start
+/lib/x86_64-linux-gnu/ld-2.27.so rtld:init_complete
+/lib/x86_64-linux-gnu/ld-2.27.so rtld:map_failed
+/lib/x86_64-linux-gnu/ld-2.27.so rtld:map_start
+/lib/x86_64-linux-gnu/ld-2.27.so rtld:map_complete
+/lib/x86_64-linux-gnu/ld-2.27.so rtld:reloc_start
+/lib/x86_64-linux-gnu/ld-2.27.so rtld:reloc_complete
+/lib/x86_64-linux-gnu/ld-2.27.so rtld:unmap_start
+/lib/x86_64-linux-gnu/ld-2.27.so rtld:unmap_complete
+/lib/x86_64-linux-gnu/ld-2.27.so rtld:setjmp
+/lib/x86_64-linux-gnu/ld-2.27.so rtld:longjmp
+/lib/x86_64-linux-gnu/ld-2.27.so rtld:longjmp_target
 ```
 
 ## Wrapping up
