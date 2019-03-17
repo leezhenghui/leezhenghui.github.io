@@ -364,8 +364,9 @@ The event sources are where the tracing data comes from, tracing framework runni
    > From [dtrace blog](http://dtrace.org/blogs/dap/2011/12/13/usdt-providers-redux/)
    >
    > USDT (Userland Statically Defined Tracing) is the mechanism by which application developers embed DTrace probes directly into an application. This allows users to trace semantically meaningful operations like “request-start”, rather than having to know which function implements the operation. More importantly, since USDT probes are part of the source code, scripts that use them continue working even as the underlying software evolves and the implementing functions are renamed and deleted.
-   
-	 > From [LWN doc](https://lwn.net/Articles/753601/)
+
+
+   > From [LWN doc](https://lwn.net/Articles/753601/)
    >
    > The origins of USDT probes can be found in Sun's DTrace utility. While DTrace can't claim to have invented static tracepoints (various implementations are described in the "related work" section of the original DTrace paper), it certainly made them much more popular. With the emergence of DTrace, many applications began adding USDT probes to important functions to aid with tracing and diagnosing run-time behavior. Given that, it's perhaps not surprising that these probes are usually enabled (as part of configuring the build) with the --enable-dtrace switch. 
 
@@ -377,7 +378,7 @@ The event sources are where the tracing data comes from, tracing framework runni
 
 - During compilation, the source code with USDT trace point will be translated into a `nop` instruction, in the meanwhile, the USDT metadata will be stored in the ELF's `.note.stapstd` section.
 
-- When register a probe, USDT tool(usually implemented based on `uprobe` under the hood) will read the ELF `.note.stapstd` section, and instrument the instruction from `nop` to `breakpoint`(`int3` on x86) for . So whenever control reaches the marker, the interrupt handler for int3 is called, and by turn the uprobe and attached eBPF program get called in kernel to process the events. If the USDT probe associated with semaphores, the front-ends need to incrementing the semaphore’s location via poking /proc/$PID/mem to enable the probe.
+- When register a probe, USDT tool(usually implemented based on `uprobe` under the hood) will read the ELF `.note.stapstd` section, and instrument the instruction from `nop` to `breakpoint`(`int3` on x86). In such way, whenever control reaches the marker, the interrupt handler for int3 is called, and by turn the uprobe and attached eBPF program get called in kernel to process the events. If the USDT probe associated with semaphores, the front-ends need to incrementing the semaphore’s location via poking /proc/$PID/mem to enable the probe.
 
 - After deregister the probe, USDT will instrument the instruction from `breakpoint` back to `nop`, no event get generated anymore, in the meanwhile, decrementing the semaphore's location to detach the current probe. 
 
