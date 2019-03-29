@@ -2,7 +2,7 @@
 layout: post
 title: Build a Modern Scalable System - Presentation of Runtime and Data Layers Challenges(in Chinese) 
 categories: [microservices]
-tags: [architecture, microservices, java, nomad, consul, envoy, servicemesh]
+tags: [architecture, microservices, servicemesh, aop, cqrs, eventsourcing, tcc, saga, event-driven]
 series: [build-scalable-system]
 comments: true
 ---
