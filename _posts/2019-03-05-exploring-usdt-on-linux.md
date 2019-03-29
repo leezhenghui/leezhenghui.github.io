@@ -1540,6 +1540,31 @@ And the same for the uretprobe would be:
 > 
 > Add probe calls, via DTRACE_PROBE macros to the source code of the application.  Compile code to object file (*.o) Use dtrace command line tool to convert the object file. This involves stubbing out the assembler function calls, and creating a table in the ELF file enumerating the probes.  Create (link) the application binary, with a special object file (drti.o). drti.o runs before main() and takes the table of probes, and lets the kernel know (via an ioctl() to the dtrace driver) of the probes.  Run the application: drti.o takes control and issues the ioctl() of the probes. Whilst the application is running, you can use "dtrace -l" to see the probes. Probes are a function of the pid provider, so you will see a new suite of probes for each process running with USDT, and as many probes as there are DTRACE_PROBE calls in the source code.  Whilst the application is running, you can use dtrace to monitor these probes at any granularity you like (eg all probes from the process, or specific probes from all such processes).  When a dtrace monitors the probe, the site where the call instruction is placed is modified and an INT3 (breakpoint instruction) is placed at the site of what was the original CALL instruction. When the breakpoint is hit, the dtrace driver takes control and actions the probe. This is very similar to how a kernel FBT probe works, except the breakpoint happened in user space. At the point of breakpoint execution, any D script associated with the probe is invoked. The target application is frozen until the D script completes, allowing it to take a static snapshot of any details it likes. Typically, this might include taking a user stack dump (ustack()).  Terminating a dtrace which is probing the application will remove the breakpoints and restore the NOP instructions.
 
+### DTrace USDT sample running on Solaris(DTrace) and Linux(via Systemtap)
+
+There is a sample([link](https://github.com/agentzh/usdt-sample)) made by agentzh on this.
+
+Steps:
+
+```
+git clone https://github.com/agentzh/usdt-sample
+make
+```
+
+```
+Run:
+
+    Terminal 1:
+        ./test
+
+    Terminal 2:
+        for dtrace:
+            sudo ./run.d
+
+        for systemtap:
+            sudo ./run.stp
+```
+
 ### Compile executable with "--with-dtrace" option
 
 E.g: compile node.js
@@ -1640,7 +1665,7 @@ GNU                  0x00000014       NT_GNU_BUILD_ID (unique build ID bitstring
 
 [^7]: http://www.brendangregg.com/perf.html 
 
-[^8]:	http://www.brendangregg.com/blog/2015-06-28/linux-ftrace-uprobe.html
+[^8]: http://www.brendangregg.com/blog/2015-06-28/linux-ftrace-uprobe.html
 
 [^9]: http://blogs.microsoft.co.il/sasha/2016/03/30/usdt-probe-support-in-bpfbcc
 
@@ -1648,7 +1673,7 @@ GNU                  0x00000014       NT_GNU_BUILD_ID (unique build ID bitstring
 
 [^11]: https://www.slideshare.net/vh21/linux-kernel-tracing
 
-[^12]: https://www.kernel.org/doc/Documentation/trace/uprobetracer.txt 
+[^12]: https://www.kernel.org/doc/Documentation/trace/uprobetracer.txt
 
 [^13]: https://www.joyfulbikeshedding.com/blog/2019-01-31-full-system-dynamic-tracing-on-linux-using-ebpf-and-bpftrace.html
 
@@ -1660,13 +1685,15 @@ GNU                  0x00000014       NT_GNU_BUILD_ID (unique build ID bitstring
 
 [^17]: https://www.sourceware.org/systemtap/wiki/AddingUserSpaceProbingToApps
 
-[^18]: https://www.slideshare.net/goldshtn/modern-linux-tracing-landscape-66299948 
+[^18]: https://www.slideshare.net/goldshtn/modern-linux-tracing-landscape-66299948
 
 [^19]: https://github.com/dtrace4linux/linux/blob/master/doc/usdt.html
 
-[^20]: https://dzone.com/articles/next-generation-linux-tracing 
+[^20]: https://dzone.com/articles/next-generation-linux-tracing
 
-[^21]: http://www.joelfernandes.org/linuxinternals/2018/02/10/usdt-notes.html 
+[^21]: http://www.joelfernandes.org/linuxinternals/2018/02/10/usdt-notes.html
 
-[^22]: https://lwn.net/Articles/753601/ 
+[^22]: https://lwn.net/Articles/753601/
+
+[^23]: https://github.com/agentzh/usdt-sample
 
