@@ -40,6 +40,10 @@
     </div>
 
     {% include blog/scripts.html %}
+
+    {% if jekyll.environment == 'production' %}
+        {% include common/analytics.html %}
+    {% endif %}
 </body>
 
 </html>
