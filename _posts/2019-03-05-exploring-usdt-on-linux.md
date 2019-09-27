@@ -562,7 +562,7 @@ stapsdt              0x0000003e       NT_STAPSDT (SystemTap probe descriptors)
 	Arguments: -4@-4(%rbp)
 ```
 
-### Register USDT probe via ftrace(basically, ftrace+uprobe)
+### Register USDT probe via ftrace(under the hood, ftrace+uprobe)
 
 USDT probes are static tracing markers placed in an executable or library. The probes are just nop instructions emitted by the compiler, whose locations are recorded in the notes section of the ELF binary. Tracing apps can instrument these locations and retrieve probe arguments. Specifically, uprobes (which BPF already supports) can be used to instrument the traced location.
 
@@ -794,7 +794,7 @@ USDT probes are static tracing markers placed in an executable or library. The p
   >
   > Actually, the better way to do the USDT probe is via bcc or bpftrace frontend tools. I still would like to demonstrate it with a ftrace here, because the hacking steps can show us with more information which can greatly help us understand how USDT works inside. If you are interested in this, please refer to blogs [hacking-linux-usdt-ftrace](http://www.brendangregg.com/blog/2015-07-03/hacking-linux-usdt-ftrace.html) and [linux-ftrace-uprobe](http://www.brendangregg.com/blog/2015-06-28/linux-ftrace-uprobe.html) for more details.
 
-### Register USDT probe via bcc(basically, eBPF+uprobe) 
+### Register USDT probe via bcc(under the hood, eBPF+uprobe) 
 
 - Use bcc tool for the tracking 
 
