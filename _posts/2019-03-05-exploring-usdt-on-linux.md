@@ -160,7 +160,11 @@ The event sources are where the tracing data comes from, tracing framework runni
 
 	(__Image credit: [Brendan Gregg's Blog - Linux Extended BPF (eBPF) Tracing Tools](http://www.brendangregg.com/ebpf.html)__)
   <img src="{{ site.url }}/assets/materials/explore-usdt-on-linux/linux_ebpf_support.png" alt="linux_ebpf_support.png">
-  
+
+	(__Image credit: [OpenResty slides by Yichun Zhang (@agentzh) - Tracing and Troubleshooting NGINX, OpenResty, and Their Backends__)
+  <img src="{{ site.url }}/assets/materials/explore-usdt-on-linux/eBPF-workflow.png" alt="eBPF-workflow.png">
+
+
 	> ![Tips]({{ site.url }}/assets/ico/tip.png)
 	> 
 	> Please refer to [LWN doc - A thorough introduction to eBPF](https://lwn.net/Articles/740157/) and [pdf-eBPF](http://nova.polymtl.ca/~suchakra/eBPF-5May2017.pdf) for more details about eBPF
@@ -190,6 +194,9 @@ The event sources are where the tracing data comes from, tracing framework runni
     > - That kernel module, when inserted, creates kprobes that call code from your kernel module when triggered (it calls register_kprobe)
     >
     > - You kernel modules prints output to userspace (using relayfs or something)
+    >
+    > (__Image credit: [OpenResty slides by Yichun Zhang (@agentzh) - Tracing and Troubleshooting NGINX, OpenResty, and Their Backends__)
+    > <img src="{{ site.url }}/assets/materials/explore-usdt-on-linux/stp-workflow.png" alt="stp-workflow.png">
 
   - LTTng
   
@@ -214,6 +221,8 @@ The event sources are where the tracing data comes from, tracing framework runni
     > From [Brendan Gregg's Blog - Choosing a Linux Tracer ](http://www.brendangregg.com/blog/2015-07-08/choosing-a-linux-tracer.html)
     >
     > [Oracle](http://docs.oracle.com/cd/E37670_01/E38608/html/index.html) Linux DTrace is a serious effort to bring DTrace to Linux, specifically Oracle Linux. Various releases over the years have shown steady progress. The developers have even spoken about improving the DTrace test suite, which shows a promising attitude to the project. Many useful providers have already been completed: syscall, profile, sdt, proc, sched, and USDT. I'm still waiting for fbt (function boundary tracing, for kernel dynamic tracing), which will be awesome on the Linux kernel. Its ultimate success will hinge on whether it's enough to tempt people to run Oracle Linux (and pay for support). Another catch is that it may not be entirely open source: the kernel components are, but I've yet to see the user-level code. 
+    > (__Image credit: [OpenResty slides by Yichun Zhang (@agentzh) - Tracing and Troubleshooting NGINX, OpenResty, and Their Backends__)
+    > <img src="{{ site.url }}/assets/materials/explore-usdt-on-linux/dtrace-workflow.png" alt="linux_ebpf_support.png">
    
   - sysdig
 
