@@ -1706,3 +1706,5 @@ GNU                  0x00000014       NT_GNU_BUILD_ID (unique build ID bitstring
 
 [^23]: https://github.com/agentzh/usdt-sample
 
+[^24]: https://openresty.org/slides/nginx-conf-2018/#1
+
