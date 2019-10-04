@@ -162,7 +162,7 @@ The event sources are where the tracing data comes from, tracing framework runni
   <img src="{{ site.url }}/assets/materials/explore-usdt-on-linux/linux_ebpf_support.png" alt="linux_ebpf_support.png">
 
 	(__Image credit: [OpenResty slides by Yichun Zhang (@agentzh) - Tracing and Troubleshooting NGINX, OpenResty, and Their Backends__)
-  <img src="{{ site.url }}/assets/materials/explore-usdt-on-linux/eBPF-workflow.png" alt="eBPF-workflow.png" style="width:300px;height:400px;">
+  <img src="{{ site.url }}/assets/materials/explore-usdt-on-linux/eBPF-workflow.png" alt="eBPF-workflow.png" style="width:600px;height:400px;">
 
 
 	> ![Tips]({{ site.url }}/assets/ico/tip.png)
@@ -197,7 +197,7 @@ The event sources are where the tracing data comes from, tracing framework runni
     >
 
     (__Image credit: [OpenResty slides by Yichun Zhang (@agentzh) - Tracing and Troubleshooting NGINX, OpenResty, and Their Backends__)
-    <img src="{{ site.url }}/assets/materials/explore-usdt-on-linux/stp-workflow.png" alt="stp-workflow.png" style="width:300px;height:400px;">
+    <img src="{{ site.url }}/assets/materials/explore-usdt-on-linux/stp-workflow.png" alt="stp-workflow.png" style="width:600px;height:400px;">
 
   - LTTng
   
@@ -226,7 +226,7 @@ The event sources are where the tracing data comes from, tracing framework runni
   - DTrace
 
     > (__Image credit: [OpenResty slides by Yichun Zhang (@agentzh) - Tracing and Troubleshooting NGINX, OpenResty, and Their Backends__)
-    > <img src="{{ site.url }}/assets/materials/explore-usdt-on-linux/dtrace-workflow.png" alt="linux_ebpf_support.png" style="width:300px;height:400px;">
+    > <img src="{{ site.url }}/assets/materials/explore-usdt-on-linux/dtrace-workflow.png" alt="linux_ebpf_support.png" style="width:600px;height:400px;">
    
   - sysdig
 
