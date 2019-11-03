@@ -1712,3 +1712,7 @@ GNU                  0x00000014       NT_GNU_BUILD_ID (unique build ID bitstring
 
 [^24]: https://openresty.org/slides/nginx-conf-2018/#1
 
+[^25]: https://openresty.org/posts/dynamic-tracing/?spm=ata.13261165.0.0.200c6d79yzOYFr
+
+[^26]: https://www.usenix.org/sites/default/files/conference/protected-files/lisa19_slides_gregg.pdf
+
