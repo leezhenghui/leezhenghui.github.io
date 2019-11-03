@@ -196,6 +196,9 @@ The event sources are where the tracing data comes from, tracing framework runni
     > - You kernel modules prints output to userspace (using relayfs or something)
     >
 
+    (__Image credit: [Yichun Zhang (@agentzh) - dynamic tracing__)
+    <img src="{{ site.url }}/assets/materials/explore-usdt-on-linux/how-systemtap-works.png" alt="how-systemtap-works.png" style="width:600px;height:400px;">
+
     (__Image credit: [OpenResty slides by Yichun Zhang (@agentzh) - Tracing and Troubleshooting NGINX, OpenResty, and Their Backends__)
     <img src="{{ site.url }}/assets/materials/explore-usdt-on-linux/stp-workflow.png" alt="stp-workflow.png" style="width:600px;height:400px;">
 
