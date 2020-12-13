@@ -1,0 +1,876 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" width="1200" height="1286" onload="init(evt)" viewBox="0 0 1200 1286" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<!-- Flame graph stack visualization. See https://github.com/brendangregg/FlameGraph for latest version, and http://www.brendangregg.com/flamegraphs.html for examples. -->
+<!-- NOTES:  -->
+<defs>
+	<linearGradient id="background" y1="0" y2="1" x1="0" x2="0" >
+		<stop stop-color="#eeeeee" offset="5%" />
+		<stop stop-color="#eeeeb0" offset="95%" />
+	</linearGradient>
+</defs>
+<style type="text/css">
+	text { font-family:Verdana; font-size:12px; fill:rgb(0,0,0); }
+	#search, #ignorecase { opacity:0.1; cursor:pointer; }
+	#search:hover, #search.show, #ignorecase:hover, #ignorecase.show { opacity:1; }
+	#subtitle { text-anchor:middle; font-color:rgb(160,160,160); }
+	#title { text-anchor:middle; font-size:17px}
+	#unzoom { cursor:pointer; }
+	#frames > *:hover { stroke:black; stroke-width:0.5; cursor:pointer; }
+	.hide { display:none; }
+	.parent { opacity:0.5; }
+</style>
+<script type="text/ecmascript">
+<![CDATA[
+	"use strict";
+	var details, searchbtn, unzoombtn, matchedtxt, svg, searching, currentSearchTerm, ignorecase, ignorecaseBtn;
+	function init(evt) {
+		details = document.getElementById("details").firstChild;
+		searchbtn = document.getElementById("search");
+		ignorecaseBtn = document.getElementById("ignorecase");
+		unzoombtn = document.getElementById("unzoom");
+		matchedtxt = document.getElementById("matched");
+		svg = document.getElementsByTagName("svg")[0];
+		searching = 0;
+		currentSearchTerm = null;
+	}
+
+	window.addEventListener("click", function(e) {
+		var target = find_group(e.target);
+		if (target) {
+			if (target.nodeName == "a") {
+				if (e.ctrlKey === false) return;
+				e.preventDefault();
+			}
+			if (target.classList.contains("parent")) unzoom();
+			zoom(target);
+		}
+		else if (e.target.id == "unzoom") unzoom();
+		else if (e.target.id == "search") search_prompt();
+		else if (e.target.id == "ignorecase") toggle_ignorecase();
+	}, false)
+
+	// mouse-over for info
+	// show
+	window.addEventListener("mouseover", function(e) {
+		var target = find_group(e.target);
+		if (target) details.nodeValue = "Function: " + g_to_text(target);
+	}, false)
+
+	// clear
+	window.addEventListener("mouseout", function(e) {
+		var target = find_group(e.target);
+		if (target) details.nodeValue = ' ';
+	}, false)
+
+	// ctrl-F for search
+	window.addEventListener("keydown",function (e) {
+		if (e.keyCode === 114 || (e.ctrlKey && e.keyCode === 70)) {
+			e.preventDefault();
+			search_prompt();
+		}
+	}, false)
+
+	// ctrl-I to toggle case-sensitive search
+	window.addEventListener("keydown",function (e) {
+		if (e.ctrlKey && e.keyCode === 73) {
+			e.preventDefault();
+			toggle_ignorecase();
+		}
+	}, false)
+
+	// functions
+	function find_child(node, selector) {
+		var children = node.querySelectorAll(selector);
+		if (children.length) return children[0];
+		return;
+	}
+	function find_group(node) {
+		var parent = node.parentElement;
+		if (!parent) return;
+		if (parent.id == "frames") return node;
+		return find_group(parent);
+	}
+	function orig_save(e, attr, val) {
+		if (e.attributes["_orig_" + attr] != undefined) return;
+		if (e.attributes[attr] == undefined) return;
+		if (val == undefined) val = e.attributes[attr].value;
+		e.setAttribute("_orig_" + attr, val);
+	}
+	function orig_load(e, attr) {
+		if (e.attributes["_orig_"+attr] == undefined) return;
+		e.attributes[attr].value = e.attributes["_orig_" + attr].value;
+		e.removeAttribute("_orig_"+attr);
+	}
+	function g_to_text(e) {
+		var text = find_child(e, "title").firstChild.nodeValue;
+		return (text)
+	}
+	function g_to_func(e) {
+		var func = g_to_text(e);
+		// if there's any manipulation we want to do to the function
+		// name before it's searched, do it here before returning.
+		return (func);
+	}
+	function update_text(e) {
+		var r = find_child(e, "rect");
+		var t = find_child(e, "text");
+		var w = parseFloat(r.attributes.width.value) -3;
+		var txt = find_child(e, "title").textContent.replace(/\([^(]*\)$/,"");
+		t.attributes.x.value = parseFloat(r.attributes.x.value) + 3;
+
+		// Smaller than this size won't fit anything
+		if (w < 2 * 12 * 0.59) {
+			t.textContent = "";
+			return;
+		}
+
+		t.textContent = txt;
+		// Fit in full text width
+		if (/^ *$/.test(txt) || t.getSubStringLength(0, txt.length) < w)
+			return;
+
+		for (var x = txt.length - 2; x > 0; x--) {
+			if (t.getSubStringLength(0, x + 2) <= w) {
+				t.textContent = txt.substring(0, x) + "..";
+				return;
+			}
+		}
+		t.textContent = "";
+	}
+
+	// zoom
+	function zoom_reset(e) {
+		if (e.attributes != undefined) {
+			orig_load(e, "x");
+			orig_load(e, "width");
+		}
+		if (e.childNodes == undefined) return;
+		for (var i = 0, c = e.childNodes; i < c.length; i++) {
+			zoom_reset(c[i]);
+		}
+	}
+	function zoom_child(e, x, ratio) {
+		if (e.attributes != undefined) {
+			if (e.attributes.x != undefined) {
+				orig_save(e, "x");
+				e.attributes.x.value = (parseFloat(e.attributes.x.value) - x - 10) * ratio + 10;
+				if (e.tagName == "text")
+					e.attributes.x.value = find_child(e.parentNode, "rect[x]").attributes.x.value + 3;
+			}
+			if (e.attributes.width != undefined) {
+				orig_save(e, "width");
+				e.attributes.width.value = parseFloat(e.attributes.width.value) * ratio;
+			}
+		}
+
+		if (e.childNodes == undefined) return;
+		for (var i = 0, c = e.childNodes; i < c.length; i++) {
+			zoom_child(c[i], x - 10, ratio);
+		}
+	}
+	function zoom_parent(e) {
+		if (e.attributes) {
+			if (e.attributes.x != undefined) {
+				orig_save(e, "x");
+				e.attributes.x.value = 10;
+			}
+			if (e.attributes.width != undefined) {
+				orig_save(e, "width");
+				e.attributes.width.value = parseInt(svg.width.baseVal.value) - (10 * 2);
+			}
+		}
+		if (e.childNodes == undefined) return;
+		for (var i = 0, c = e.childNodes; i < c.length; i++) {
+			zoom_parent(c[i]);
+		}
+	}
+	function zoom(node) {
+		var attr = find_child(node, "rect").attributes;
+		var width = parseFloat(attr.width.value);
+		var xmin = parseFloat(attr.x.value);
+		var xmax = parseFloat(xmin + width);
+		var ymin = parseFloat(attr.y.value);
+		var ratio = (svg.width.baseVal.value - 2 * 10) / width;
+
+		// XXX: Workaround for JavaScript float issues (fix me)
+		var fudge = 0.0001;
+
+		unzoombtn.classList.remove("hide");
+
+		var el = document.getElementById("frames").children;
+		for (var i = 0; i < el.length; i++) {
+			var e = el[i];
+			var a = find_child(e, "rect").attributes;
+			var ex = parseFloat(a.x.value);
+			var ew = parseFloat(a.width.value);
+			var upstack;
+			// Is it an ancestor
+			if (0 == 0) {
+				upstack = parseFloat(a.y.value) > ymin;
+			} else {
+				upstack = parseFloat(a.y.value) < ymin;
+			}
+			if (upstack) {
+				// Direct ancestor
+				if (ex <= xmin && (ex+ew+fudge) >= xmax) {
+					e.classList.add("parent");
+					zoom_parent(e);
+					update_text(e);
+				}
+				// not in current path
+				else
+					e.classList.add("hide");
+			}
+			// Children maybe
+			else {
+				// no common path
+				if (ex < xmin || ex + fudge >= xmax) {
+					e.classList.add("hide");
+				}
+				else {
+					zoom_child(e, xmin, ratio);
+					update_text(e);
+				}
+			}
+		}
+		search();
+	}
+	function unzoom() {
+		unzoombtn.classList.add("hide");
+		var el = document.getElementById("frames").children;
+		for(var i = 0; i < el.length; i++) {
+			el[i].classList.remove("parent");
+			el[i].classList.remove("hide");
+			zoom_reset(el[i]);
+			update_text(el[i]);
+		}
+		search();
+	}
+
+	// search
+	function toggle_ignorecase() {
+		ignorecase = !ignorecase;
+		if (ignorecase) {
+			ignorecaseBtn.classList.add("show");
+		} else {
+			ignorecaseBtn.classList.remove("show");
+		}
+		reset_search();
+		search();
+	}
+	function reset_search() {
+		var el = document.querySelectorAll("#frames rect");
+		for (var i = 0; i < el.length; i++) {
+			orig_load(el[i], "fill")
+		}
+	}
+	function search_prompt() {
+		if (!searching) {
+			var term = prompt("Enter a search term (regexp " +
+			    "allowed, eg: ^ext4_)"
+			    + (ignorecase ? ", ignoring case" : "")
+			    + "\nPress Ctrl-i to toggle case sensitivity", "");
+			if (term != null) {
+				currentSearchTerm = term;
+				search();
+			}
+		} else {
+			reset_search();
+			searching = 0;
+			currentSearchTerm = null;
+			searchbtn.classList.remove("show");
+			searchbtn.firstChild.nodeValue = "Search"
+			matchedtxt.classList.add("hide");
+			matchedtxt.firstChild.nodeValue = ""
+		}
+	}
+	function search(term) {
+		if (currentSearchTerm === null) return;
+		var term = currentSearchTerm;
+
+		var re = new RegExp(term, ignorecase ? 'i' : '');
+		var el = document.getElementById("frames").children;
+		var matches = new Object();
+		var maxwidth = 0;
+		for (var i = 0; i < el.length; i++) {
+			var e = el[i];
+			var func = g_to_func(e);
+			var rect = find_child(e, "rect");
+			if (func == null || rect == null)
+				continue;
+
+			// Save max width. Only works as we have a root frame
+			var w = parseFloat(rect.attributes.width.value);
+			if (w > maxwidth)
+				maxwidth = w;
+
+			if (func.match(re)) {
+				// highlight
+				var x = parseFloat(rect.attributes.x.value);
+				orig_save(rect, "fill");
+				rect.attributes.fill.value = "rgb(230,0,230)";
+
+				// remember matches
+				if (matches[x] == undefined) {
+					matches[x] = w;
+				} else {
+					if (w > matches[x]) {
+						// overwrite with parent
+						matches[x] = w;
+					}
+				}
+				searching = 1;
+			}
+		}
+		if (!searching)
+			return;
+
+		searchbtn.classList.add("show");
+		searchbtn.firstChild.nodeValue = "Reset Search";
+
+		// calculate percent matched, excluding vertical overlap
+		var count = 0;
+		var lastx = -1;
+		var lastw = 0;
+		var keys = Array();
+		for (k in matches) {
+			if (matches.hasOwnProperty(k))
+				keys.push(k);
+		}
+		// sort the matched frames by their x location
+		// ascending, then width descending
+		keys.sort(function(a, b){
+			return a - b;
+		});
+		// Step through frames saving only the biggest bottom-up frames
+		// thanks to the sort order. This relies on the tree property
+		// where children are always smaller than their parents.
+		var fudge = 0.0001;	// JavaScript floating point
+		for (var k in keys) {
+			var x = parseFloat(keys[k]);
+			var w = matches[keys[k]];
+			if (x >= lastx + lastw - fudge) {
+				count += w;
+				lastx = x;
+				lastw = w;
+			}
+		}
+		// display matched percent
+		matchedtxt.classList.remove("hide");
+		var pct = 100 * count / maxwidth;
+		if (pct != 100) pct = pct.toFixed(1)
+		matchedtxt.firstChild.nodeValue = "Matched: " + pct + "%";
+	}
+]]>
+</script>
+<rect x="0.0" y="0" width="1200.0" height="1286.0" fill="url(#background)"  />
+<text id="title" x="600.00" y="24" >Flame Graph</text>
+<text id="details" x="10.00" y="1269" > </text>
+<text id="unzoom" x="10.00" y="24" class="hide">Reset Zoom</text>
+<text id="search" x="1090.00" y="24" >Search</text>
+<text id="ignorecase" x="1174.00" y="24" >ic</text>
+<text id="matched" x="1090.00" y="1269" > </text>
+<g id="frames">
+<g >
+<title>__netif_receive_skb (1 us, 16.67%)</title><rect x="206.7" y="245" width="196.6" height="15.0" fill="rgb(226,51,48)" rx="2" ry="2" />
+<text  x="209.67" y="255.5" >__netif_receive_skb</text>
+</g>
+<g >
+<title>tcp_rcv_established (1 us, 16.67%)</title><rect x="206.7" y="117" width="196.6" height="15.0" fill="rgb(250,59,36)" rx="2" ry="2" />
+<text  x="209.67" y="127.5" >tcp_rcv_established</text>
+</g>
+<g >
+<title>ip_local_out (1 us, 16.67%)</title><rect x="206.7" y="405" width="196.6" height="15.0" fill="rgb(245,229,5)" rx="2" ry="2" />
+<text  x="209.67" y="415.5" >ip_local_out</text>
+</g>
+<g >
+<title>ngx_palloc_small (1 us, 16.67%)</title><rect x="403.3" y="997" width="196.7" height="15.0" fill="rgb(250,17,30)" rx="2" ry="2" />
+<text  x="406.33" y="1007.5" >ngx_palloc_small</text>
+</g>
+<g >
+<title>__lock_text_start (1 us, 16.67%)</title><rect x="206.7" y="53" width="196.6" height="15.0" fill="rgb(217,97,38)" rx="2" ry="2" />
+<text  x="209.67" y="63.5" >__lock_text_start</text>
+</g>
+<g >
+<title>__wake_up_common_lock (1 us, 16.67%)</title><rect x="206.7" y="69" width="196.6" height="15.0" fill="rgb(217,207,14)" rx="2" ry="2" />
+<text  x="209.67" y="79.5" >__wake_up_common_lock</text>
+</g>
+<g >
+<title>__x64_sys_writev (1 us, 16.67%)</title><rect x="206.7" y="645" width="196.6" height="15.0" fill="rgb(217,179,3)" rx="2" ry="2" />
+<text  x="209.67" y="655.5" >__x64_sys_writev</text>
+</g>
+<g >
+<title>do_iter_write (1 us, 16.67%)</title><rect x="206.7" y="597" width="196.6" height="15.0" fill="rgb(233,203,14)" rx="2" ry="2" />
+<text  x="209.67" y="607.5" >do_iter_write</text>
+</g>
+<g >
+<title>ngx_list_init (1 us, 16.67%)</title><rect x="403.3" y="1029" width="196.7" height="15.0" fill="rgb(220,37,28)" rx="2" ry="2" />
+<text  x="406.33" y="1039.5" >ngx_list_init</text>
+</g>
+<g >
+<title>ngx_http_range_body_filter (1 us, 16.67%)</title><rect x="206.7" y="869" width="196.6" height="15.0" fill="rgb(242,112,16)" rx="2" ry="2" />
+<text  x="209.67" y="879.5" >ngx_http_range_body_filter</text>
+</g>
+<g >
+<title>net_rx_action (1 us, 16.67%)</title><rect x="206.7" y="277" width="196.6" height="15.0" fill="rgb(245,10,10)" rx="2" ry="2" />
+<text  x="209.67" y="287.5" >net_rx_action</text>
+</g>
+<g >
+<title>ngx_http_process_request_line (3 us, 50.00%)</title><rect x="10.0" y="1045" width="590.0" height="15.0" fill="rgb(232,199,13)" rx="2" ry="2" />
+<text  x="13.00" y="1055.5" >ngx_http_process_request_line</text>
+</g>
+<g >
+<title>ngx_http_output_filter (1 us, 16.67%)</title><rect x="206.7" y="885" width="196.6" height="15.0" fill="rgb(247,127,27)" rx="2" ry="2" />
+<text  x="209.67" y="895.5" >ngx_http_output_filter</text>
+</g>
+<g >
+<title>ngx_process_events_and_timers (6 us, 100.00%)</title><rect x="10.0" y="1093" width="1180.0" height="15.0" fill="rgb(241,90,54)" rx="2" ry="2" />
+<text  x="13.00" y="1103.5" >ngx_process_events_and_timers</text>
+</g>
+<g >
+<title>do_softirq_own_stack (2 us, 33.33%)</title><rect x="600.0" y="741" width="393.3" height="15.0" fill="rgb(214,124,25)" rx="2" ry="2" />
+<text  x="603.00" y="751.5" >do_softirq_own_stack</text>
+</g>
+<g >
+<title>tcp_sendmsg_locked (1 us, 16.67%)</title><rect x="206.7" y="501" width="196.6" height="15.0" fill="rgb(229,184,34)" rx="2" ry="2" />
+<text  x="209.67" y="511.5" >tcp_sendmsg_locked</text>
+</g>
+<g >
+<title>process_backlog (1 us, 16.67%)</title><rect x="206.7" y="261" width="196.6" height="15.0" fill="rgb(218,99,14)" rx="2" ry="2" />
+<text  x="209.67" y="271.5" >process_backlog</text>
+</g>
+<g >
+<title>__tcp_push_pending_frames (1 us, 16.67%)</title><rect x="206.7" y="469" width="196.6" height="15.0" fill="rgb(238,60,26)" rx="2" ry="2" />
+<text  x="209.67" y="479.5" >__tcp_push_pending_frames</text>
+</g>
+<g >
+<title>ip_local_deliver_finish (1 us, 16.67%)</title><rect x="206.7" y="165" width="196.6" height="15.0" fill="rgb(250,56,34)" rx="2" ry="2" />
+<text  x="209.67" y="175.5" >ip_local_deliver_finish</text>
+</g>
+<g >
+<title>ngx_http_process_request_headers (2 us, 33.33%)</title><rect x="10.0" y="1029" width="393.3" height="15.0" fill="rgb(228,13,40)" rx="2" ry="2" />
+<text  x="13.00" y="1039.5" >ngx_http_process_request_headers</text>
+</g>
+<g >
+<title>tcp_recvmsg (2 us, 33.33%)</title><rect x="600.0" y="933" width="393.3" height="15.0" fill="rgb(244,139,20)" rx="2" ry="2" />
+<text  x="603.00" y="943.5" >tcp_recvmsg</text>
+</g>
+<g >
+<title>ip_finish_output2 (1 us, 16.67%)</title><rect x="206.7" y="357" width="196.6" height="15.0" fill="rgb(218,95,8)" rx="2" ry="2" />
+<text  x="209.67" y="367.5" >ip_finish_output2</text>
+</g>
+<g >
+<title>ngx_time_update (1 us, 16.67%)</title><rect x="993.3" y="1061" width="196.7" height="15.0" fill="rgb(243,38,52)" rx="2" ry="2" />
+<text  x="996.33" y="1071.5" >ngx_time_update</text>
+</g>
+<g >
+<title>sock_def_readable (1 us, 16.67%)</title><rect x="206.7" y="101" width="196.6" height="15.0" fill="rgb(233,70,10)" rx="2" ry="2" />
+<text  x="209.67" y="111.5" >sock_def_readable</text>
+</g>
+<g >
+<title>tcp_rcv_established (2 us, 33.33%)</title><rect x="600.0" y="549" width="393.3" height="15.0" fill="rgb(226,33,36)" rx="2" ry="2" />
+<text  x="603.00" y="559.5" >tcp_rcv_established</text>
+</g>
+<g >
+<title>acpi_pm_read (1 us, 16.67%)</title><rect x="993.3" y="933" width="196.7" height="15.0" fill="rgb(253,204,42)" rx="2" ry="2" />
+<text  x="996.33" y="943.5" >acpi_pm_read</text>
+</g>
+<g >
+<title>ngx_output_chain (1 us, 16.67%)</title><rect x="206.7" y="837" width="196.6" height="15.0" fill="rgb(254,143,35)" rx="2" ry="2" />
+<text  x="209.67" y="847.5" >ngx_output_chain</text>
+</g>
+<g >
+<title>tcp_send_ack (2 us, 33.33%)</title><rect x="600.0" y="901" width="393.3" height="15.0" fill="rgb(241,148,37)" rx="2" ry="2" />
+<text  x="603.00" y="911.5" >tcp_send_ack</text>
+</g>
+<g >
+<title>do_syscall_64 (2 us, 33.33%)</title><rect x="600.0" y="1013" width="393.3" height="15.0" fill="rgb(209,102,41)" rx="2" ry="2" />
+<text  x="603.00" y="1023.5" >do_syscall_64</text>
+</g>
+<g >
+<title>ngx_http_core_run_phases (1 us, 16.67%)</title><rect x="206.7" y="981" width="196.6" height="15.0" fill="rgb(254,74,8)" rx="2" ry="2" />
+<text  x="209.67" y="991.5" >ngx_http_core_run_phases</text>
+</g>
+<g >
+<title>native_sched_clock (2 us, 33.33%)</title><rect x="600.0" y="469" width="393.3" height="15.0" fill="rgb(253,57,48)" rx="2" ry="2" />
+<text  x="603.00" y="479.5" >native_sched_clock</text>
+</g>
+<g >
+<title>ngx_palloc (1 us, 16.67%)</title><rect x="403.3" y="1013" width="196.7" height="15.0" fill="rgb(208,18,4)" rx="2" ry="2" />
+<text  x="406.33" y="1023.5" >ngx_palloc</text>
+</g>
+<g >
+<title>ip_rcv (2 us, 33.33%)</title><rect x="600.0" y="645" width="393.3" height="15.0" fill="rgb(217,69,28)" rx="2" ry="2" />
+<text  x="603.00" y="655.5" >ip_rcv</text>
+</g>
+<g >
+<title>__libc_start_main (6 us, 100.00%)</title><rect x="10.0" y="1189" width="1180.0" height="15.0" fill="rgb(231,1,44)" rx="2" ry="2" />
+<text  x="13.00" y="1199.5" >__libc_start_main</text>
+</g>
+<g >
+<title>ngx_http_ssi_body_filter (1 us, 16.67%)</title><rect x="206.7" y="789" width="196.6" height="15.0" fill="rgb(249,147,38)" rx="2" ry="2" />
+<text  x="209.67" y="799.5" >ngx_http_ssi_body_filter</text>
+</g>
+<g >
+<title>ngx_http_trailers_filter (1 us, 16.67%)</title><rect x="206.7" y="821" width="196.6" height="15.0" fill="rgb(215,125,35)" rx="2" ry="2" />
+<text  x="209.67" y="831.5" >ngx_http_trailers_filter</text>
+</g>
+<g >
+<title>ngx_http_core_content_phase (1 us, 16.67%)</title><rect x="206.7" y="965" width="196.6" height="15.0" fill="rgb(235,183,10)" rx="2" ry="2" />
+<text  x="209.67" y="975.5" >ngx_http_core_content_phase</text>
+</g>
+<g >
+<title>entry_SYSCALL_64_after_hwframe (1 us, 16.67%)</title><rect x="993.3" y="1029" width="196.7" height="15.0" fill="rgb(251,113,22)" rx="2" ry="2" />
+<text  x="996.33" y="1039.5" >entry_SYSCALL_64_after_hw..</text>
+</g>
+<g >
+<title>ngx_http_echo_run_cmds (1 us, 16.67%)</title><rect x="206.7" y="933" width="196.6" height="15.0" fill="rgb(213,165,4)" rx="2" ry="2" />
+<text  x="209.67" y="943.5" >ngx_http_echo_run_cmds</text>
+</g>
+<g >
+<title>__tcp_send_ack.part.42 (2 us, 33.33%)</title><rect x="600.0" y="885" width="393.3" height="15.0" fill="rgb(230,179,53)" rx="2" ry="2" />
+<text  x="603.00" y="895.5" >__tcp_send_ack.part.42</text>
+</g>
+<g >
+<title>ip_local_deliver (1 us, 16.67%)</title><rect x="206.7" y="181" width="196.6" height="15.0" fill="rgb(228,206,30)" rx="2" ry="2" />
+<text  x="209.67" y="191.5" >ip_local_deliver</text>
+</g>
+<g >
+<title>sock_write_iter (1 us, 16.67%)</title><rect x="206.7" y="565" width="196.6" height="15.0" fill="rgb(232,52,3)" rx="2" ry="2" />
+<text  x="209.67" y="575.5" >sock_write_iter</text>
+</g>
+<g >
+<title>do_softirq.part.19 (2 us, 33.33%)</title><rect x="600.0" y="757" width="393.3" height="15.0" fill="rgb(233,227,48)" rx="2" ry="2" />
+<text  x="603.00" y="767.5" >do_softirq.part.19</text>
+</g>
+<g >
+<title>vfs_writev (1 us, 16.67%)</title><rect x="206.7" y="613" width="196.6" height="15.0" fill="rgb(235,209,7)" rx="2" ry="2" />
+<text  x="209.67" y="623.5" >vfs_writev</text>
+</g>
+<g >
+<title>ngx_http_send_special (1 us, 16.67%)</title><rect x="206.7" y="901" width="196.6" height="15.0" fill="rgb(241,69,38)" rx="2" ry="2" />
+<text  x="209.67" y="911.5" >ngx_http_send_special</text>
+</g>
+<g >
+<title>ngx_master_process_cycle (6 us, 100.00%)</title><rect x="10.0" y="1157" width="1180.0" height="15.0" fill="rgb(242,7,7)" rx="2" ry="2" />
+<text  x="13.00" y="1167.5" >ngx_master_process_cycle</text>
+</g>
+<g >
+<title>ktime_get_real_ts64 (1 us, 16.67%)</title><rect x="993.3" y="965" width="196.7" height="15.0" fill="rgb(210,157,43)" rx="2" ry="2" />
+<text  x="996.33" y="975.5" >ktime_get_real_ts64</text>
+</g>
+<g >
+<title>native_sched_clock (2 us, 33.33%)</title><rect x="600.0" y="485" width="393.3" height="15.0" fill="rgb(226,3,15)" rx="2" ry="2" />
+<text  x="603.00" y="495.5" >native_sched_clock</text>
+</g>
+<g >
+<title>tcp_v4_do_rcv (2 us, 33.33%)</title><rect x="600.0" y="565" width="393.3" height="15.0" fill="rgb(228,104,26)" rx="2" ry="2" />
+<text  x="603.00" y="575.5" >tcp_v4_do_rcv</text>
+</g>
+<g >
+<title>sched_clock (2 us, 33.33%)</title><rect x="600.0" y="501" width="393.3" height="15.0" fill="rgb(205,19,24)" rx="2" ry="2" />
+<text  x="603.00" y="511.5" >sched_clock</text>
+</g>
+<g >
+<title>ip_finish_output (2 us, 33.33%)</title><rect x="600.0" y="805" width="393.3" height="15.0" fill="rgb(243,212,28)" rx="2" ry="2" />
+<text  x="603.00" y="815.5" >ip_finish_output</text>
+</g>
+<g >
+<title>ngx_http_charset_body_filter (1 us, 16.67%)</title><rect x="206.7" y="805" width="196.6" height="15.0" fill="rgb(206,60,39)" rx="2" ry="2" />
+<text  x="209.67" y="815.5" >ngx_http_charset_body_fil..</text>
+</g>
+<g >
+<title>ngx_spawn_process (6 us, 100.00%)</title><rect x="10.0" y="1125" width="1180.0" height="15.0" fill="rgb(229,150,1)" rx="2" ry="2" />
+<text  x="13.00" y="1135.5" >ngx_spawn_process</text>
+</g>
+<g >
+<title>ngx_worker_process_cycle (6 us, 100.00%)</title><rect x="10.0" y="1109" width="1180.0" height="15.0" fill="rgb(248,182,25)" rx="2" ry="2" />
+<text  x="13.00" y="1119.5" >ngx_worker_process_cycle</text>
+</g>
+<g >
+<title>ip_finish_output (1 us, 16.67%)</title><rect x="206.7" y="373" width="196.6" height="15.0" fill="rgb(211,142,53)" rx="2" ry="2" />
+<text  x="209.67" y="383.5" >ip_finish_output</text>
+</g>
+<g >
+<title>[unknown] (1 us, 16.67%)</title><rect x="993.3" y="1045" width="196.7" height="15.0" fill="rgb(244,224,31)" rx="2" ry="2" />
+<text  x="996.33" y="1055.5" >[unknown]</text>
+</g>
+<g >
+<title>__x64_sys_gettimeofday (1 us, 16.67%)</title><rect x="993.3" y="997" width="196.7" height="15.0" fill="rgb(226,146,31)" rx="2" ry="2" />
+<text  x="996.33" y="1007.5" >__x64_sys_gettimeofday</text>
+</g>
+<g >
+<title>sock_recvmsg (2 us, 33.33%)</title><rect x="600.0" y="965" width="393.3" height="15.0" fill="rgb(230,226,32)" rx="2" ry="2" />
+<text  x="603.00" y="975.5" >sock_recvmsg</text>
+</g>
+<g >
+<title>do_softirq_own_stack (1 us, 16.67%)</title><rect x="206.7" y="309" width="196.6" height="15.0" fill="rgb(239,64,32)" rx="2" ry="2" />
+<text  x="209.67" y="319.5" >do_softirq_own_stack</text>
+</g>
+<g >
+<title>inet_sendmsg (1 us, 16.67%)</title><rect x="206.7" y="533" width="196.6" height="15.0" fill="rgb(222,212,5)" rx="2" ry="2" />
+<text  x="209.67" y="543.5" >inet_sendmsg</text>
+</g>
+<g >
+<title>ngx_start_worker_processes (6 us, 100.00%)</title><rect x="10.0" y="1141" width="1180.0" height="15.0" fill="rgb(221,66,35)" rx="2" ry="2" />
+<text  x="13.00" y="1151.5" >ngx_start_worker_processes</text>
+</g>
+<g >
+<title>ip_local_deliver_finish (2 us, 33.33%)</title><rect x="600.0" y="597" width="393.3" height="15.0" fill="rgb(249,79,54)" rx="2" ry="2" />
+<text  x="603.00" y="607.5" >ip_local_deliver_finish</text>
+</g>
+<g >
+<title>writev (1 us, 16.67%)</title><rect x="206.7" y="693" width="196.6" height="15.0" fill="rgb(222,151,0)" rx="2" ry="2" />
+<text  x="209.67" y="703.5" >writev</text>
+</g>
+<g >
+<title>do_writev (1 us, 16.67%)</title><rect x="206.7" y="629" width="196.6" height="15.0" fill="rgb(243,148,10)" rx="2" ry="2" />
+<text  x="209.67" y="639.5" >do_writev</text>
+</g>
+<g >
+<title>ngx_http_gzip_body_filter (1 us, 16.67%)</title><rect x="206.7" y="757" width="196.6" height="15.0" fill="rgb(207,81,51)" rx="2" ry="2" />
+<text  x="209.67" y="767.5" >ngx_http_gzip_body_filter</text>
+</g>
+<g >
+<title>ngx_http_copy_filter (1 us, 16.67%)</title><rect x="206.7" y="853" width="196.6" height="15.0" fill="rgb(226,228,32)" rx="2" ry="2" />
+<text  x="209.67" y="863.5" >ngx_http_copy_filter</text>
+</g>
+<g >
+<title>tcp_v4_rcv (2 us, 33.33%)</title><rect x="600.0" y="581" width="393.3" height="15.0" fill="rgb(246,197,42)" rx="2" ry="2" />
+<text  x="603.00" y="591.5" >tcp_v4_rcv</text>
+</g>
+<g >
+<title>tcp_v4_rcv (1 us, 16.67%)</title><rect x="206.7" y="149" width="196.6" height="15.0" fill="rgb(254,80,43)" rx="2" ry="2" />
+<text  x="209.67" y="159.5" >tcp_v4_rcv</text>
+</g>
+<g >
+<title>tcp_write_xmit (1 us, 16.67%)</title><rect x="206.7" y="453" width="196.6" height="15.0" fill="rgb(242,129,9)" rx="2" ry="2" />
+<text  x="209.67" y="463.5" >tcp_write_xmit</text>
+</g>
+<g >
+<title>tcp_push (1 us, 16.67%)</title><rect x="206.7" y="485" width="196.6" height="15.0" fill="rgb(251,71,51)" rx="2" ry="2" />
+<text  x="209.67" y="495.5" >tcp_push</text>
+</g>
+<g >
+<title>ip_local_deliver (2 us, 33.33%)</title><rect x="600.0" y="613" width="393.3" height="15.0" fill="rgb(232,145,22)" rx="2" ry="2" />
+<text  x="603.00" y="623.5" >ip_local_deliver</text>
+</g>
+<g >
+<title>all (6 us, 100%)</title><rect x="10.0" y="1237" width="1180.0" height="15.0" fill="rgb(249,29,15)" rx="2" ry="2" />
+<text  x="13.00" y="1247.5" ></text>
+</g>
+<g >
+<title>__tcp_transmit_skb (1 us, 16.67%)</title><rect x="206.7" y="437" width="196.6" height="15.0" fill="rgb(242,195,53)" rx="2" ry="2" />
+<text  x="209.67" y="447.5" >__tcp_transmit_skb</text>
+</g>
+<g >
+<title>sched_clock_cpu (2 us, 33.33%)</title><rect x="600.0" y="533" width="393.3" height="15.0" fill="rgb(213,222,21)" rx="2" ry="2" />
+<text  x="603.00" y="543.5" >sched_clock_cpu</text>
+</g>
+<g >
+<title>__netif_receive_skb_core (1 us, 16.67%)</title><rect x="206.7" y="229" width="196.6" height="15.0" fill="rgb(228,140,49)" rx="2" ry="2" />
+<text  x="209.67" y="239.5" >__netif_receive_skb_core</text>
+</g>
+<g >
+<title>tcp_cleanup_rbuf (2 us, 33.33%)</title><rect x="600.0" y="917" width="393.3" height="15.0" fill="rgb(217,23,53)" rx="2" ry="2" />
+<text  x="603.00" y="927.5" >tcp_cleanup_rbuf</text>
+</g>
+<g >
+<title>[unknown] (6 us, 100.00%)</title><rect x="10.0" y="1205" width="1180.0" height="15.0" fill="rgb(218,55,42)" rx="2" ry="2" />
+<text  x="13.00" y="1215.5" >[unknown]</text>
+</g>
+<g >
+<title>ip_queue_xmit (1 us, 16.67%)</title><rect x="206.7" y="421" width="196.6" height="15.0" fill="rgb(217,85,39)" rx="2" ry="2" />
+<text  x="209.67" y="431.5" >ip_queue_xmit</text>
+</g>
+<g >
+<title>entry_SYSCALL_64_after_hwframe (1 us, 16.67%)</title><rect x="206.7" y="677" width="196.6" height="15.0" fill="rgb(231,110,42)" rx="2" ry="2" />
+<text  x="209.67" y="687.5" >entry_SYSCALL_64_after_hw..</text>
+</g>
+<g >
+<title>ngx_epoll_process_events (6 us, 100.00%)</title><rect x="10.0" y="1077" width="1180.0" height="15.0" fill="rgb(251,95,44)" rx="2" ry="2" />
+<text  x="13.00" y="1087.5" >ngx_epoll_process_events</text>
+</g>
+<g >
+<title>ngx_http_echo_handler (1 us, 16.67%)</title><rect x="206.7" y="949" width="196.6" height="15.0" fill="rgb(211,95,23)" rx="2" ry="2" />
+<text  x="209.67" y="959.5" >ngx_http_echo_handler</text>
+</g>
+<g >
+<title>ip_output (2 us, 33.33%)</title><rect x="600.0" y="821" width="393.3" height="15.0" fill="rgb(222,209,24)" rx="2" ry="2" />
+<text  x="603.00" y="831.5" >ip_output</text>
+</g>
+<g >
+<title>recv (2 us, 33.33%)</title><rect x="600.0" y="1045" width="393.3" height="15.0" fill="rgb(227,105,37)" rx="2" ry="2" />
+<text  x="603.00" y="1055.5" >recv</text>
+</g>
+<g >
+<title>tcp_sendmsg (1 us, 16.67%)</title><rect x="206.7" y="517" width="196.6" height="15.0" fill="rgb(240,204,42)" rx="2" ry="2" />
+<text  x="209.67" y="527.5" >tcp_sendmsg</text>
+</g>
+<g >
+<title>__netif_receive_skb_core (2 us, 33.33%)</title><rect x="600.0" y="661" width="393.3" height="15.0" fill="rgb(225,210,23)" rx="2" ry="2" />
+<text  x="603.00" y="671.5" >__netif_receive_skb_core</text>
+</g>
+<g >
+<title>ip_local_out (2 us, 33.33%)</title><rect x="600.0" y="837" width="393.3" height="15.0" fill="rgb(216,57,33)" rx="2" ry="2" />
+<text  x="603.00" y="847.5" >ip_local_out</text>
+</g>
+<g >
+<title>ngx_linux_sendfile_chain (1 us, 16.67%)</title><rect x="206.7" y="709" width="196.6" height="15.0" fill="rgb(238,151,25)" rx="2" ry="2" />
+<text  x="209.67" y="719.5" >ngx_linux_sendfile_chain</text>
+</g>
+<g >
+<title>process_backlog (2 us, 33.33%)</title><rect x="600.0" y="693" width="393.3" height="15.0" fill="rgb(222,221,16)" rx="2" ry="2" />
+<text  x="603.00" y="703.5" >process_backlog</text>
+</g>
+<g >
+<title>inet_recvmsg (2 us, 33.33%)</title><rect x="600.0" y="949" width="393.3" height="15.0" fill="rgb(252,222,51)" rx="2" ry="2" />
+<text  x="603.00" y="959.5" >inet_recvmsg</text>
+</g>
+<g >
+<title>ip_queue_xmit (2 us, 33.33%)</title><rect x="600.0" y="853" width="393.3" height="15.0" fill="rgb(216,69,31)" rx="2" ry="2" />
+<text  x="603.00" y="863.5" >ip_queue_xmit</text>
+</g>
+<g >
+<title>tcp_v4_do_rcv (1 us, 16.67%)</title><rect x="206.7" y="133" width="196.6" height="15.0" fill="rgb(240,74,37)" rx="2" ry="2" />
+<text  x="209.67" y="143.5" >tcp_v4_do_rcv</text>
+</g>
+<g >
+<title>net_rx_action (2 us, 33.33%)</title><rect x="600.0" y="709" width="393.3" height="15.0" fill="rgb(218,226,2)" rx="2" ry="2" />
+<text  x="603.00" y="719.5" >net_rx_action</text>
+</g>
+<g >
+<title>ngx_http_write_filter (1 us, 16.67%)</title><rect x="206.7" y="725" width="196.6" height="15.0" fill="rgb(235,77,51)" rx="2" ry="2" />
+<text  x="209.67" y="735.5" >ngx_http_write_filter</text>
+</g>
+<g >
+<title>ngx_http_handler (1 us, 16.67%)</title><rect x="206.7" y="997" width="196.6" height="15.0" fill="rgb(220,228,0)" rx="2" ry="2" />
+<text  x="209.67" y="1007.5" >ngx_http_handler</text>
+</g>
+<g >
+<title>do_iter_readv_writev (1 us, 16.67%)</title><rect x="206.7" y="581" width="196.6" height="15.0" fill="rgb(210,219,42)" rx="2" ry="2" />
+<text  x="209.67" y="591.5" >do_iter_readv_writev</text>
+</g>
+<g >
+<title>sched_clock_local (2 us, 33.33%)</title><rect x="600.0" y="517" width="393.3" height="15.0" fill="rgb(247,29,8)" rx="2" ry="2" />
+<text  x="603.00" y="527.5" >sched_clock_local</text>
+</g>
+<g >
+<title>do_softirq.part.19 (1 us, 16.67%)</title><rect x="206.7" y="325" width="196.6" height="15.0" fill="rgb(246,55,32)" rx="2" ry="2" />
+<text  x="209.67" y="335.5" >do_softirq.part.19</text>
+</g>
+<g >
+<title>ngx_http_chunked_body_filter (1 us, 16.67%)</title><rect x="206.7" y="741" width="196.6" height="15.0" fill="rgb(220,138,54)" rx="2" ry="2" />
+<text  x="209.67" y="751.5" >ngx_http_chunked_body_fil..</text>
+</g>
+<g >
+<title>sock_sendmsg (1 us, 16.67%)</title><rect x="206.7" y="549" width="196.6" height="15.0" fill="rgb(211,48,54)" rx="2" ry="2" />
+<text  x="209.67" y="559.5" >sock_sendmsg</text>
+</g>
+<g >
+<title>ip_output (1 us, 16.67%)</title><rect x="206.7" y="389" width="196.6" height="15.0" fill="rgb(242,176,26)" rx="2" ry="2" />
+<text  x="209.67" y="399.5" >ip_output</text>
+</g>
+<g >
+<title>acpi_pm_read (1 us, 16.67%)</title><rect x="993.3" y="949" width="196.7" height="15.0" fill="rgb(214,207,14)" rx="2" ry="2" />
+<text  x="996.33" y="959.5" >acpi_pm_read</text>
+</g>
+<g >
+<title>do_gettimeofday (1 us, 16.67%)</title><rect x="993.3" y="981" width="196.7" height="15.0" fill="rgb(251,18,23)" rx="2" ry="2" />
+<text  x="996.33" y="991.5" >do_gettimeofday</text>
+</g>
+<g >
+<title>entry_SYSCALL_64_after_hwframe (2 us, 33.33%)</title><rect x="600.0" y="1029" width="393.3" height="15.0" fill="rgb(228,29,25)" rx="2" ry="2" />
+<text  x="603.00" y="1039.5" >entry_SYSCALL_64_after_hwframe</text>
+</g>
+<g >
+<title>__lock_text_start (1 us, 16.67%)</title><rect x="206.7" y="37" width="196.6" height="15.0" fill="rgb(213,50,35)" rx="2" ry="2" />
+<text  x="209.67" y="47.5" >__lock_text_start</text>
+</g>
+<g >
+<title>__tcp_transmit_skb (2 us, 33.33%)</title><rect x="600.0" y="869" width="393.3" height="15.0" fill="rgb(231,86,17)" rx="2" ry="2" />
+<text  x="603.00" y="879.5" >__tcp_transmit_skb</text>
+</g>
+<g >
+<title>nginx (6 us, 100.00%)</title><rect x="10.0" y="1221" width="1180.0" height="15.0" fill="rgb(230,58,45)" rx="2" ry="2" />
+<text  x="13.00" y="1231.5" >nginx</text>
+</g>
+<g >
+<title>__x64_sys_recvfrom (2 us, 33.33%)</title><rect x="600.0" y="997" width="393.3" height="15.0" fill="rgb(212,221,24)" rx="2" ry="2" />
+<text  x="603.00" y="1007.5" >__x64_sys_recvfrom</text>
+</g>
+<g >
+<title>ngx_http_postpone_filter (1 us, 16.67%)</title><rect x="206.7" y="773" width="196.6" height="15.0" fill="rgb(220,112,14)" rx="2" ry="2" />
+<text  x="209.67" y="783.5" >ngx_http_postpone_filter</text>
+</g>
+<g >
+<title>__netif_receive_skb (2 us, 33.33%)</title><rect x="600.0" y="677" width="393.3" height="15.0" fill="rgb(240,75,28)" rx="2" ry="2" />
+<text  x="603.00" y="687.5" >__netif_receive_skb</text>
+</g>
+<g >
+<title>__softirqentry_text_start (2 us, 33.33%)</title><rect x="600.0" y="725" width="393.3" height="15.0" fill="rgb(208,37,54)" rx="2" ry="2" />
+<text  x="603.00" y="735.5" >__softirqentry_text_start</text>
+</g>
+<g >
+<title>ngx_http_keepalive_handler (5 us, 83.33%)</title><rect x="10.0" y="1061" width="983.3" height="15.0" fill="rgb(214,124,5)" rx="2" ry="2" />
+<text  x="13.00" y="1071.5" >ngx_http_keepalive_handler</text>
+</g>
+<g >
+<title>do_syscall_64 (1 us, 16.67%)</title><rect x="206.7" y="661" width="196.6" height="15.0" fill="rgb(211,30,1)" rx="2" ry="2" />
+<text  x="209.67" y="671.5" >do_syscall_64</text>
+</g>
+<g >
+<title>__local_bh_enable_ip (1 us, 16.67%)</title><rect x="206.7" y="341" width="196.6" height="15.0" fill="rgb(219,168,24)" rx="2" ry="2" />
+<text  x="209.67" y="351.5" >__local_bh_enable_ip</text>
+</g>
+<g >
+<title>__local_bh_enable_ip (2 us, 33.33%)</title><rect x="600.0" y="773" width="393.3" height="15.0" fill="rgb(227,64,50)" rx="2" ry="2" />
+<text  x="603.00" y="783.5" >__local_bh_enable_ip</text>
+</g>
+<g >
+<title>ip_rcv_finish (1 us, 16.67%)</title><rect x="206.7" y="197" width="196.6" height="15.0" fill="rgb(209,100,21)" rx="2" ry="2" />
+<text  x="209.67" y="207.5" >ip_rcv_finish</text>
+</g>
+<g >
+<title>ip_rcv (1 us, 16.67%)</title><rect x="206.7" y="213" width="196.6" height="15.0" fill="rgb(216,185,37)" rx="2" ry="2" />
+<text  x="209.67" y="223.5" >ip_rcv</text>
+</g>
+<g >
+<title>ip_finish_output2 (2 us, 33.33%)</title><rect x="600.0" y="789" width="393.3" height="15.0" fill="rgb(244,50,15)" rx="2" ry="2" />
+<text  x="603.00" y="799.5" >ip_finish_output2</text>
+</g>
+<g >
+<title>__wake_up_sync_key (1 us, 16.67%)</title><rect x="206.7" y="85" width="196.6" height="15.0" fill="rgb(212,119,30)" rx="2" ry="2" />
+<text  x="209.67" y="95.5" >__wake_up_sync_key</text>
+</g>
+<g >
+<title>ngx_http_process_request (2 us, 33.33%)</title><rect x="10.0" y="1013" width="393.3" height="15.0" fill="rgb(252,169,11)" rx="2" ry="2" />
+<text  x="13.00" y="1023.5" >ngx_http_process_request</text>
+</g>
+<g >
+<title>main (6 us, 100.00%)</title><rect x="10.0" y="1173" width="1180.0" height="15.0" fill="rgb(237,36,34)" rx="2" ry="2" />
+<text  x="13.00" y="1183.5" >main</text>
+</g>
+<g >
+<title>ngx_http_echo_send_chain_link (1 us, 16.67%)</title><rect x="206.7" y="917" width="196.6" height="15.0" fill="rgb(214,20,43)" rx="2" ry="2" />
+<text  x="209.67" y="927.5" >ngx_http_echo_send_chain_..</text>
+</g>
+<g >
+<title>ip_rcv_finish (2 us, 33.33%)</title><rect x="600.0" y="629" width="393.3" height="15.0" fill="rgb(210,136,7)" rx="2" ry="2" />
+<text  x="603.00" y="639.5" >ip_rcv_finish</text>
+</g>
+<g >
+<title>__softirqentry_text_start (1 us, 16.67%)</title><rect x="206.7" y="293" width="196.6" height="15.0" fill="rgb(231,147,7)" rx="2" ry="2" />
+<text  x="209.67" y="303.5" >__softirqentry_text_start</text>
+</g>
+<g >
+<title>__sys_recvfrom (2 us, 33.33%)</title><rect x="600.0" y="981" width="393.3" height="15.0" fill="rgb(236,94,5)" rx="2" ry="2" />
+<text  x="603.00" y="991.5" >__sys_recvfrom</text>
+</g>
+<g >
+<title>do_syscall_64 (1 us, 16.67%)</title><rect x="993.3" y="1013" width="196.7" height="15.0" fill="rgb(209,107,36)" rx="2" ry="2" />
+<text  x="996.33" y="1023.5" >do_syscall_64</text>
+</g>
+</g>
+</svg>

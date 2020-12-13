@@ -1,0 +1,880 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" width="1200" height="1110" onload="init(evt)" viewBox="0 0 1200 1110" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<!-- Flame graph stack visualization. See https://github.com/brendangregg/FlameGraph for latest version, and http://www.brendangregg.com/flamegraphs.html for examples. -->
+<!-- NOTES:  -->
+<defs>
+	<linearGradient id="background" y1="0" y2="1" x1="0" x2="0" >
+		<stop stop-color="#eeeeee" offset="5%" />
+		<stop stop-color="#e0e0ff" offset="95%" />
+	</linearGradient>
+</defs>
+<style type="text/css">
+	text { font-family:Verdana; font-size:12px; fill:rgb(0,0,0); }
+	#search, #ignorecase { opacity:0.1; cursor:pointer; }
+	#search:hover, #search.show, #ignorecase:hover, #ignorecase.show { opacity:1; }
+	#subtitle { text-anchor:middle; font-color:rgb(160,160,160); }
+	#title { text-anchor:middle; font-size:17px}
+	#unzoom { cursor:pointer; }
+	#frames > *:hover { stroke:black; stroke-width:0.5; cursor:pointer; }
+	.hide { display:none; }
+	.parent { opacity:0.5; }
+</style>
+<script type="text/ecmascript">
+<![CDATA[
+	"use strict";
+	var details, searchbtn, unzoombtn, matchedtxt, svg, searching, currentSearchTerm, ignorecase, ignorecaseBtn;
+	function init(evt) {
+		details = document.getElementById("details").firstChild;
+		searchbtn = document.getElementById("search");
+		ignorecaseBtn = document.getElementById("ignorecase");
+		unzoombtn = document.getElementById("unzoom");
+		matchedtxt = document.getElementById("matched");
+		svg = document.getElementsByTagName("svg")[0];
+		searching = 0;
+		currentSearchTerm = null;
+	}
+
+	window.addEventListener("click", function(e) {
+		var target = find_group(e.target);
+		if (target) {
+			if (target.nodeName == "a") {
+				if (e.ctrlKey === false) return;
+				e.preventDefault();
+			}
+			if (target.classList.contains("parent")) unzoom();
+			zoom(target);
+		}
+		else if (e.target.id == "unzoom") unzoom();
+		else if (e.target.id == "search") search_prompt();
+		else if (e.target.id == "ignorecase") toggle_ignorecase();
+	}, false)
+
+	// mouse-over for info
+	// show
+	window.addEventListener("mouseover", function(e) {
+		var target = find_group(e.target);
+		if (target) details.nodeValue = "Function: " + g_to_text(target);
+	}, false)
+
+	// clear
+	window.addEventListener("mouseout", function(e) {
+		var target = find_group(e.target);
+		if (target) details.nodeValue = ' ';
+	}, false)
+
+	// ctrl-F for search
+	window.addEventListener("keydown",function (e) {
+		if (e.keyCode === 114 || (e.ctrlKey && e.keyCode === 70)) {
+			e.preventDefault();
+			search_prompt();
+		}
+	}, false)
+
+	// ctrl-I to toggle case-sensitive search
+	window.addEventListener("keydown",function (e) {
+		if (e.ctrlKey && e.keyCode === 73) {
+			e.preventDefault();
+			toggle_ignorecase();
+		}
+	}, false)
+
+	// functions
+	function find_child(node, selector) {
+		var children = node.querySelectorAll(selector);
+		if (children.length) return children[0];
+		return;
+	}
+	function find_group(node) {
+		var parent = node.parentElement;
+		if (!parent) return;
+		if (parent.id == "frames") return node;
+		return find_group(parent);
+	}
+	function orig_save(e, attr, val) {
+		if (e.attributes["_orig_" + attr] != undefined) return;
+		if (e.attributes[attr] == undefined) return;
+		if (val == undefined) val = e.attributes[attr].value;
+		e.setAttribute("_orig_" + attr, val);
+	}
+	function orig_load(e, attr) {
+		if (e.attributes["_orig_"+attr] == undefined) return;
+		e.attributes[attr].value = e.attributes["_orig_" + attr].value;
+		e.removeAttribute("_orig_"+attr);
+	}
+	function g_to_text(e) {
+		var text = find_child(e, "title").firstChild.nodeValue;
+		return (text)
+	}
+	function g_to_func(e) {
+		var func = g_to_text(e);
+		// if there's any manipulation we want to do to the function
+		// name before it's searched, do it here before returning.
+		return (func);
+	}
+	function update_text(e) {
+		var r = find_child(e, "rect");
+		var t = find_child(e, "text");
+		var w = parseFloat(r.attributes.width.value) -3;
+		var txt = find_child(e, "title").textContent.replace(/\([^(]*\)$/,"");
+		t.attributes.x.value = parseFloat(r.attributes.x.value) + 3;
+
+		// Smaller than this size won't fit anything
+		if (w < 2 * 12 * 0.59) {
+			t.textContent = "";
+			return;
+		}
+
+		t.textContent = txt;
+		// Fit in full text width
+		if (/^ *$/.test(txt) || t.getSubStringLength(0, txt.length) < w)
+			return;
+
+		for (var x = txt.length - 2; x > 0; x--) {
+			if (t.getSubStringLength(0, x + 2) <= w) {
+				t.textContent = txt.substring(0, x) + "..";
+				return;
+			}
+		}
+		t.textContent = "";
+	}
+
+	// zoom
+	function zoom_reset(e) {
+		if (e.attributes != undefined) {
+			orig_load(e, "x");
+			orig_load(e, "width");
+		}
+		if (e.childNodes == undefined) return;
+		for (var i = 0, c = e.childNodes; i < c.length; i++) {
+			zoom_reset(c[i]);
+		}
+	}
+	function zoom_child(e, x, ratio) {
+		if (e.attributes != undefined) {
+			if (e.attributes.x != undefined) {
+				orig_save(e, "x");
+				e.attributes.x.value = (parseFloat(e.attributes.x.value) - x - 10) * ratio + 10;
+				if (e.tagName == "text")
+					e.attributes.x.value = find_child(e.parentNode, "rect[x]").attributes.x.value + 3;
+			}
+			if (e.attributes.width != undefined) {
+				orig_save(e, "width");
+				e.attributes.width.value = parseFloat(e.attributes.width.value) * ratio;
+			}
+		}
+
+		if (e.childNodes == undefined) return;
+		for (var i = 0, c = e.childNodes; i < c.length; i++) {
+			zoom_child(c[i], x - 10, ratio);
+		}
+	}
+	function zoom_parent(e) {
+		if (e.attributes) {
+			if (e.attributes.x != undefined) {
+				orig_save(e, "x");
+				e.attributes.x.value = 10;
+			}
+			if (e.attributes.width != undefined) {
+				orig_save(e, "width");
+				e.attributes.width.value = parseInt(svg.width.baseVal.value) - (10 * 2);
+			}
+		}
+		if (e.childNodes == undefined) return;
+		for (var i = 0, c = e.childNodes; i < c.length; i++) {
+			zoom_parent(c[i]);
+		}
+	}
+	function zoom(node) {
+		var attr = find_child(node, "rect").attributes;
+		var width = parseFloat(attr.width.value);
+		var xmin = parseFloat(attr.x.value);
+		var xmax = parseFloat(xmin + width);
+		var ymin = parseFloat(attr.y.value);
+		var ratio = (svg.width.baseVal.value - 2 * 10) / width;
+
+		// XXX: Workaround for JavaScript float issues (fix me)
+		var fudge = 0.0001;
+
+		unzoombtn.classList.remove("hide");
+
+		var el = document.getElementById("frames").children;
+		for (var i = 0; i < el.length; i++) {
+			var e = el[i];
+			var a = find_child(e, "rect").attributes;
+			var ex = parseFloat(a.x.value);
+			var ew = parseFloat(a.width.value);
+			var upstack;
+			// Is it an ancestor
+			if (0 == 0) {
+				upstack = parseFloat(a.y.value) > ymin;
+			} else {
+				upstack = parseFloat(a.y.value) < ymin;
+			}
+			if (upstack) {
+				// Direct ancestor
+				if (ex <= xmin && (ex+ew+fudge) >= xmax) {
+					e.classList.add("parent");
+					zoom_parent(e);
+					update_text(e);
+				}
+				// not in current path
+				else
+					e.classList.add("hide");
+			}
+			// Children maybe
+			else {
+				// no common path
+				if (ex < xmin || ex + fudge >= xmax) {
+					e.classList.add("hide");
+				}
+				else {
+					zoom_child(e, xmin, ratio);
+					update_text(e);
+				}
+			}
+		}
+		search();
+	}
+	function unzoom() {
+		unzoombtn.classList.add("hide");
+		var el = document.getElementById("frames").children;
+		for(var i = 0; i < el.length; i++) {
+			el[i].classList.remove("parent");
+			el[i].classList.remove("hide");
+			zoom_reset(el[i]);
+			update_text(el[i]);
+		}
+		search();
+	}
+
+	// search
+	function toggle_ignorecase() {
+		ignorecase = !ignorecase;
+		if (ignorecase) {
+			ignorecaseBtn.classList.add("show");
+		} else {
+			ignorecaseBtn.classList.remove("show");
+		}
+		reset_search();
+		search();
+	}
+	function reset_search() {
+		var el = document.querySelectorAll("#frames rect");
+		for (var i = 0; i < el.length; i++) {
+			orig_load(el[i], "fill")
+		}
+	}
+	function search_prompt() {
+		if (!searching) {
+			var term = prompt("Enter a search term (regexp " +
+			    "allowed, eg: ^ext4_)"
+			    + (ignorecase ? ", ignoring case" : "")
+			    + "\nPress Ctrl-i to toggle case sensitivity", "");
+			if (term != null) {
+				currentSearchTerm = term;
+				search();
+			}
+		} else {
+			reset_search();
+			searching = 0;
+			currentSearchTerm = null;
+			searchbtn.classList.remove("show");
+			searchbtn.firstChild.nodeValue = "Search"
+			matchedtxt.classList.add("hide");
+			matchedtxt.firstChild.nodeValue = ""
+		}
+	}
+	function search(term) {
+		if (currentSearchTerm === null) return;
+		var term = currentSearchTerm;
+
+		var re = new RegExp(term, ignorecase ? 'i' : '');
+		var el = document.getElementById("frames").children;
+		var matches = new Object();
+		var maxwidth = 0;
+		for (var i = 0; i < el.length; i++) {
+			var e = el[i];
+			var func = g_to_func(e);
+			var rect = find_child(e, "rect");
+			if (func == null || rect == null)
+				continue;
+
+			// Save max width. Only works as we have a root frame
+			var w = parseFloat(rect.attributes.width.value);
+			if (w > maxwidth)
+				maxwidth = w;
+
+			if (func.match(re)) {
+				// highlight
+				var x = parseFloat(rect.attributes.x.value);
+				orig_save(rect, "fill");
+				rect.attributes.fill.value = "rgb(230,0,230)";
+
+				// remember matches
+				if (matches[x] == undefined) {
+					matches[x] = w;
+				} else {
+					if (w > matches[x]) {
+						// overwrite with parent
+						matches[x] = w;
+					}
+				}
+				searching = 1;
+			}
+		}
+		if (!searching)
+			return;
+
+		searchbtn.classList.add("show");
+		searchbtn.firstChild.nodeValue = "Reset Search";
+
+		// calculate percent matched, excluding vertical overlap
+		var count = 0;
+		var lastx = -1;
+		var lastw = 0;
+		var keys = Array();
+		for (k in matches) {
+			if (matches.hasOwnProperty(k))
+				keys.push(k);
+		}
+		// sort the matched frames by their x location
+		// ascending, then width descending
+		keys.sort(function(a, b){
+			return a - b;
+		});
+		// Step through frames saving only the biggest bottom-up frames
+		// thanks to the sort order. This relies on the tree property
+		// where children are always smaller than their parents.
+		var fudge = 0.0001;	// JavaScript floating point
+		for (var k in keys) {
+			var x = parseFloat(keys[k]);
+			var w = matches[keys[k]];
+			if (x >= lastx + lastw - fudge) {
+				count += w;
+				lastx = x;
+				lastw = w;
+			}
+		}
+		// display matched percent
+		matchedtxt.classList.remove("hide");
+		var pct = 100 * count / maxwidth;
+		if (pct != 100) pct = pct.toFixed(1)
+		matchedtxt.firstChild.nodeValue = "Matched: " + pct + "%";
+	}
+]]>
+</script>
+<rect x="0.0" y="0" width="1200.0" height="1110.0" fill="url(#background)"  />
+<text id="title" x="600.00" y="24" >Flame Graph</text>
+<text id="details" x="10.00" y="1093" > </text>
+<text id="unzoom" x="10.00" y="24" class="hide">Reset Zoom</text>
+<text id="search" x="1090.00" y="24" >Search</text>
+<text id="ignorecase" x="1174.00" y="24" >ic</text>
+<text id="matched" x="1090.00" y="1093" > </text>
+<g id="frames">
+<g >
+<title>sock_sendmsg (37,584 us, 0.13%)</title><rect x="10.0" y="197" width="1.5" height="15.0" fill="rgb(88,200,200)" rx="2" ry="2" />
+<text  x="13.04" y="207.5" ></text>
+</g>
+<g >
+<title>ip_rcv (37,584 us, 0.13%)</title><rect x="10.0" y="533" width="1.5" height="15.0" fill="rgb(106,216,216)" rx="2" ry="2" />
+<text  x="13.04" y="543.5" ></text>
+</g>
+<g >
+<title>nginx (29,988,109 us, 100.00%)</title><rect x="10.0" y="1045" width="1180.0" height="15.0" fill="rgb(102,102,223)" rx="2" ry="2" />
+<text  x="13.00" y="1055.5" >nginx</text>
+</g>
+<g >
+<title>ngx_http_echo_run_cmds (600,720 us, 2.00%)</title><rect x="1166.4" y="757" width="23.6" height="15.0" fill="rgb(137,137,252)" rx="2" ry="2" />
+<text  x="1169.36" y="767.5" >n..</text>
+</g>
+<g >
+<title>tcp_rcv_established (37,584 us, 0.13%)</title><rect x="10.0" y="629" width="1.5" height="15.0" fill="rgb(76,189,189)" rx="2" ry="2" />
+<text  x="13.04" y="639.5" ></text>
+</g>
+<g >
+<title>wrk (37,584 us, 0.13%)</title><rect x="10.0" y="37" width="1.5" height="15.0" fill="rgb(84,196,196)" rx="2" ry="2" />
+<text  x="13.04" y="47.5" ></text>
+</g>
+<g >
+<title>secondary_startup_64 (29,348,528 us, 97.87%)</title><rect x="11.5" y="437" width="1154.9" height="15.0" fill="rgb(87,198,198)" rx="2" ry="2" />
+<text  x="14.53" y="447.5" >secondary_startup_64</text>
+</g>
+<g >
+<title>do_idle (600,720 us, 2.00%)</title><rect x="1166.4" y="485" width="23.6" height="15.0" fill="rgb(107,218,218)" rx="2" ry="2" />
+<text  x="1169.36" y="495.5" >d..</text>
+</g>
+<g >
+<title>__x64_sys_epoll_wait (38,808 us, 0.13%)</title><rect x="10.0" y="869" width="1.5" height="15.0" fill="rgb(131,131,248)" rx="2" ry="2" />
+<text  x="13.00" y="879.5" ></text>
+</g>
+<g >
+<title>main (29,988,109 us, 100.00%)</title><rect x="10.0" y="997" width="1180.0" height="15.0" fill="rgb(93,93,216)" rx="2" ry="2" />
+<text  x="13.00" y="1007.5" >main</text>
+</g>
+<g >
+<title>__wake_up_common (38,435 us, 0.13%)</title><rect x="10.0" y="757" width="1.5" height="15.0" fill="rgb(72,185,185)" rx="2" ry="2" />
+<text  x="13.01" y="767.5" ></text>
+</g>
+<g >
+<title>__wake_up_common (38,435 us, 0.13%)</title><rect x="10.0" y="709" width="1.5" height="15.0" fill="rgb(94,206,206)" rx="2" ry="2" />
+<text  x="13.01" y="719.5" ></text>
+</g>
+<g >
+<title>__hrtimer_run_queues (600,720 us, 2.00%)</title><rect x="1166.4" y="613" width="23.6" height="15.0" fill="rgb(107,218,218)" rx="2" ry="2" />
+<text  x="1169.36" y="623.5" >_..</text>
+</g>
+<g >
+<title>apic_timer_interrupt (29,348,528 us, 97.87%)</title><rect x="11.5" y="565" width="1154.9" height="15.0" fill="rgb(55,169,169)" rx="2" ry="2" />
+<text  x="14.53" y="575.5" >apic_timer_interrupt</text>
+</g>
+<g >
+<title>__tcp_transmit_skb (37,584 us, 0.13%)</title><rect x="10.0" y="309" width="1.5" height="15.0" fill="rgb(70,183,183)" rx="2" ry="2" />
+<text  x="13.04" y="319.5" ></text>
+</g>
+<g >
+<title>entry_SYSCALL_64_after_hwframe (37,584 us, 0.13%)</title><rect x="10.0" y="69" width="1.5" height="15.0" fill="rgb(107,217,217)" rx="2" ry="2" />
+<text  x="13.04" y="79.5" ></text>
+</g>
+<g >
+<title>ngx_http_wait_request_handler (600,720 us, 2.00%)</title><rect x="1166.4" y="885" width="23.6" height="15.0" fill="rgb(117,117,236)" rx="2" ry="2" />
+<text  x="1169.36" y="895.5" >n..</text>
+</g>
+<g >
+<title>do_nanosleep (29,348,528 us, 97.87%)</title><rect x="11.5" y="677" width="1154.9" height="15.0" fill="rgb(126,126,243)" rx="2" ry="2" />
+<text  x="14.53" y="687.5" >do_nanosleep</text>
+</g>
+<g >
+<title>arch_cpu_idle (600,720 us, 2.00%)</title><rect x="1166.4" y="517" width="23.6" height="15.0" fill="rgb(93,204,204)" rx="2" ry="2" />
+<text  x="1169.36" y="527.5" >a..</text>
+</g>
+<g >
+<title>ngx_http_echo_handler (29,348,564 us, 97.87%)</title><rect x="11.5" y="773" width="1154.9" height="15.0" fill="rgb(109,109,229)" rx="2" ry="2" />
+<text  x="14.53" y="783.5" >ngx_http_echo_handler</text>
+</g>
+<g >
+<title>process_backlog (37,584 us, 0.13%)</title><rect x="10.0" y="485" width="1.5" height="15.0" fill="rgb(108,218,218)" rx="2" ry="2" />
+<text  x="13.04" y="495.5" ></text>
+</g>
+<g >
+<title>ngx_http_core_content_phase (600,720 us, 2.00%)</title><rect x="1166.4" y="789" width="23.6" height="15.0" fill="rgb(97,97,219)" rx="2" ry="2" />
+<text  x="1169.36" y="799.5" >n..</text>
+</g>
+<g >
+<title>secondary_startup_64 (600,720 us, 2.00%)</title><rect x="1166.4" y="437" width="23.6" height="15.0" fill="rgb(88,200,200)" rx="2" ry="2" />
+<text  x="1169.36" y="447.5" >s..</text>
+</g>
+<g >
+<title>ip_local_deliver (37,584 us, 0.13%)</title><rect x="10.0" y="565" width="1.5" height="15.0" fill="rgb(99,210,210)" rx="2" ry="2" />
+<text  x="13.04" y="575.5" ></text>
+</g>
+<g >
+<title>ksys_write (37,584 us, 0.13%)</title><rect x="10.0" y="117" width="1.5" height="15.0" fill="rgb(62,176,176)" rx="2" ry="2" />
+<text  x="13.04" y="127.5" ></text>
+</g>
+<g >
+<title>sock_def_readable (38,435 us, 0.13%)</title><rect x="10.0" y="661" width="1.5" height="15.0" fill="rgb(89,201,201)" rx="2" ry="2" />
+<text  x="13.01" y="671.5" ></text>
+</g>
+<g >
+<title>ep_poll_callback (38,435 us, 0.13%)</title><rect x="10.0" y="725" width="1.5" height="15.0" fill="rgb(80,192,192)" rx="2" ry="2" />
+<text  x="13.01" y="735.5" ></text>
+</g>
+<g >
+<title>__wake_up_common_lock (38,435 us, 0.13%)</title><rect x="10.0" y="693" width="1.5" height="15.0" fill="rgb(71,184,184)" rx="2" ry="2" />
+<text  x="13.01" y="703.5" ></text>
+</g>
+<g >
+<title>ngx_worker_process_cycle (29,988,109 us, 100.00%)</title><rect x="10.0" y="933" width="1180.0" height="15.0" fill="rgb(130,130,247)" rx="2" ry="2" />
+<text  x="13.00" y="943.5" >ngx_worker_process_cycle</text>
+</g>
+<g >
+<title>hrtimer_interrupt (29,348,528 us, 97.87%)</title><rect x="11.5" y="597" width="1154.9" height="15.0" fill="rgb(56,170,170)" rx="2" ry="2" />
+<text  x="14.53" y="607.5" >hrtimer_interrupt</text>
+</g>
+<g >
+<title>__softirqentry_text_start (37,584 us, 0.13%)</title><rect x="10.0" y="453" width="1.5" height="15.0" fill="rgb(101,212,212)" rx="2" ry="2" />
+<text  x="13.04" y="463.5" ></text>
+</g>
+<g >
+<title>tcp_sendmsg_locked (37,584 us, 0.13%)</title><rect x="10.0" y="245" width="1.5" height="15.0" fill="rgb(61,175,175)" rx="2" ry="2" />
+<text  x="13.04" y="255.5" ></text>
+</g>
+<g >
+<title>-- (29,348,528 us, 97.87%)</title><rect x="11.5" y="645" width="1154.9" height="15.0" fill="rgb(160,160,160)" rx="2" ry="2" />
+<text  x="14.53" y="655.5" >--</text>
+</g>
+<g >
+<title>tcp_v4_rcv (37,584 us, 0.13%)</title><rect x="10.0" y="597" width="1.5" height="15.0" fill="rgb(63,177,177)" rx="2" ry="2" />
+<text  x="13.04" y="607.5" ></text>
+</g>
+<g >
+<title>entry_SYSCALL_64_after_hwframe (600,720 us, 2.00%)</title><rect x="1166.4" y="741" width="23.6" height="15.0" fill="rgb(133,133,249)" rx="2" ry="2" />
+<text  x="1169.36" y="751.5" >e..</text>
+</g>
+<g >
+<title>ngx_http_process_request_line (29,348,564 us, 97.87%)</title><rect x="11.5" y="869" width="1154.9" height="15.0" fill="rgb(90,90,213)" rx="2" ry="2" />
+<text  x="14.53" y="879.5" >ngx_http_process_request_line</text>
+</g>
+<g >
+<title>apic_timer_interrupt (600,720 us, 2.00%)</title><rect x="1166.4" y="565" width="23.6" height="15.0" fill="rgb(83,195,195)" rx="2" ry="2" />
+<text  x="1169.36" y="575.5" >a..</text>
+</g>
+<g >
+<title>entry_SYSCALL_64_after_hwframe (38,808 us, 0.13%)</title><rect x="10.0" y="901" width="1.5" height="15.0" fill="rgb(95,95,218)" rx="2" ry="2" />
+<text  x="13.00" y="911.5" ></text>
+</g>
+<g >
+<title>ngx_process_events_and_timers (29,988,109 us, 100.00%)</title><rect x="10.0" y="917" width="1180.0" height="15.0" fill="rgb(121,121,239)" rx="2" ry="2" />
+<text  x="13.00" y="927.5" >ngx_process_events_and_timers</text>
+</g>
+<g >
+<title>ngx_start_worker_processes (29,988,109 us, 100.00%)</title><rect x="10.0" y="965" width="1180.0" height="15.0" fill="rgb(136,136,251)" rx="2" ry="2" />
+<text  x="13.00" y="975.5" >ngx_start_worker_processes</text>
+</g>
+<g >
+<title>__x64_sys_nanosleep (600,720 us, 2.00%)</title><rect x="1166.4" y="709" width="23.6" height="15.0" fill="rgb(101,101,222)" rx="2" ry="2" />
+<text  x="1169.36" y="719.5" >_..</text>
+</g>
+<g >
+<title>start_secondary (29,348,528 us, 97.87%)</title><rect x="11.5" y="453" width="1154.9" height="15.0" fill="rgb(54,169,169)" rx="2" ry="2" />
+<text  x="14.53" y="463.5" >start_secondary</text>
+</g>
+<g >
+<title>ngx_http_keepalive_handler (29,348,581 us, 97.87%)</title><rect x="11.5" y="885" width="1154.9" height="15.0" fill="rgb(134,134,250)" rx="2" ry="2" />
+<text  x="14.53" y="895.5" >ngx_http_keepalive_handler</text>
+</g>
+<g >
+<title>__libc_start_main (29,988,109 us, 100.00%)</title><rect x="10.0" y="1013" width="1180.0" height="15.0" fill="rgb(127,127,244)" rx="2" ry="2" />
+<text  x="13.00" y="1023.5" >__libc_start_main</text>
+</g>
+<g >
+<title>hrtimer_wakeup (600,720 us, 2.00%)</title><rect x="1166.4" y="629" width="23.6" height="15.0" fill="rgb(105,216,216)" rx="2" ry="2" />
+<text  x="1169.36" y="639.5" >h..</text>
+</g>
+<g >
+<title>cpu_startup_entry (29,348,528 us, 97.87%)</title><rect x="11.5" y="469" width="1154.9" height="15.0" fill="rgb(61,175,175)" rx="2" ry="2" />
+<text  x="14.53" y="479.5" >cpu_startup_entry</text>
+</g>
+<g >
+<title>__netif_receive_skb_core (37,584 us, 0.13%)</title><rect x="10.0" y="517" width="1.5" height="15.0" fill="rgb(60,174,174)" rx="2" ry="2" />
+<text  x="13.04" y="527.5" ></text>
+</g>
+<g >
+<title>tcp_data_queue (37,584 us, 0.13%)</title><rect x="10.0" y="645" width="1.5" height="15.0" fill="rgb(59,173,173)" rx="2" ry="2" />
+<text  x="13.04" y="655.5" ></text>
+</g>
+<g >
+<title>ip_local_deliver_finish (37,584 us, 0.13%)</title><rect x="10.0" y="581" width="1.5" height="15.0" fill="rgb(83,196,196)" rx="2" ry="2" />
+<text  x="13.04" y="591.5" ></text>
+</g>
+<g >
+<title>ngx_http_core_run_phases (29,348,564 us, 97.87%)</title><rect x="11.5" y="805" width="1154.9" height="15.0" fill="rgb(134,134,250)" rx="2" ry="2" />
+<text  x="14.53" y="815.5" >ngx_http_core_run_phases</text>
+</g>
+<g >
+<title>ngx_http_process_request_headers (29,348,564 us, 97.87%)</title><rect x="11.5" y="853" width="1154.9" height="15.0" fill="rgb(117,117,235)" rx="2" ry="2" />
+<text  x="14.53" y="863.5" >ngx_http_process_request_headers</text>
+</g>
+<g >
+<title>ip_finish_output2 (37,584 us, 0.13%)</title><rect x="10.0" y="389" width="1.5" height="15.0" fill="rgb(97,208,208)" rx="2" ry="2" />
+<text  x="13.04" y="399.5" ></text>
+</g>
+<g >
+<title>ngx_epoll_process_events (29,949,301 us, 99.87%)</title><rect x="11.5" y="901" width="1178.5" height="15.0" fill="rgb(101,101,223)" rx="2" ry="2" />
+<text  x="14.53" y="911.5" >ngx_epoll_process_events</text>
+</g>
+<g >
+<title>inet_sendmsg (37,584 us, 0.13%)</title><rect x="10.0" y="213" width="1.5" height="15.0" fill="rgb(52,167,167)" rx="2" ry="2" />
+<text  x="13.04" y="223.5" ></text>
+</g>
+<g >
+<title>-- (600,720 us, 2.00%)</title><rect x="1166.4" y="645" width="23.6" height="15.0" fill="rgb(160,160,160)" rx="2" ry="2" />
+<text  x="1169.36" y="655.5" >--</text>
+</g>
+<g >
+<title>[unknown] (37,584 us, 0.13%)</title><rect x="10.0" y="53" width="1.5" height="15.0" fill="rgb(100,211,211)" rx="2" ry="2" />
+<text  x="13.04" y="63.5" ></text>
+</g>
+<g >
+<title>ip_rcv_finish (37,584 us, 0.13%)</title><rect x="10.0" y="549" width="1.5" height="15.0" fill="rgb(83,195,195)" rx="2" ry="2" />
+<text  x="13.04" y="559.5" ></text>
+</g>
+<g >
+<title>ngx_spawn_process (29,988,109 us, 100.00%)</title><rect x="10.0" y="949" width="1180.0" height="15.0" fill="rgb(90,90,213)" rx="2" ry="2" />
+<text  x="13.00" y="959.5" >ngx_spawn_process</text>
+</g>
+<g >
+<title>ep_poll (38,808 us, 0.13%)</title><rect x="10.0" y="837" width="1.5" height="15.0" fill="rgb(138,138,253)" rx="2" ry="2" />
+<text  x="13.00" y="847.5" ></text>
+</g>
+<g >
+<title>ip_queue_xmit (37,584 us, 0.13%)</title><rect x="10.0" y="325" width="1.5" height="15.0" fill="rgb(91,202,202)" rx="2" ry="2" />
+<text  x="13.04" y="335.5" ></text>
+</g>
+<g >
+<title>swapper/11 (600,720 us, 2.00%)</title><rect x="1166.4" y="421" width="23.6" height="15.0" fill="rgb(103,214,214)" rx="2" ry="2" />
+<text  x="1169.36" y="431.5" >s..</text>
+</g>
+<g >
+<title>default_idle_call (29,348,528 us, 97.87%)</title><rect x="11.5" y="501" width="1154.9" height="15.0" fill="rgb(106,216,216)" rx="2" ry="2" />
+<text  x="14.53" y="511.5" >default_idle_call</text>
+</g>
+<g >
+<title>hrtimer_nanosleep (29,348,528 us, 97.87%)</title><rect x="11.5" y="693" width="1154.9" height="15.0" fill="rgb(131,131,247)" rx="2" ry="2" />
+<text  x="14.53" y="703.5" >hrtimer_nanosleep</text>
+</g>
+<g >
+<title>smp_apic_timer_interrupt (600,720 us, 2.00%)</title><rect x="1166.4" y="581" width="23.6" height="15.0" fill="rgb(85,197,197)" rx="2" ry="2" />
+<text  x="1169.36" y="591.5" >s..</text>
+</g>
+<g >
+<title>__netif_receive_skb (37,584 us, 0.13%)</title><rect x="10.0" y="501" width="1.5" height="15.0" fill="rgb(85,197,197)" rx="2" ry="2" />
+<text  x="13.04" y="511.5" ></text>
+</g>
+<g >
+<title>schedule_hrtimeout_range (38,808 us, 0.13%)</title><rect x="10.0" y="821" width="1.5" height="15.0" fill="rgb(116,116,235)" rx="2" ry="2" />
+<text  x="13.00" y="831.5" ></text>
+</g>
+<g >
+<title>tcp_write_xmit (37,584 us, 0.13%)</title><rect x="10.0" y="293" width="1.5" height="15.0" fill="rgb(94,205,205)" rx="2" ry="2" />
+<text  x="13.04" y="303.5" ></text>
+</g>
+<g >
+<title>__x64_sys_nanosleep (29,348,528 us, 97.87%)</title><rect x="11.5" y="709" width="1154.9" height="15.0" fill="rgb(132,132,248)" rx="2" ry="2" />
+<text  x="14.53" y="719.5" >__x64_sys_nanosleep</text>
+</g>
+<g >
+<title>all (29,988,109 us, 100%)</title><rect x="10.0" y="1061" width="1180.0" height="15.0" fill="rgb(109,109,229)" rx="2" ry="2" />
+<text  x="13.00" y="1071.5" ></text>
+</g>
+<g >
+<title>__tcp_push_pending_frames (37,584 us, 0.13%)</title><rect x="10.0" y="277" width="1.5" height="15.0" fill="rgb(58,172,172)" rx="2" ry="2" />
+<text  x="13.04" y="287.5" ></text>
+</g>
+<g >
+<title>net_rx_action (37,584 us, 0.13%)</title><rect x="10.0" y="469" width="1.5" height="15.0" fill="rgb(106,217,217)" rx="2" ry="2" />
+<text  x="13.04" y="479.5" ></text>
+</g>
+<g >
+<title>do_idle (29,348,528 us, 97.87%)</title><rect x="11.5" y="485" width="1154.9" height="15.0" fill="rgb(107,218,218)" rx="2" ry="2" />
+<text  x="14.53" y="495.5" >do_idle</text>
+</g>
+<g >
+<title>__vfs_write (37,584 us, 0.13%)</title><rect x="10.0" y="149" width="1.5" height="15.0" fill="rgb(103,214,214)" rx="2" ry="2" />
+<text  x="13.04" y="159.5" ></text>
+</g>
+<g >
+<title>default_idle (600,720 us, 2.00%)</title><rect x="1166.4" y="533" width="23.6" height="15.0" fill="rgb(94,205,205)" rx="2" ry="2" />
+<text  x="1169.36" y="543.5" >d..</text>
+</g>
+<g >
+<title>do_nanosleep (600,720 us, 2.00%)</title><rect x="1166.4" y="677" width="23.6" height="15.0" fill="rgb(94,94,216)" rx="2" ry="2" />
+<text  x="1169.36" y="687.5" >d..</text>
+</g>
+<g >
+<title>start_secondary (600,720 us, 2.00%)</title><rect x="1166.4" y="453" width="23.6" height="15.0" fill="rgb(52,167,167)" rx="2" ry="2" />
+<text  x="1169.36" y="463.5" >s..</text>
+</g>
+<g >
+<title>cpu_startup_entry (600,720 us, 2.00%)</title><rect x="1166.4" y="469" width="23.6" height="15.0" fill="rgb(60,174,174)" rx="2" ry="2" />
+<text  x="1169.36" y="479.5" >c..</text>
+</g>
+<g >
+<title>ngx_http_process_request_line (600,720 us, 2.00%)</title><rect x="1166.4" y="869" width="23.6" height="15.0" fill="rgb(138,138,253)" rx="2" ry="2" />
+<text  x="1169.36" y="879.5" >n..</text>
+</g>
+<g >
+<title>__x64_sys_write (37,584 us, 0.13%)</title><rect x="10.0" y="101" width="1.5" height="15.0" fill="rgb(74,187,187)" rx="2" ry="2" />
+<text  x="13.04" y="111.5" ></text>
+</g>
+<g >
+<title>ngx_http_core_content_phase (29,348,564 us, 97.87%)</title><rect x="11.5" y="789" width="1154.9" height="15.0" fill="rgb(88,88,211)" rx="2" ry="2" />
+<text  x="14.53" y="799.5" >ngx_http_core_content_phase</text>
+</g>
+<g >
+<title>default_idle (29,348,528 us, 97.87%)</title><rect x="11.5" y="533" width="1154.9" height="15.0" fill="rgb(87,199,199)" rx="2" ry="2" />
+<text  x="14.53" y="543.5" >default_idle</text>
+</g>
+<g >
+<title>new_sync_write (37,584 us, 0.13%)</title><rect x="10.0" y="165" width="1.5" height="15.0" fill="rgb(105,215,215)" rx="2" ry="2" />
+<text  x="13.04" y="175.5" ></text>
+</g>
+<g >
+<title>__wake_up_locked (38,435 us, 0.13%)</title><rect x="10.0" y="741" width="1.5" height="15.0" fill="rgb(63,177,177)" rx="2" ry="2" />
+<text  x="13.01" y="751.5" ></text>
+</g>
+<g >
+<title>ip_local_out (37,584 us, 0.13%)</title><rect x="10.0" y="341" width="1.5" height="15.0" fill="rgb(86,198,198)" rx="2" ry="2" />
+<text  x="13.04" y="351.5" ></text>
+</g>
+<g >
+<title>ip_output (37,584 us, 0.13%)</title><rect x="10.0" y="357" width="1.5" height="15.0" fill="rgb(52,167,167)" rx="2" ry="2" />
+<text  x="13.04" y="367.5" ></text>
+</g>
+<g >
+<title>__local_bh_enable_ip (37,584 us, 0.13%)</title><rect x="10.0" y="405" width="1.5" height="15.0" fill="rgb(74,187,187)" rx="2" ry="2" />
+<text  x="13.04" y="415.5" ></text>
+</g>
+<g >
+<title>do_syscall_64 (37,584 us, 0.13%)</title><rect x="10.0" y="85" width="1.5" height="15.0" fill="rgb(82,194,194)" rx="2" ry="2" />
+<text  x="13.04" y="95.5" ></text>
+</g>
+<g >
+<title>schedule_hrtimeout_range_clock (38,808 us, 0.13%)</title><rect x="10.0" y="805" width="1.5" height="15.0" fill="rgb(84,84,209)" rx="2" ry="2" />
+<text  x="13.00" y="815.5" ></text>
+</g>
+<g >
+<title>ngx_http_handler (29,348,564 us, 97.87%)</title><rect x="11.5" y="821" width="1154.9" height="15.0" fill="rgb(81,81,206)" rx="2" ry="2" />
+<text  x="14.53" y="831.5" >ngx_http_handler</text>
+</g>
+<g >
+<title>tcp_push (37,584 us, 0.13%)</title><rect x="10.0" y="261" width="1.5" height="15.0" fill="rgb(53,168,168)" rx="2" ry="2" />
+<text  x="13.04" y="271.5" ></text>
+</g>
+<g >
+<title>ngx_http_process_request (29,348,564 us, 97.87%)</title><rect x="11.5" y="837" width="1154.9" height="15.0" fill="rgb(113,113,232)" rx="2" ry="2" />
+<text  x="14.53" y="847.5" >ngx_http_process_request</text>
+</g>
+<g >
+<title>schedule (600,720 us, 2.00%)</title><rect x="1166.4" y="661" width="23.6" height="15.0" fill="rgb(87,87,211)" rx="2" ry="2" />
+<text  x="1169.36" y="671.5" >s..</text>
+</g>
+<g >
+<title>ngx_http_process_request_headers (600,720 us, 2.00%)</title><rect x="1166.4" y="853" width="23.6" height="15.0" fill="rgb(118,118,237)" rx="2" ry="2" />
+<text  x="1169.36" y="863.5" >n..</text>
+</g>
+<g >
+<title>ip_finish_output (37,584 us, 0.13%)</title><rect x="10.0" y="373" width="1.5" height="15.0" fill="rgb(77,190,190)" rx="2" ry="2" />
+<text  x="13.04" y="383.5" ></text>
+</g>
+<g >
+<title>arch_cpu_idle (29,348,528 us, 97.87%)</title><rect x="11.5" y="517" width="1154.9" height="15.0" fill="rgb(85,197,197)" rx="2" ry="2" />
+<text  x="14.53" y="527.5" >arch_cpu_idle</text>
+</g>
+<g >
+<title>vfs_write (37,584 us, 0.13%)</title><rect x="10.0" y="133" width="1.5" height="15.0" fill="rgb(69,182,182)" rx="2" ry="2" />
+<text  x="13.04" y="143.5" ></text>
+</g>
+<g >
+<title>do_softirq_own_stack (37,584 us, 0.13%)</title><rect x="10.0" y="437" width="1.5" height="15.0" fill="rgb(90,202,202)" rx="2" ry="2" />
+<text  x="13.04" y="447.5" ></text>
+</g>
+<g >
+<title>do_epoll_wait (38,808 us, 0.13%)</title><rect x="10.0" y="853" width="1.5" height="15.0" fill="rgb(132,132,248)" rx="2" ry="2" />
+<text  x="13.00" y="863.5" ></text>
+</g>
+<g >
+<title>default_idle_call (600,720 us, 2.00%)</title><rect x="1166.4" y="501" width="23.6" height="15.0" fill="rgb(68,181,181)" rx="2" ry="2" />
+<text  x="1169.36" y="511.5" >d..</text>
+</g>
+<g >
+<title>do_softirq.part.19 (37,584 us, 0.13%)</title><rect x="10.0" y="421" width="1.5" height="15.0" fill="rgb(78,191,191)" rx="2" ry="2" />
+<text  x="13.04" y="431.5" ></text>
+</g>
+<g >
+<title>schedule (38,808 us, 0.13%)</title><rect x="10.0" y="789" width="1.5" height="15.0" fill="rgb(80,80,205)" rx="2" ry="2" />
+<text  x="13.00" y="799.5" ></text>
+</g>
+<g >
+<title>__hrtimer_run_queues (29,348,528 us, 97.87%)</title><rect x="11.5" y="613" width="1154.9" height="15.0" fill="rgb(85,197,197)" rx="2" ry="2" />
+<text  x="14.53" y="623.5" >__hrtimer_run_queues</text>
+</g>
+<g >
+<title>do_syscall_64 (29,348,528 us, 97.87%)</title><rect x="11.5" y="725" width="1154.9" height="15.0" fill="rgb(131,131,247)" rx="2" ry="2" />
+<text  x="14.53" y="735.5" >do_syscall_64</text>
+</g>
+<g >
+<title>__wake_up_sync_key (38,435 us, 0.13%)</title><rect x="10.0" y="677" width="1.5" height="15.0" fill="rgb(96,207,207)" rx="2" ry="2" />
+<text  x="13.01" y="687.5" ></text>
+</g>
+<g >
+<title>do_syscall_64 (38,808 us, 0.13%)</title><rect x="10.0" y="885" width="1.5" height="15.0" fill="rgb(129,129,246)" rx="2" ry="2" />
+<text  x="13.00" y="895.5" ></text>
+</g>
+<g >
+<title>hrtimer_nanosleep (600,720 us, 2.00%)</title><rect x="1166.4" y="693" width="23.6" height="15.0" fill="rgb(135,135,251)" rx="2" ry="2" />
+<text  x="1169.36" y="703.5" >h..</text>
+</g>
+<g >
+<title>native_safe_halt (600,720 us, 2.00%)</title><rect x="1166.4" y="549" width="23.6" height="15.0" fill="rgb(89,201,201)" rx="2" ry="2" />
+<text  x="1169.36" y="559.5" >n..</text>
+</g>
+<g >
+<title>do_syscall_64 (600,720 us, 2.00%)</title><rect x="1166.4" y="725" width="23.6" height="15.0" fill="rgb(120,120,238)" rx="2" ry="2" />
+<text  x="1169.36" y="735.5" >d..</text>
+</g>
+<g >
+<title>ngx_http_echo_run_cmds (29,348,564 us, 97.87%)</title><rect x="11.5" y="757" width="1154.9" height="15.0" fill="rgb(125,125,242)" rx="2" ry="2" />
+<text  x="14.53" y="767.5" >ngx_http_echo_run_cmds</text>
+</g>
+<g >
+<title>hrtimer_wakeup (29,348,528 us, 97.87%)</title><rect x="11.5" y="629" width="1154.9" height="15.0" fill="rgb(90,202,202)" rx="2" ry="2" />
+<text  x="14.53" y="639.5" >hrtimer_wakeup</text>
+</g>
+<g >
+<title>entry_SYSCALL_64_after_hwframe (29,348,528 us, 97.87%)</title><rect x="11.5" y="741" width="1154.9" height="15.0" fill="rgb(94,94,216)" rx="2" ry="2" />
+<text  x="14.53" y="751.5" >entry_SYSCALL_64_after_hwframe</text>
+</g>
+<g >
+<title>sock_write_iter (37,584 us, 0.13%)</title><rect x="10.0" y="181" width="1.5" height="15.0" fill="rgb(74,187,187)" rx="2" ry="2" />
+<text  x="13.04" y="191.5" ></text>
+</g>
+<g >
+<title>tcp_v4_do_rcv (37,584 us, 0.13%)</title><rect x="10.0" y="613" width="1.5" height="15.0" fill="rgb(104,215,215)" rx="2" ry="2" />
+<text  x="13.04" y="623.5" ></text>
+</g>
+<g >
+<title>schedule (29,348,528 us, 97.87%)</title><rect x="11.5" y="661" width="1154.9" height="15.0" fill="rgb(112,112,232)" rx="2" ry="2" />
+<text  x="14.53" y="671.5" >schedule</text>
+</g>
+<g >
+<title>ngx_master_process_cycle (29,988,109 us, 100.00%)</title><rect x="10.0" y="981" width="1180.0" height="15.0" fill="rgb(91,91,214)" rx="2" ry="2" />
+<text  x="13.00" y="991.5" >ngx_master_process_cycle</text>
+</g>
+<g >
+<title>tcp_sendmsg (37,584 us, 0.13%)</title><rect x="10.0" y="229" width="1.5" height="15.0" fill="rgb(79,192,192)" rx="2" ry="2" />
+<text  x="13.04" y="239.5" ></text>
+</g>
+<g >
+<title>smp_apic_timer_interrupt (29,348,528 us, 97.87%)</title><rect x="11.5" y="581" width="1154.9" height="15.0" fill="rgb(100,211,211)" rx="2" ry="2" />
+<text  x="14.53" y="591.5" >smp_apic_timer_interrupt</text>
+</g>
+<g >
+<title>ngx_http_handler (600,720 us, 2.00%)</title><rect x="1166.4" y="821" width="23.6" height="15.0" fill="rgb(134,134,250)" rx="2" ry="2" />
+<text  x="1169.36" y="831.5" >n..</text>
+</g>
+<g >
+<title>ngx_http_process_request (600,720 us, 2.00%)</title><rect x="1166.4" y="837" width="23.6" height="15.0" fill="rgb(132,132,248)" rx="2" ry="2" />
+<text  x="1169.36" y="847.5" >n..</text>
+</g>
+<g >
+<title>[unknown] (29,988,109 us, 100.00%)</title><rect x="10.0" y="1029" width="1180.0" height="15.0" fill="rgb(136,136,251)" rx="2" ry="2" />
+<text  x="13.00" y="1039.5" >[unknown]</text>
+</g>
+<g >
+<title>ngx_http_echo_handler (600,720 us, 2.00%)</title><rect x="1166.4" y="773" width="23.6" height="15.0" fill="rgb(104,104,225)" rx="2" ry="2" />
+<text  x="1169.36" y="783.5" >n..</text>
+</g>
+<g >
+<title>swapper/11 (29,348,528 us, 97.87%)</title><rect x="11.5" y="421" width="1154.9" height="15.0" fill="rgb(60,174,174)" rx="2" ry="2" />
+<text  x="14.53" y="431.5" >swapper/11</text>
+</g>
+<g >
+<title>-- (38,808 us, 0.13%)</title><rect x="10.0" y="773" width="1.5" height="15.0" fill="rgb(160,160,160)" rx="2" ry="2" />
+<text  x="13.00" y="783.5" ></text>
+</g>
+<g >
+<title>ngx_http_core_run_phases (600,720 us, 2.00%)</title><rect x="1166.4" y="805" width="23.6" height="15.0" fill="rgb(127,127,244)" rx="2" ry="2" />
+<text  x="1169.36" y="815.5" >n..</text>
+</g>
+<g >
+<title>native_safe_halt (29,348,528 us, 97.87%)</title><rect x="11.5" y="549" width="1154.9" height="15.0" fill="rgb(63,177,177)" rx="2" ry="2" />
+<text  x="14.53" y="559.5" >native_safe_halt</text>
+</g>
+<g >
+<title>hrtimer_interrupt (600,720 us, 2.00%)</title><rect x="1166.4" y="597" width="23.6" height="15.0" fill="rgb(78,190,190)" rx="2" ry="2" />
+<text  x="1169.36" y="607.5" >h..</text>
+</g>
+</g>
+</svg>

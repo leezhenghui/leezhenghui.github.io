@@ -382,9 +382,16 @@ E.g: put a log-shipper in sidecar which responsible for streaming logs to `Kafka
 
 ## Reference modes for MSA service communication
 
-### Gateway mode 
+### Gateway mode
 
-<img src="{{ site.url }}/assets/materials/build-scalable-system/architecture-gateway-mode.png" alt="leaky-bucket-algorithm.jpeg">
+#### centralized internal service proxy
+
+ <img src="{{ site.url }}/assets/materials/build-scalable-system/architecture-gateway-mode.png" alt="leaky-bucket-algorithm.jpeg">
+
+#### per-node internal service proxy
+
+ <img src="{{ site.url }}/assets/materials/build-scalable-system/architecture-gateway-mode-v2.png" alt="leaky-bucket-algorithm.jpeg">
+
 
 * Pros and Cons
 
