@@ -11,4 +11,4 @@ comments: true
 
 {% include_relative includes/msa-evolution.html %}
 
-> The slides loading might need a little bit long time due to the material large size.
+> Strongly suggest you open this page with PC browser. The slides loading might need a little bit long time due to the material large size.
