@@ -11,4 +11,4 @@ comments: true
 
 {% include_relative includes/msa-evolution.html %}
 
-**[Link](https://leezhenghui.github.io/assets/materials/build-scalable-system/msa-evolution.html)** for the presentation(the loading might need a little bit long time due to the material large size)
+> The slides loading might need a little bit long time due to the material large size.
