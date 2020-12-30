@@ -384,11 +384,11 @@ E.g: put a log-shipper in sidecar which responsible for streaming logs to `Kafka
 
 ### Gateway mode
 
-#### centralized internal service proxy
+#### Centralized internal service proxy
 
  <img src="{{ site.url }}/assets/materials/build-scalable-system/architecture-gateway-mode.png" alt="leaky-bucket-algorithm.jpeg">
 
-#### per-node internal service proxy
+#### Per-node internal service proxy
 
  <img src="{{ site.url }}/assets/materials/build-scalable-system/architecture-gateway-mode-v2.png" alt="leaky-bucket-algorithm.jpeg">
 
@@ -400,7 +400,7 @@ E.g: put a log-shipper in sidecar which responsible for streaming logs to `Kafka
     | **Pros** | **Cons**
     |:-|:-
     | Multiple languages support| <br>Limited for lightweight common cummunication protocol.<br>e.g: RESTful, gRPC
-    || <br>Introduce centralized connect point in network topology <br>Although it eaily can be horizontally scaled
+    || <br>Introduce (per-node)centralized connection point in network topology <br>Although it eaily can be horizontally scaled
     || <br>Introduce one more hop per communication,<br> has performance impact
 
 ### Embedded router mode 
