@@ -1,6 +1,7 @@
 # Site Settings
 encoding: UTF-8
-exclude: ["*.gem", "*.gemspec", "Gemfile", "Gemfile.lock", "node_modules", "Rakefile", "starter-kit", "vendor"]
+# include: ["_private_posts", "_private_assets"]
+exclude: ["build.gradle", "settings.gradle", "gradlew", "gradle.properties", "jekyll-run.sh", "*.gem", "*.gemspec", "Gemfile", "Gemfile.lock", "node_modules", "Rakefile", "starter-kit", "vendor", "out"]
 lang: en # Language code as defined in _data/i18n.yml. en, en-gb, en-us, zh, zh-cn, zh-tw etc.
 permalink: /:categories/:year/:month/:day/:title.html
 
@@ -53,7 +54,7 @@ home:
 blog:
   cc_license: http://creativecommons.org/licenses/by-sa/4.0/ # A link to CC License of your choice.
   cc_license_image: /assets/images/theme/cc-by-sa.png # An image of your CC License. 
-  footer_content: Copyright (c) 2011~2019 Zhenghui Lee <a href="http://creativecommons.org/licenses/by-sa/4.0/">(CC BY-SA 4.0)</a>
+  footer_content: Copyright (c) 2011~2026 Zhenghui Lee <a href="http://creativecommons.org/licenses/by-sa/4.0/">(CC BY-SA 4.0)</a>
 
 disqus:
   shortname: zhenghui
