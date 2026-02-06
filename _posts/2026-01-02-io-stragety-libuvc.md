@@ -1,6 +1,6 @@
 --- 
 layout: post
-title: IO Strategy - Dive into Libuvc
+title: IO Strategy - The internals of Libuvc
 categories: [io-strategy]
 tags: [I/O, linux, libuv, coroutine, vibe-coding]
 series: [io-strategy]
@@ -150,13 +150,13 @@ The transformation from `libuv` to `libuvc` isn't just about syntax; it's about 
 
 One of the biggest challenges in system programming is developing Linux-specific features (like `epoll` or `io_uring`) on a macOS machine (the "Vibe Coding" environment). We implemented two distinct mocking strategies to allow Linux logic to compile and "run" on macOS.
 
-### 1. Epoll Mock: "The Truman Show"
+### 1. Epoll Mock: "Syscall Shim Based Mock"
 For `epoll`, we use a **Syscall Shim**. We compile the *real* `src/unix/io-backend/io-backend-epoll.c` (the Linux implementation) on macOS.
 *   **How:** We intercept `epoll_create`, `epoll_ctl`, and `epoll_wait` calls.
 *   **Result:** The code *thinks* it's running on Linux. It manages the red-black trees and state logic exactly as it would on production. The "kernel" it talks to is actually a user-space simulation in `src/unix/mocks/linux-stub.c`.
 *   **Benefit:** High test coverage of the actual backend logic.
 
-### 2. Iouring Mock: "The Stunt Double"
+### 2. Iouring Mock: "io-backend Stub Mock"
 For `io_uring`, mocking the complex shared-memory ring buffer mechanism in user space was too heavy.
 *   **How:** We replace the entire backend with a stub (`src/unix/mocks/io-backend-iouring-stub.c`).
 *   **Result:** It compiles and satisfies the linker, but it doesn't perform real I/O.
