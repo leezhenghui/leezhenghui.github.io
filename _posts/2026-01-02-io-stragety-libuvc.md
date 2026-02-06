@@ -1,6 +1,6 @@
 --- 
 layout: post
-title: IO Strategy - The internals of Libuvc
+title: Boost I/O Strategy - The Internals of Libuvc 
 categories: [io-strategy]
 tags: [I/O, linux, libuv, coroutine, vibe-coding]
 series: [io-strategy]
